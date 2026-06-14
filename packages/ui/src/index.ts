@@ -33,6 +33,10 @@ export {
 export { Button, IconButton, Pill, StatusDot } from "./opaline-v2/Button";
 export type { OpalineV2ButtonProps } from "./opaline-v2/Button";
 export { Alert, AlertDescription, AlertTitle, Badge, Input, Spinner, Textarea } from "./components";
+export { Switch } from "./components/switch";
+export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./components/select";
+export { RadioGroup, RadioGroupItem } from "./components/radio-group";
+export { Label } from "./components/label";
 export type {
   AppShellProps,
   AppShellState,

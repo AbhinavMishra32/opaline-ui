@@ -331,7 +331,12 @@ export function OpalineV2Shell({
     collapsedSidebarTrigger != null ? (
       resolveSlot(collapsedSidebarTrigger, state)
     ) : (
-      <OpalineV2NavigationControls state={state} variant="collapsed" />
+      <OpalineV2CollapsedSidebarTrigger
+        aria-label={state.sidebarOpen ? "Close sidebar" : "Open sidebar"}
+        onClick={state.toggleSidebar}
+      >
+        <SidebarToggleIcon active={false} />
+      </OpalineV2CollapsedSidebarTrigger>
     );
 
   const shell = (

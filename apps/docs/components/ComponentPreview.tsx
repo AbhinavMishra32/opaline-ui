@@ -5,43 +5,43 @@ import { Bookmark, Check, Clock, FileCode2, Folder, Settings, Terminal } from "l
 import {
   AdaptiveSidecarLayout,
   AdaptiveSidecarSurface,
+  AgentSessionSurface,
   AppShell,
   AgentActivity,
   AgentSuggestion,
   BottomPanel,
   Button,
-  Composer,
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuSeparator,
   ContextMenuTrigger,
-  Dialog,
-  DialogBody,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
   FileTree,
   HoverPreview,
   IconButton,
+  Input,
   SettingsCard,
   SettingsPanel,
   SettingsRow,
   SettingsSection,
   SettingsSelect,
   SettingsToggle,
+  ShadcnDialog,
+  ShadcnDialogContent,
+  ShadcnDialogDescription,
+  ShadcnDialogFooter,
+  ShadcnDialogHeader,
+  ShadcnDialogTitle,
+  ShadcnDialogTrigger,
+  ShadcnDropdownMenu,
+  ShadcnDropdownMenuContent,
+  ShadcnDropdownMenuItem,
+  ShadcnDropdownMenuSeparator,
+  ShadcnDropdownMenuTrigger,
   Sidebar,
   SidebarSection,
   SlotPanel,
   TerminalSurface,
-  ThreadSurface,
   Timeline,
   useShellHistory,
 } from "@opaline/ui";
@@ -124,12 +124,12 @@ const snippets: Record<PreviewName, string> = {
   entries={activity}
 />
 <AgentSuggestion title="Split the large edit" onAction={applyPatch} />`,
-  "app-shell": `import { AppShell, Sidebar, Composer } from "@opaline/ui";
+  "app-shell": `import { AppShell, Sidebar, Input } from "@opaline/ui";
 
 <AppShell
   sidebar={<Sidebar projects={projects} items={[]} />}
   main={<Workspace />}
-  composer={<Composer placeholder="Ask the agent..." />}
+  composer={<div className="border-t p-3"><Input placeholder="Ask the agent..." /></div>}
   rightPanel={<Inspector />}
   bottomPanel={<TerminalPanel />}
 />`,
@@ -138,9 +138,11 @@ const snippets: Record<PreviewName, string> = {
 <Button variant="primary">Create project</Button>
 <Button variant="secondary">Review changes</Button>
 <IconButton aria-label="Settings"><Settings /></IconButton>`,
-  composer: `import { Composer } from "@opaline/ui";
+  composer: `import { Input } from "@opaline/ui";
 
-<Composer placeholder="Ask the agent to inspect this workspace..." />`,
+<div className="border-t p-3">
+  <Input placeholder="Ask the agent to inspect this workspace..." />
+</div>`,
   "context-menu": `import { ContextMenu, ContextMenuContent, ContextMenuItem } from "@opaline/ui";
 
 <ContextMenu>
@@ -149,18 +151,18 @@ const snippets: Record<PreviewName, string> = {
     <ContextMenuItem>Open in new tab</ContextMenuItem>
   </ContextMenuContent>
 </ContextMenu>`,
-  dialog: `import { Dialog, DialogContent, DialogTrigger } from "@opaline/ui";
+  dialog: `import { ShadcnDialog, ShadcnDialogContent, ShadcnDialogTrigger } from "@opaline/ui";
 
-<Dialog>
-  <DialogTrigger asChild><Button>Open dialog</Button></DialogTrigger>
-  <DialogContent size="compact">...</DialogContent>
-</Dialog>`,
-  "dropdown-menu": `import { DropdownMenu, DropdownMenuContent, DropdownMenuItem } from "@opaline/ui";
+<ShadcnDialog>
+  <ShadcnDialogTrigger render={<Button>Open dialog</Button>} />
+  <ShadcnDialogContent>...</ShadcnDialogContent>
+</ShadcnDialog>`,
+  "dropdown-menu": `import { ShadcnDropdownMenu, ShadcnDropdownMenuContent, ShadcnDropdownMenuItem } from "@opaline/ui";
 
-<DropdownMenu>
-  <DropdownMenuTrigger asChild><Button>Open menu</Button></DropdownMenuTrigger>
-  <DropdownMenuContent><DropdownMenuItem>Rename</DropdownMenuItem></DropdownMenuContent>
-</DropdownMenu>`,
+<ShadcnDropdownMenu>
+  <ShadcnDropdownMenuTrigger render={<Button>Open menu</Button>} />
+  <ShadcnDropdownMenuContent><ShadcnDropdownMenuItem>Rename</ShadcnDropdownMenuItem></ShadcnDropdownMenuContent>
+</ShadcnDropdownMenu>`,
   "file-tree": `import { FileTree } from "@opaline/ui";
 
 <FileTree items={workspaceFiles} onSelect={(file) => openFile(file.path)} />`,
@@ -222,11 +224,11 @@ function renderPreview(name: PreviewName) {
     case "buttons":
       return <PreviewStage><div className="docs-button-row"><Button variant="primary">Create project</Button><Button variant="secondary">Review changes</Button><Button variant="soft">Later</Button><Button variant="danger">Delete</Button><IconButton aria-label="Settings"><Settings size={16} /></IconButton></div></PreviewStage>;
     case "dropdown-menu":
-      return <PreviewStage><DropdownMenu><DropdownMenuTrigger asChild><Button variant="secondary">Open menu</Button></DropdownMenuTrigger><DropdownMenuContent><DropdownMenuItem>Pin thread</DropdownMenuItem><DropdownMenuItem>Rename</DropdownMenuItem><DropdownMenuSeparator /><DropdownMenuItem>Copy link</DropdownMenuItem></DropdownMenuContent></DropdownMenu></PreviewStage>;
+      return <PreviewStage><ShadcnDropdownMenu><ShadcnDropdownMenuTrigger render={<Button variant="secondary">Open menu</Button>} /><ShadcnDropdownMenuContent><ShadcnDropdownMenuItem>Pin thread</ShadcnDropdownMenuItem><ShadcnDropdownMenuItem>Rename</ShadcnDropdownMenuItem><ShadcnDropdownMenuSeparator /><ShadcnDropdownMenuItem>Copy link</ShadcnDropdownMenuItem></ShadcnDropdownMenuContent></ShadcnDropdownMenu></PreviewStage>;
     case "context-menu":
       return <PreviewStage><ContextMenu><ContextMenuTrigger asChild><button className="opaline-button opaline-button-secondary" type="button">Right-click this surface</button></ContextMenuTrigger><ContextMenuContent><ContextMenuItem>Open in new tab</ContextMenuItem><ContextMenuItem>Reveal in file tree</ContextMenuItem><ContextMenuSeparator /><ContextMenuItem>Copy path</ContextMenuItem></ContextMenuContent></ContextMenu></PreviewStage>;
     case "dialog":
-      return <PreviewStage><Dialog><DialogTrigger asChild><Button variant="primary">Open dialog</Button></DialogTrigger><DialogContent size="compact"><DialogHeader><DialogTitle>Create workspace</DialogTitle></DialogHeader><DialogBody>Choose a directory and Opaline will keep the shell state caller-owned.</DialogBody><DialogFooter><Button variant="secondary">Cancel</Button><Button variant="primary">Create</Button></DialogFooter></DialogContent></Dialog></PreviewStage>;
+      return <PreviewStage><ShadcnDialog><ShadcnDialogTrigger render={<Button variant="primary">Open dialog</Button>} /><ShadcnDialogContent><ShadcnDialogHeader><ShadcnDialogTitle>Create workspace</ShadcnDialogTitle></ShadcnDialogHeader><div className="p-4">Choose a directory and Opaline will keep the shell state caller-owned.</div><ShadcnDialogFooter><Button variant="secondary">Cancel</Button><Button variant="primary">Create</Button></ShadcnDialogFooter></ShadcnDialogContent></ShadcnDialog></PreviewStage>;
     case "hover-preview":
       return <PreviewStage><HoverPreview content={<div className="docs-hover-card"><strong>Opaline documentation</strong><span>Next.js, Fumadocs, MDX, and live package source.</span></div>}><Button variant="secondary">Hover for context</Button></HoverPreview></PreviewStage>;
     case "timeline":
@@ -240,7 +242,7 @@ function renderPreview(name: PreviewName) {
     case "file-tree":
       return <PreviewStage size="wide"><div className="docs-sidebar-demo"><FileTree items={files} /></div></PreviewStage>;
     case "composer":
-      return <PreviewStage><div className="docs-composer-demo"><Composer placeholder="Ask the agent to inspect this workspace..." /></div></PreviewStage>;
+      return <PreviewStage><div className="docs-composer-demo border-t p-3"><Input placeholder="Ask the agent to inspect this workspace..." /></div></PreviewStage>;
     case "slot-panel":
       return <PreviewStage size="wide"><SlotPanel tabs={[{ id: "terminal", title: "Terminal", icon: <Terminal size={14} />, content: <TerminalSurface cwd="~/opaline">npm run docs:dev</TerminalSurface> }, { id: "files", title: "Files", icon: <Folder size={14} />, content: <FileTree items={files} /> }]} onClose={() => undefined} /></PreviewStage>;
     case "app-shell":
@@ -332,8 +334,8 @@ function ShellDemo() {
         <AppShell
           headerTabs={[{ active: true, id: "docs", title: "Opaline docs" }, { id: "button", title: "Button.tsx", dirty: true }]}
           sidebar={<Sidebar projects={projects} items={[]}><SidebarSection heading="Files"><FileTree items={files} variant="sidebar" /></SidebarSection></Sidebar>}
-          main={<ThreadSurface title="Rebuild component docs" subtitle="Live workspace package" messages={[{ role: "assistant", status: "Updated 14 components", body: "The docs render Opaline directly from packages/ui/src, so component changes appear without publishing or rebuilding the package." }, { role: "user", body: "Make every example interactive and explain the systems behind the shell." }]} />}
-          composer={<Composer placeholder="Ask about the component system..." />}
+          main={<AgentSessionSurface title="Rebuild component docs" lead="Live workspace package" messages={[{ id: "msg-1", role: "assistant", content: "The docs render Opaline directly from packages/ui/src, so component changes appear without publishing or rebuilding the package." }, { id: "msg-2", role: "user", content: "Make every example interactive and explain the systems behind the shell." }]} />}
+          composer={<div className="border-t p-3"><Input placeholder="Ask about the component system..." /></div>}
           rightPanel={<FileTree items={files} />}
           bottomPanel={<BottomPanel tabs={[{ id: "terminal", title: "Terminal", active: true, content: <TerminalSurface cwd="~/opaline">npm run docs:dev</TerminalSurface> }]} />}
         />

@@ -24,22 +24,15 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  AgentSessionSurface,
   AppShell,
   AppShellHeaderPillButton,
   AppShellHeaderToolButton,
   BottomPanel,
   Button,
-  OpalineMark,
-  Composer,
-  Dialog,
-  DialogBody,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogSection,
-  DialogTrigger,
-  FileBrowserPanel,
   FileTree,
+  Input,
+  OpalineMark,
   SettingsCard,
   SettingsOptionCard,
   SettingsPanel,
@@ -48,9 +41,15 @@ import {
   SettingsSelect,
   SettingsSidebar,
   SettingsToggle,
+  ShadcnDialog,
+  ShadcnDialogContent,
+  ShadcnDialogDescription,
+  ShadcnDialogFooter,
+  ShadcnDialogHeader,
+  ShadcnDialogTitle,
+  ShadcnDialogTrigger,
   Sidebar,
   TerminalSurface,
-  ThreadSurface,
   useShellHistory,
 } from "@opaline/ui";
 import type {
@@ -111,12 +110,14 @@ const baseProjects: SidebarProject[] = [
 
 const messages = [
   {
+    id: "msg-1",
     role: "user" as const,
-    body: "Strip out the component system and create a library component system from their code.",
+    content: "Strip out the component system and create a library component system from their code.",
   },
   {
+    id: "msg-2",
     role: "assistant" as const,
-    body:
+    content:
       "The readable component library now carries Opaline shell/sidebar/composer/thread primitives plus recovered dialog, bottom panel, terminal, and file-tree systems.",
   },
 ];
@@ -517,40 +518,39 @@ export function App() {
           />
         ) : (
           <div className="opaline-renderer-stack">
-            <ThreadSurface title={String(activeThreadTitle)} subtitle="Component-system reconstruction" messages={messages} />
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="secondary">Open Opaline popup primitive</Button>
-              </DialogTrigger>
-              <DialogContent size="wide">
-                <DialogHeader
-                  title="Opaline dialog primitive"
-                  subtitle="Radix dialog behavior with the recovered Opaline overlay, surface, close button, sizes, and measured-height transition."
-                />
-                <DialogBody>
-                  <DialogSection>
-                    This is the shared popup layer used as the readable target for upstream `dialog-layout-CCvvb1Vc.js`.
-                  </DialogSection>
-                </DialogBody>
-                <DialogFooter>
+            <AgentSessionSurface title={String(activeThreadTitle)} lead="Component-system reconstruction" messages={messages} />
+            <ShadcnDialog>
+              <ShadcnDialogTrigger render={<Button variant="secondary">Open Opaline popup primitive</Button>} />
+              <ShadcnDialogContent>
+                <ShadcnDialogHeader>
+                  <ShadcnDialogTitle>Opaline dialog primitive</ShadcnDialogTitle>
+                  <ShadcnDialogDescription>Radix dialog behavior with the recovered Opaline overlay, surface, close button, sizes, and measured-height transition.</ShadcnDialogDescription>
+                </ShadcnDialogHeader>
+                <div className="p-4">
+                  <p>This is the shared popup layer used as the readable target for upstream `dialog-layout-CCvvb1Vc.js`.</p>
+                </div>
+                <ShadcnDialogFooter>
                   <Button variant="secondary">Cancel</Button>
                   <Button variant="primary">Continue</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+                </ShadcnDialogFooter>
+              </ShadcnDialogContent>
+            </ShadcnDialog>
           </div>
         )
       }
-      composer={isSettingsOpen ? undefined : <Composer placeholder="Ask Opaline to build, inspect, or recreate a component..." />}
+      composer={isSettingsOpen ? undefined : <div className="border-t p-3"><Input placeholder="Ask Opaline to build, inspect, or recreate a component..." /></div>}
       rightPanel={
         isSettingsOpen ? undefined : (
-          <FileBrowserPanel
-            breadcrumbs={selectedFile.breadcrumbs}
-            code={selectedFile.code}
-            fileName={selectedFile.fileName}
-            language={selectedFile.language}
-            sidePanel={
-              <aside className="opaline-file-browser-tree-panel" data-app-shell-focus-area="file-tree">
+          <div className="flex h-full flex-col overflow-hidden border-l bg-card">
+            <div className="flex items-center gap-2 border-b px-3 py-2 text-sm">
+              {selectedFile.breadcrumbs.map((crumb, i) => (
+                <span key={i} className={i === selectedFile.breadcrumbs.length - 1 ? "font-medium" : "text-muted-foreground"}>
+                  {crumb}
+                </span>
+              ))}
+            </div>
+            <div className="flex min-h-0 flex-1 overflow-hidden">
+              <aside className="w-48 shrink-0 overflow-auto border-r p-2" data-app-shell-focus-area="file-tree">
                 <FileTree
                   items={fileTreeItems}
                   defaultExpandedIds={["opaline", "opaline/packages/ui/src", "opaline/packages/ui/src/lib"]}
@@ -559,8 +559,11 @@ export function App() {
                   onNodeClick={handleFileTreeNodeClick}
                 />
               </aside>
-            }
-          />
+              <div className="min-w-0 flex-1 overflow-auto p-4">
+                <pre className="text-sm">{selectedFile.code}</pre>
+              </div>
+            </div>
+          </div>
         )
       }
       bottomPanel={
