@@ -32,6 +32,11 @@
       "import": "./dist/components/index.js",
       "default": "./dist/components/index.js"
     },
+    "./v2": {
+      "types": "./dist/opaline-v2/index.d.ts",
+      "import": "./dist/opaline-v2/index.js",
+      "default": "./dist/opaline-v2/index.js"
+    },
     "./styles.css": "./dist/styles.css",
     "./theme.css": "./src/theme.css",
     "./package.json": "./package.json"
