@@ -18,7 +18,7 @@ export type AgentSessionActionEntry = {
   description?: ReactNode;
   icon?: ReactNode;
   disabled?: boolean;
-  variant?: "default" | "secondary" | "ghost" | "destructive";
+  variant?: "default" | "secondary" | "outline" | "ghost" | "destructive";
   onSelect?: () => void;
 };
 
@@ -104,13 +104,16 @@ export type AgentSessionSurfaceProps = Omit<HTMLAttributes<HTMLDivElement>, "tit
   composer?: ReactNode;
   emptyState?: ReactNode;
   showReasoningSummaries?: boolean;
+  scrollKey?: string | number;
 };
 
 export type AgentSessionTimelineProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
+  header?: ReactNode;
   messages: AgentSessionMessage[];
   rows?: AgentSessionTimelineRow[];
   emptyState?: ReactNode;
   showReasoningSummaries?: boolean;
+  scrollKey?: string | number;
 };
 
 export type AgentSessionComposerProps = Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "onSubmit"> & {
@@ -137,4 +140,15 @@ export type AgentSessionDockProps = Omit<HTMLAttributes<HTMLDivElement>, "title"
   actions?: AgentSessionDockAction[];
   defaultCollapsed?: boolean;
   children?: ReactNode;
+};
+
+export type AgentRunTraceEntry = {
+  id: string;
+  kind: "thought" | "tool";
+  title: string;
+  subtitle?: string;
+  status?: AgentSessionToolStatus;
+  icon?: "read" | "search" | "file" | "terminal" | "memory" | "tool";
+  input?: string;
+  output?: string;
 };

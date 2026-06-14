@@ -75,6 +75,7 @@ export {
   AgentSessionToolCard,
   AgentSessionToolEntryRow,
   AgentSessionToolGroup,
+  AgentRunTrace,
   buildAgentSessionTimeline,
 } from "./agent-session/AgentSessionSurface";
 export type {
@@ -89,6 +90,7 @@ export type {
   AgentSessionTimelineRow,
   AgentSessionToolEntry,
   AgentSessionToolStatus,
+  AgentRunTraceEntry,
 } from "./agent-session/AgentSessionSurface";
 export { AgentActivity, AgentActivityList, AgentSuggestion, AgentThinking } from "./agent-activity/AgentActivity";
 export type {

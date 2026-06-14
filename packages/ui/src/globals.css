@@ -5,6 +5,20 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@keyframes opaline-agent-thinking-shimmer {
+  from { background-position: 100% center; }
+  to { background-position: 0% center; }
+}
+
+.opaline-agent-thinking-shimmer {
+  display: inline-flex;
+  background-image: linear-gradient(90deg, var(--muted-foreground) 0%, var(--muted-foreground) 40%, var(--foreground) 50%, var(--muted-foreground) 60%, var(--muted-foreground) 100%);
+  background-size: 250% 100%;
+  background-clip: text;
+  color: transparent;
+  animation: opaline-agent-thinking-shimmer 1.2s linear infinite;
+}
+
 @theme inline {
     --font-heading: var(--font-sans);
     --font-sans: 'Inter Variable', sans-serif;
