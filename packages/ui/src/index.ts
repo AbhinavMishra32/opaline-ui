@@ -33,6 +33,10 @@ export {
 export { Button, IconButton, Pill, StatusDot } from "./opaline-v2/Button";
 export type { OpalineV2ButtonProps } from "./opaline-v2/Button";
 export { Alert, AlertDescription, AlertTitle, Badge, Input, Spinner, Textarea } from "./components";
+export { Switch } from "./components/switch";
+export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./components/select";
+export { RadioGroup, RadioGroupItem } from "./components/radio-group";
+export { Label } from "./components/label";
 export type {
   AppShellProps,
   AppShellState,
@@ -57,12 +61,32 @@ export {
   useShellHistory,
   useShellHistoryContext,
 } from "./history/ShellHistory";
-export { AgentSessionComposer, AgentSessionSurface } from "./agent-session/AgentSessionSurface";
+export {
+  AgentSessionActions,
+  AgentSessionComposer,
+  AgentSessionDisclosure,
+  AgentSessionDock,
+  AgentSessionMessageView,
+  AgentSessionPartView,
+  AgentSessionSurface,
+  AgentSessionThinkingRow,
+  AgentSessionTimeline,
+  AgentSessionTimelineRowView,
+  AgentSessionToolCard,
+  AgentSessionToolEntryRow,
+  AgentSessionToolGroup,
+  buildAgentSessionTimeline,
+} from "./agent-session/AgentSessionSurface";
 export type {
+  AgentSessionActionEntry,
   AgentSessionComposerProps,
+  AgentSessionDockAction,
+  AgentSessionDockProps,
   AgentSessionMessage,
   AgentSessionMessagePart,
   AgentSessionSurfaceProps,
+  AgentSessionTimelineProps,
+  AgentSessionTimelineRow,
   AgentSessionToolEntry,
   AgentSessionToolStatus,
 } from "./agent-session/AgentSessionSurface";

@@ -331,13 +331,18 @@ export function OpalineV2Shell({
     collapsedSidebarTrigger != null ? (
       resolveSlot(collapsedSidebarTrigger, state)
     ) : (
-      <OpalineV2NavigationControls state={state} variant="collapsed" />
+      <OpalineV2CollapsedSidebarTrigger
+        aria-label={state.sidebarOpen ? "Close sidebar" : "Open sidebar"}
+        onClick={state.toggleSidebar}
+      >
+        <SidebarToggleIcon active={false} />
+      </OpalineV2CollapsedSidebarTrigger>
     );
 
   const shell = (
     <TooltipProvider>
       <div
-        className={cn("flex h-full min-h-0 w-full overflow-hidden bg-background text-foreground", className)}
+        className={cn("opaline-app-shell flex h-full min-h-0 w-full overflow-hidden bg-background text-foreground", className)}
         data-bottom-panel-open={bottomPanel != null && bottomPanelOpen ? "true" : "false"}
         data-inspector-open={resolvedInspector != null && inspectorOpen ? "true" : "false"}
         data-sidebar-open={sidebar != null && sidebarOpen ? "true" : "false"}
@@ -353,13 +358,13 @@ export function OpalineV2Shell({
         {sidebar != null ? (
           <aside
             className={cn(
-              "relative h-full min-h-0 shrink-0 overflow-visible bg-sidebar transition-[width,opacity] duration-200",
+              "relative h-full min-h-0 shrink-0 overflow-visible border-r bg-sidebar/80 backdrop-blur-xl backdrop-saturate-150 transition-[width,opacity] duration-200",
               sidebarOpen ? "w-[var(--opaline-v2-sidebar-width)] opacity-100" : "pointer-events-none w-0 opacity-0"
             )}
             data-open={sidebarOpen ? "true" : "false"}
             data-resizing={sidebarResizing ? "true" : "false"}
           >
-            {showSidebarChrome ? <div className="flex h-12 items-center gap-1 px-3 [-webkit-app-region:drag] [&>*]:[-webkit-app-region:no-drag]">{sidebarChromeContent}</div> : null}
+            {showSidebarChrome ? <div className="flex h-12 items-center gap-1 px-3 pl-28 [-webkit-app-region:drag] [&>*]:[-webkit-app-region:no-drag]">{sidebarChromeContent}</div> : null}
             <div className="absolute inset-x-0 bottom-0 top-12 flex min-h-0 flex-col overflow-hidden">{sidebar}</div>
             <div
               aria-disabled={!sidebarOpen}
@@ -372,9 +377,9 @@ export function OpalineV2Shell({
             </div>
           </aside>
         ) : null}
-        <section className="relative flex min-w-0 flex-1 flex-col overflow-hidden border-l bg-background">
+        <section className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-background">
           <header className="relative z-30 flex h-12 min-h-12 min-w-0 items-center justify-between gap-3 border-b px-3 select-none [-webkit-app-region:drag]">
-            {sidebar != null ? <div className={cn("absolute left-20 top-2 z-40 flex items-center gap-1 [-webkit-app-region:no-drag]", sidebarOpen && "pointer-events-none opacity-0")}>{collapsedTriggerContent}</div> : null}
+            {sidebar != null ? <div className={cn("absolute left-24 top-2 z-40 flex items-center gap-1 [-webkit-app-region:no-drag]", sidebarOpen && "pointer-events-none opacity-0")}>{collapsedTriggerContent}</div> : null}
             <div className="flex min-w-0 flex-1 items-center gap-3 overflow-hidden">
               {headerTabs.length > 0 ? (
                 <div className="flex h-full min-w-0 items-center gap-1 [-webkit-app-region:no-drag]">
@@ -517,11 +522,11 @@ export function OpalineV2NavigationControls({
 }
 
 export function OpalineV2ChromeButton({ className, type = "button", ...props }: OpalineV2ShellButtonProps) {
-  return <Button className={className} size="icon-sm" type={type} variant="ghost" {...props} />;
+  return <Button className={className} size="icon" type={type} variant="ghost" {...props} />;
 }
 
 export function OpalineV2CollapsedSidebarTrigger({ className, type = "button", ...props }: OpalineV2ShellButtonProps) {
-  return <Button className={className} size="icon-sm" type={type} variant="ghost" {...props} />;
+  return <Button className={className} size="icon" type={type} variant="ghost" {...props} />;
 }
 
 export function OpalineV2HeaderToolButton({
@@ -540,7 +545,7 @@ export function OpalineV2HeaderToolButton({
       aria-label={label}
       aria-pressed={pressed}
       className={className}
-      size="icon-sm"
+      size="icon"
       variant="ghost"
       type={type}
       {...props}

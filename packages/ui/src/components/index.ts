@@ -48,6 +48,10 @@ export {
 } from "./dropdown-menu";
 export { ScrollArea, ScrollBar } from "./scroll-area";
 export { Separator } from "./separator";
+export { RadioGroup, RadioGroupItem } from "./radio-group";
+export { Select, SelectContent, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from "./select";
+export { Switch } from "./switch";
+export { Label } from "./label";
 export {
   Sheet,
   SheetClose,

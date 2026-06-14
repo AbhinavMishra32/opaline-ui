@@ -57,12 +57,32 @@ export {
   useShellHistory,
   useShellHistoryContext,
 } from "../history/ShellHistory";
-export { AgentSessionComposer, AgentSessionSurface } from "../agent-session/AgentSessionSurface";
+export {
+  AgentSessionActions,
+  AgentSessionComposer,
+  AgentSessionDisclosure,
+  AgentSessionDock,
+  AgentSessionMessageView,
+  AgentSessionPartView,
+  AgentSessionSurface,
+  AgentSessionThinkingRow,
+  AgentSessionTimeline,
+  AgentSessionTimelineRowView,
+  AgentSessionToolCard,
+  AgentSessionToolEntryRow,
+  AgentSessionToolGroup,
+  buildAgentSessionTimeline,
+} from "../agent-session/AgentSessionSurface";
 export type {
+  AgentSessionActionEntry,
   AgentSessionComposerProps,
+  AgentSessionDockAction,
+  AgentSessionDockProps,
   AgentSessionMessage,
   AgentSessionMessagePart,
   AgentSessionSurfaceProps,
+  AgentSessionTimelineProps,
+  AgentSessionTimelineRow,
   AgentSessionToolEntry,
   AgentSessionToolStatus,
 } from "../agent-session/AgentSessionSurface";

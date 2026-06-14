@@ -7,6 +7,7 @@ const rendererIndex = path.join(projectRoot, "dist", "renderer", "index.html");
 const preload = path.join(projectRoot, "src", "preload", "library-preload.cjs");
 
 function createWindow() {
+  const isMac = process.platform === "darwin";
   const win = new BrowserWindow({
     width: 1180,
     height: 780,
@@ -15,9 +16,11 @@ function createWindow() {
     title: "Opaline Example",
     backgroundColor: "#00000000",
     transparent: true,
-    vibrancy: process.platform === "darwin" ? "menu" : undefined,
-    trafficLightPosition: { x: 16, y: 16 },
-    titleBarStyle: "hiddenInset",
+    vibrancy: isMac ? "sidebar" : undefined,
+    visualEffectState: isMac ? "active" : undefined,
+    trafficLightPosition: { x: 22, y: 19 },
+    roundedCorners: true,
+    titleBarStyle: isMac ? "hiddenInset" : "default",
     webPreferences: {
       preload,
       contextIsolation: true,

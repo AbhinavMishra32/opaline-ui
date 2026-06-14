@@ -86,6 +86,7 @@ export const BottomPanel = React.forwardRef<SlotPanelHandle, BottomPanelProps>(
       const el = document.querySelector(".opaline-app-shell") || document.documentElement;
       if (el) {
         (el as HTMLElement).style.setProperty("--app-shell-bottom-panel-height", `${panelHeight}px`);
+        (el as HTMLElement).style.setProperty("--opaline-v2-bottom-panel-height", `${panelHeight}px`);
       }
     }, [panelHeight]);
 
@@ -139,13 +140,16 @@ export const BottomPanel = React.forwardRef<SlotPanelHandle, BottomPanelProps>(
 
     return (
       <div
-        className="relative flex min-h-0 w-full shrink-0 flex-col border-t bg-background"
+        className="relative flex h-full min-h-0 w-full shrink-0 flex-col overflow-hidden border-t bg-background"
         data-app-shell-focus-area="bottom-panel"
         data-fullscreen={isFullscreen ? "true" : "false"}
-        style={{ "--app-shell-bottom-panel-height": `${panelHeight}px` } as CSSProperties}
+        style={{
+          "--app-shell-bottom-panel-height": `${panelHeight}px`,
+          "--opaline-v2-bottom-panel-height": `${panelHeight}px`
+        } as CSSProperties}
       >
         <div
-          className="absolute inset-x-0 -top-1 z-20 h-2 cursor-row-resize touch-none after:absolute after:inset-x-0 after:top-1 after:h-px after:bg-border hover:after:bg-primary"
+          className="absolute inset-x-0 top-0 z-50 h-2 cursor-row-resize touch-none after:absolute after:inset-x-0 after:top-0 after:h-px after:bg-border hover:after:bg-primary"
           aria-label="Resize bottom panel"
           role="separator"
           onPointerDown={startResize}

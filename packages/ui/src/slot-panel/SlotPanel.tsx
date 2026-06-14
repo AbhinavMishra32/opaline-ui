@@ -1,6 +1,7 @@
 import * as Tabs from "@radix-ui/react-tabs";
 import type { ReactNode } from "react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Button as ShadcnButton } from "../components/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -305,20 +306,22 @@ export const SlotPanel = React.forwardRef<SlotPanelHandle, SlotPanelProps>(
         onValueChange={(val) => commitActiveTabId(val || null)}
       >
         <div className="flex h-9 shrink-0 items-center justify-between border-b bg-muted/20">
-          <div className="flex min-w-0 flex-1 items-center">
+          <div className="flex min-w-0 flex-1 items-center overflow-hidden">
             {tabOverflow.canScrollLeft ? (
-              <button
-                className="flex size-8 shrink-0 items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground"
+              <ShadcnButton
+                className="shrink-0 text-muted-foreground"
+                size="icon"
+                variant="ghost"
                 type="button"
                 aria-label="Scroll tabs left"
                 onClick={() => scrollTabs("left")}
               >
                 <ChevronLeft size={14} strokeWidth={1.9} />
-              </button>
+              </ShadcnButton>
             ) : null}
             <Tabs.List
               ref={tabsRef}
-              className="flex min-w-0 flex-1 items-stretch overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              className="flex min-w-0 max-w-full items-stretch overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
               aria-label={ariaLabel}
               data-overflow-left={tabOverflow.canScrollLeft ? "true" : undefined}
               data-overflow-right={tabOverflow.canScrollRight ? "true" : undefined}
@@ -357,18 +360,20 @@ export const SlotPanel = React.forwardRef<SlotPanelHandle, SlotPanelProps>(
               ))}
             </Tabs.List>
             {tabOverflow.canScrollRight ? (
-              <button
-                className="flex size-8 shrink-0 items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground"
+              <ShadcnButton
+                className="shrink-0 text-muted-foreground"
+                size="icon"
+                variant="ghost"
                 type="button"
                 aria-label="Scroll tabs right"
                 onClick={() => scrollTabs("right")}
               >
                 <ChevronRight size={14} strokeWidth={1.9} />
-              </button>
+              </ShadcnButton>
             ) : null}
             {launcherItems.length > 0 && (
               <DropdownMenu>
-                <DropdownMenuTrigger render={<button className="flex size-8 shrink-0 items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground" type="button" aria-label="Add tab" />}>
+                <DropdownMenuTrigger render={<ShadcnButton className="shrink-0 text-muted-foreground" size="icon" variant="ghost" type="button" aria-label="Add tab" />}>
                     <Plus size={15} strokeWidth={1.8} />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="min-w-52" side="bottom">
@@ -385,14 +390,16 @@ export const SlotPanel = React.forwardRef<SlotPanelHandle, SlotPanelProps>(
           </div>
           {onClose && (
             <div className="flex shrink-0 items-center border-l">
-              <button
-                className="flex size-8 items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground"
+              <ShadcnButton
+                className="text-muted-foreground"
+                size="icon"
+                variant="ghost"
                 type="button"
                 aria-label="Close panel"
                 onClick={onClose}
               >
                 <X size={14} strokeWidth={1.9} />
-              </button>
+              </ShadcnButton>
             </div>
           )}
         </div>
@@ -406,10 +413,11 @@ export const SlotPanel = React.forwardRef<SlotPanelHandle, SlotPanelProps>(
               </div>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {launcherItems.map((item) => (
-                  <button
+                  <ShadcnButton
                     key={item.type}
                     type="button"
-                    className="flex items-start gap-3 rounded-lg border bg-card p-4 text-left transition-colors hover:bg-muted/50"
+                    className="h-auto items-start justify-start gap-3 p-4 text-left"
+                    variant="outline"
                     onClick={() => handleLauncherSelect(item)}
                   >
                     <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted [&_svg]:size-4">{item.icon}</div>
@@ -417,7 +425,7 @@ export const SlotPanel = React.forwardRef<SlotPanelHandle, SlotPanelProps>(
                       <h4 className="text-sm font-medium">{item.title}</h4>
                       {item.description && <p className="mt-0.5 text-xs text-muted-foreground">{item.description}</p>}
                     </div>
-                  </button>
+                  </ShadcnButton>
                 ))}
               </div>
             </div>
