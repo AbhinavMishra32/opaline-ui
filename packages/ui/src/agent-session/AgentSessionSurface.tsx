@@ -67,9 +67,9 @@ export function AgentSessionSurface({
   ) : null;
 
   return (
-    <section className={cn("flex min-h-0 flex-1 flex-col bg-background text-foreground", className)} {...props}>
+    <section className={cn("flex min-h-0 flex-1 flex-col overflow-hidden bg-background text-foreground", className)} {...props}>
       <AgentSessionTimeline
-        className="min-h-0 flex-1 overflow-y-auto"
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
         header={header}
         messages={messages}
         rows={rows}

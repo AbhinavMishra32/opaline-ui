@@ -440,13 +440,13 @@ export const SlotPanel = React.forwardRef<SlotPanelHandle, SlotPanelProps>(
             </div>
           </div>
         ) : outlet !== undefined ? (
-          <div className="min-h-0 flex-1 overflow-hidden">{outlet}</div>
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">{outlet}</div>
         ) : (
           openTabs.map((tab) => (
             <Tabs.Content
               key={tab.id}
               value={tab.id}
-              className="min-h-0 flex-1 overflow-hidden outline-none"
+              className="flex min-h-0 flex-1 flex-col overflow-hidden outline-none"
               forceMount={keepMounted ? true : undefined}
               hidden={keepMounted && activeTabId !== tab.id ? true : undefined}
             >

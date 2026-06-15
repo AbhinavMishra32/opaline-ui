@@ -34,10 +34,14 @@ export function AgentRunTrace({
   const [open, setOpen] = useState(defaultOpen);
   const active = state === "thinking";
   const expandable = entries.length > 0;
-  const label = active ? "Thinking" : durationMs ? `Thought for ${formatDuration(durationMs)}` : "Thought";
+  const label = active ? "Working" : durationMs ? `Worked for ${formatDuration(durationMs)}` : "Activity";
 
   return (
-    <div className={cn("flex w-full flex-col gap-2", className)} data-component="agent-run-trace" data-active={active || undefined}>
+    <div
+      className={cn("flex w-full flex-col gap-2 animate-in fade-in-0 slide-in-from-top-1 duration-200", className)}
+      data-component="agent-run-trace"
+      data-active={active || undefined}
+    >
       <button
         type="button"
         className={cn(
@@ -53,7 +57,7 @@ export function AgentRunTrace({
       </button>
 
       {expandable && open ? (
-        <div className="ml-1.5 flex max-h-52 flex-col gap-2 overflow-y-auto border-l border-border/70 pl-3 pr-1" data-slot="agent-run-trace-list">
+        <div className="ml-1.5 flex flex-col gap-2 border-l border-border/70 pl-3 pr-1 animate-in fade-in-0 slide-in-from-top-1 duration-200" data-slot="agent-run-trace-list">
           {entries.map((entry) => <AgentRunTraceRow entry={entry} key={entry.id} />)}
         </div>
       ) : null}
@@ -67,7 +71,7 @@ function AgentRunTraceRow({ entry }: { entry: AgentRunTraceEntry }) {
   const active = entry.status === "pending" || entry.status === "running";
 
   return (
-    <div className="flex min-w-0 flex-col gap-1" data-slot="agent-run-trace-entry" data-kind={entry.kind}>
+    <div className="flex min-w-0 flex-col gap-1 animate-in fade-in-0 slide-in-from-left-1 duration-200" data-slot="agent-run-trace-entry" data-kind={entry.kind}>
       <button
         type="button"
         className={cn(
@@ -89,7 +93,7 @@ function AgentRunTraceRow({ entry }: { entry: AgentRunTraceEntry }) {
       </button>
 
       {expandable && open ? (
-        <div className="ml-5 flex flex-col gap-2 rounded-md bg-muted/25 p-2 text-[11px] leading-relaxed text-muted-foreground ring-1 ring-border/30">
+        <div className="ml-5 flex flex-col gap-2 rounded-md bg-muted/25 p-2 text-[11px] leading-relaxed text-muted-foreground ring-1 ring-border/30 animate-in fade-in-0 zoom-in-95 duration-150">
           {entry.input ? <TraceDetail label="Input" value={entry.input} /> : null}
           {entry.output ? <TraceDetail label="Result" value={entry.output} /> : null}
         </div>
