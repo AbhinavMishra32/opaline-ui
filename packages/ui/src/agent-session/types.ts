@@ -127,6 +127,7 @@ export type AgentSessionComposerProps = Omit<TextareaHTMLAttributes<HTMLTextArea
   onValueChange: (value: string) => void;
   onSubmit: () => void;
   submitLabel?: ReactNode;
+  footerStart?: ReactNode;
   pending?: boolean;
   disabled?: boolean;
 };

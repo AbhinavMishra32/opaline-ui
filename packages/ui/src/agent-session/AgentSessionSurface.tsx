@@ -162,6 +162,7 @@ export function AgentSessionComposer({
   onValueChange,
   onSubmit,
   submitLabel = "Send",
+  footerStart,
   placeholder = "Answer in your own words...",
   pending = false,
   disabled = false,
@@ -189,7 +190,8 @@ export function AgentSessionComposer({
         placeholder={placeholder}
         spellCheck
       />
-      <div className="flex items-center justify-end px-2 pb-2 pt-0.5">
+      <div className="flex items-center justify-between gap-2 px-2 pb-2 pt-0.5">
+        <div className="flex min-w-0 flex-1 items-center gap-1.5">{footerStart}</div>
         <Tooltip>
           <TooltipTrigger
             render={(
