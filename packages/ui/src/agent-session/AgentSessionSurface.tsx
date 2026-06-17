@@ -60,7 +60,7 @@ export function AgentSessionSurface({
       className="mb-5 border-l-2 border-border/80 pl-3 pr-1"
       data-component="agent-session-header"
     >
-      {eyebrow != null ? <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{eyebrow}</p> : null}
+      {eyebrow != null ? <p className="text-xs font-medium text-muted-foreground">{eyebrow}</p> : null}
       {title != null ? <h3 className="mt-1 text-sm font-semibold">{title}</h3> : null}
       {lead != null ? <div className="mt-1.5 text-[13px] leading-5 text-foreground/90">{lead}</div> : null}
     </header>
@@ -78,7 +78,7 @@ export function AgentSessionSurface({
         scrollKey={scrollKey}
       />
 
-      {composer ? <div className="shrink-0 bg-background/95 px-2 pb-2 pt-1 backdrop-blur">{composer}</div> : null}
+      {composer ? <div className="shrink-0 bg-background/95 px-3 pb-3 pt-1 backdrop-blur">{composer}</div> : null}
     </section>
   );
 }
@@ -106,7 +106,7 @@ export function AgentSessionTimeline({
   return (
     <div
       ref={scrollRef}
-      className={cn("px-3 pb-5 pt-2 [&_[data-component=assistant-message]]:flex [&_[data-component=assistant-message]]:flex-col [&_[data-component=assistant-message]]:gap-2 [&_[data-component=text-part]]:text-[13px] [&_[data-slot=text-part-body]]:leading-[1.65] [&_[data-component=user-message]]:ml-auto [&_[data-component=user-message]]:max-w-[77%] [&_[data-slot=user-message-body]]:rounded-2xl [&_[data-slot=user-message-body]]:bg-muted/75 [&_[data-slot=user-message-body]]:px-3 [&_[data-slot=user-message-body]]:py-2 [&_[data-slot=user-message-body]]:ring-1 [&_[data-slot=user-message-body]]:ring-border/40 [&_[data-slot=user-message-text]]:whitespace-pre-wrap [&_[data-slot=user-message-text]]:break-words [&_[data-slot=user-message-text]]:text-[13px] [&_[data-slot=user-message-text]]:leading-5 [&_[data-slot=text-part-meta]]:mt-2 [&_[data-slot=text-part-meta]]:inline-flex [&_[data-slot=text-part-meta]]:w-fit [&_[data-slot=text-part-meta]]:rounded-full [&_[data-slot=text-part-meta]]:bg-muted/45 [&_[data-slot=text-part-meta]]:px-2 [&_[data-slot=text-part-meta]]:py-0.5 [&_[data-slot=text-part-meta]]:text-[10px] [&_[data-slot=text-part-meta]]:leading-4 [&_[data-slot=text-part-meta]]:text-muted-foreground", className)}
+      className={cn("px-4 pb-6 pt-3 [&_[data-slot=session-turn-content]]:mx-auto [&_[data-slot=session-turn-content]]:w-full [&_[data-slot=session-turn-content]]:max-w-[820px] [&_[data-component=assistant-message]]:flex [&_[data-component=assistant-message]]:flex-col [&_[data-component=assistant-message]]:gap-2 [&_[data-component=text-part]]:text-[13px] [&_[data-slot=text-part-body]]:leading-[1.65] [&_[data-component=user-message]]:ml-auto [&_[data-component=user-message]]:max-w-[77%] [&_[data-slot=user-message-body]]:rounded-2xl [&_[data-slot=user-message-body]]:bg-muted/75 [&_[data-slot=user-message-body]]:px-3 [&_[data-slot=user-message-body]]:py-2 [&_[data-slot=user-message-body]]:ring-1 [&_[data-slot=user-message-body]]:ring-border/40 [&_[data-slot=user-message-text]]:whitespace-pre-wrap [&_[data-slot=user-message-text]]:break-words [&_[data-slot=user-message-text]]:text-[13px] [&_[data-slot=user-message-text]]:leading-5 [&_[data-slot=text-part-meta]]:mt-2 [&_[data-slot=text-part-meta]]:inline-flex [&_[data-slot=text-part-meta]]:w-fit [&_[data-slot=text-part-meta]]:rounded-full [&_[data-slot=text-part-meta]]:bg-muted/45 [&_[data-slot=text-part-meta]]:px-2 [&_[data-slot=text-part-meta]]:py-0.5 [&_[data-slot=text-part-meta]]:text-[10px] [&_[data-slot=text-part-meta]]:leading-4 [&_[data-slot=text-part-meta]]:text-muted-foreground", className)}
       data-component="agent-session-timeline"
       {...props}
       onScroll={(event) => {
@@ -148,10 +148,10 @@ export function AgentSessionComposer({
   const accessibleSubmitLabel = typeof submitLabel === "string" ? submitLabel : "Send";
 
   return (
-    <div className={cn("overflow-hidden rounded-3xl bg-muted/35 shadow-sm ring-1 ring-border/80 transition-[box-shadow,background-color] focus-within:bg-muted/45 focus-within:ring-ring/70", className)}>
+    <div className={cn("mx-auto w-full max-w-[840px] overflow-hidden rounded-3xl bg-card shadow-[0_12px_36px_color-mix(in_srgb,var(--foreground)_10%,transparent)] ring-1 ring-border transition-[box-shadow,background-color] focus-within:ring-ring/70", className)}>
       <Textarea
         {...props}
-        className="min-h-11 max-h-32 resize-none border-0 bg-transparent px-4 pb-0 pt-3 text-[13px] leading-5 shadow-none focus-visible:border-transparent focus-visible:ring-0"
+        className="min-h-16 max-h-36 resize-none border-0 bg-transparent px-4 pb-1 pt-3 text-[13px] leading-5 shadow-none focus-visible:border-transparent focus-visible:ring-0"
         value={value}
         onChange={(event) => onValueChange(event.target.value)}
         onKeyDown={(event) => {

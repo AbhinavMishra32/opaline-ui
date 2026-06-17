@@ -342,7 +342,7 @@ export function OpalineV2Shell({
   const shell = (
     <TooltipProvider>
       <div
-        className={cn("opaline-app-shell flex h-full min-h-0 w-full overflow-hidden bg-background text-foreground", className)}
+        className={cn("opaline-app-shell flex h-full min-h-0 w-full overflow-hidden bg-background text-foreground antialiased", className)}
         data-bottom-panel-open={bottomPanel != null && bottomPanelOpen ? "true" : "false"}
         data-inspector-open={resolvedInspector != null && inspectorOpen ? "true" : "false"}
         data-sidebar-open={sidebar != null && sidebarOpen ? "true" : "false"}
@@ -358,14 +358,14 @@ export function OpalineV2Shell({
         {sidebar != null ? (
           <aside
             className={cn(
-              "relative h-full min-h-0 shrink-0 overflow-visible border-r bg-sidebar/80 backdrop-blur-xl backdrop-saturate-150 transition-[width,opacity] duration-200",
+              "relative h-full min-h-0 shrink-0 overflow-visible border-r border-sidebar-border bg-sidebar/55 backdrop-blur-2xl backdrop-saturate-150 transition-[width,opacity] duration-200",
               sidebarOpen ? "w-[var(--opaline-v2-sidebar-width)] opacity-100" : "pointer-events-none w-0 opacity-0"
             )}
             data-open={sidebarOpen ? "true" : "false"}
             data-resizing={sidebarResizing ? "true" : "false"}
           >
-            {showSidebarChrome ? <div className="flex h-12 items-center gap-1 px-3 pl-28 [-webkit-app-region:drag] [&>*]:[-webkit-app-region:no-drag]">{sidebarChromeContent}</div> : null}
-            <div className="absolute inset-x-0 bottom-0 top-12 flex min-h-0 flex-col overflow-hidden">{sidebar}</div>
+            {showSidebarChrome ? <div className="flex h-11 items-center gap-1 bg-sidebar/20 px-3 pl-24 [-webkit-app-region:drag] [&>*]:[-webkit-app-region:no-drag]">{sidebarChromeContent}</div> : null}
+            <div className="absolute inset-x-0 bottom-0 top-11 flex min-h-0 flex-col overflow-hidden">{sidebar}</div>
             <div
               aria-disabled={!sidebarOpen}
               aria-orientation="vertical"
@@ -378,7 +378,7 @@ export function OpalineV2Shell({
           </aside>
         ) : null}
         <section className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-background">
-          <header className="relative z-30 flex h-12 min-h-12 min-w-0 items-center justify-between gap-3 border-b px-3 select-none [-webkit-app-region:drag]">
+          <header className="relative z-30 flex h-11 min-h-11 min-w-0 items-end justify-between gap-3 border-b bg-background px-3 pb-1.5 select-none [-webkit-app-region:drag]">
             {sidebar != null ? <div className={cn("absolute left-24 top-2 z-40 flex items-center gap-1 [-webkit-app-region:no-drag]", sidebarOpen && "pointer-events-none opacity-0")}>{collapsedTriggerContent}</div> : null}
             <div className="flex min-w-0 flex-1 items-center gap-3 overflow-hidden">
               {headerTabs.length > 0 ? (
@@ -398,7 +398,7 @@ export function OpalineV2Shell({
               )}
               {headerContent}
             </div>
-            <div className="inline-flex items-center gap-1 [-webkit-app-region:no-drag]">
+            <div className="inline-flex items-center gap-1 pb-px [-webkit-app-region:no-drag]">
               {actionContent}
             </div>
           </header>
@@ -427,7 +427,7 @@ export function OpalineV2Shell({
                 >
                   <div className="m-auto h-full w-px bg-border opacity-0 transition-opacity hover:opacity-100" />
                 </div>
-                <div className="absolute inset-0 flex min-h-0 min-w-0 flex-col overflow-hidden border-l bg-card">{resolvedInspector}</div>
+                <div className="absolute inset-0 flex min-h-0 min-w-0 flex-col overflow-hidden border-l bg-background">{resolvedInspector}</div>
               </aside>
             ) : null}
           </div>
@@ -454,7 +454,7 @@ export function OpalineV2Sidebar({
       <div className={cn("flex min-h-10 items-center px-3 py-2 [-webkit-app-region:drag] [&>*]:[-webkit-app-region:no-drag]", reserveWindowControls && "pl-20")} data-reserve-window-controls={reserveWindowControls ? "true" : "false"}>
         {header ?? (
           <div className="min-w-0">
-            {title != null ? <div className="truncate text-sm font-medium">{title}</div> : null}
+            {title != null ? <div className="truncate text-[13px] font-semibold">{title}</div> : null}
             {subtitle != null ? <div className="mt-0.5 truncate text-xs text-muted-foreground">{subtitle}</div> : null}
           </div>
         )}
@@ -462,7 +462,7 @@ export function OpalineV2Sidebar({
       <ScrollArea className="min-h-0 flex-1 px-2 pb-2">
         {sections.map((section) => (
           <div className="flex flex-col gap-1 py-1" key={section.id}>
-            {section.label != null ? <div className="px-2 py-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">{section.label}</div> : null}
+            {section.label != null ? <div className="px-2 py-1 text-xs font-medium text-muted-foreground">{section.label}</div> : null}
             {section.items.map((item) => (
               <React.Fragment key={item.id}>
                 {renderItem != null ? renderItem(item) : <OpalineV2SidebarItemButton item={item} />}
@@ -522,11 +522,11 @@ export function OpalineV2NavigationControls({
 }
 
 export function OpalineV2ChromeButton({ className, type = "button", ...props }: OpalineV2ShellButtonProps) {
-  return <Button className={className} size="icon" type={type} variant="ghost" {...props} />;
+  return <Button className={cn("text-muted-foreground data-[active=true]:bg-muted data-[active=true]:text-foreground", className)} size="icon" type={type} variant="ghost" {...props} />;
 }
 
 export function OpalineV2CollapsedSidebarTrigger({ className, type = "button", ...props }: OpalineV2ShellButtonProps) {
-  return <Button className={className} size="icon" type={type} variant="ghost" {...props} />;
+  return <Button className={cn("text-muted-foreground", className)} size="icon" type={type} variant="ghost" {...props} />;
 }
 
 export function OpalineV2HeaderToolButton({
@@ -544,7 +544,7 @@ export function OpalineV2HeaderToolButton({
     <Button
       aria-label={label}
       aria-pressed={pressed}
-      className={className}
+      className={cn("text-muted-foreground data-[active=true]:bg-muted data-[active=true]:text-foreground", className)}
       size="icon"
       variant="ghost"
       type={type}
@@ -585,7 +585,7 @@ export function AppShellChromeControls(props: AppShellSlotProps) {
 }
 
 export function AppShellSidebarChrome(props: AppShellSlotProps) {
-  return <ShellSlot {...props} className={cn("flex h-12 items-center gap-1 px-3", props.className)} />;
+  return <ShellSlot {...props} className={cn("flex h-11 items-center gap-1 px-3", props.className)} />;
 }
 
 export function AppShellNavigationControls({ onHome, state, variant = "sidebar" }: {
@@ -597,7 +597,7 @@ export function AppShellNavigationControls({ onHome, state, variant = "sidebar" 
 }
 
 export function AppShellHeader(props: AppShellSlotProps) {
-  return <ShellSlot {...props} as="header" className={cn("flex h-12 items-center justify-between gap-3 border-b px-3", props.className)} />;
+  return <ShellSlot {...props} as="header" className={cn("flex h-11 items-center justify-between gap-3 border-b px-3", props.className)} />;
 }
 
 export function AppShellHeaderContextSurface(props: AppShellSlotProps) {
@@ -664,7 +664,7 @@ export function OpalineV2HeaderTab({
   ...props
 }: OpalineV2ShellButtonProps & { tab: OpalineV2ShellTabItem }) {
   return (
-    <Button className={cn("max-w-48", className)} data-active={tab.active ? "true" : undefined} size="sm" type={type} variant={tab.active ? "secondary" : "ghost"} {...props}>
+    <Button className={cn("max-w-48 rounded-lg data-[active=true]:shadow-sm", className)} data-active={tab.active ? "true" : undefined} size="sm" type={type} variant={tab.active ? "secondary" : "ghost"} {...props}>
       {tab.dirty ? <span className="size-2 rounded-full bg-primary" /> : null}
       <span className="truncate">{tab.title}</span>
     </Button>

@@ -305,11 +305,11 @@ export const SlotPanel = React.forwardRef<SlotPanelHandle, SlotPanelProps>(
         value={activeTabId || ""}
         onValueChange={(val) => commitActiveTabId(val || null)}
       >
-        <div className="flex h-9 shrink-0 items-center justify-between border-b bg-muted/20">
-          <div className="flex min-w-0 flex-1 items-center overflow-hidden">
+        <div className="flex h-10 shrink-0 items-center justify-between border-b bg-background px-2">
+          <div className="flex min-w-0 flex-1 items-center gap-1 overflow-hidden">
             {tabOverflow.canScrollLeft ? (
               <ShadcnButton
-                className="shrink-0 text-muted-foreground"
+                className="size-7 shrink-0 rounded-[8px] text-muted-foreground"
                 size="icon"
                 variant="ghost"
                 type="button"
@@ -321,7 +321,7 @@ export const SlotPanel = React.forwardRef<SlotPanelHandle, SlotPanelProps>(
             ) : null}
             <Tabs.List
               ref={tabsRef}
-              className="flex min-w-0 max-w-full items-stretch overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              className="flex min-w-0 max-w-full items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
               aria-label={ariaLabel}
               data-overflow-left={tabOverflow.canScrollLeft ? "true" : undefined}
               data-overflow-right={tabOverflow.canScrollRight ? "true" : undefined}
@@ -330,14 +330,14 @@ export const SlotPanel = React.forwardRef<SlotPanelHandle, SlotPanelProps>(
                 <Tabs.Trigger
                   key={tab.id}
                   value={tab.id}
-                  className="group relative flex h-9 max-w-52 shrink-0 items-center gap-1.5 border-r px-3 text-xs text-muted-foreground outline-none hover:bg-muted/50 hover:text-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:after:absolute data-[state=active]:after:inset-x-0 data-[state=active]:after:bottom-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
+                  className="group relative flex h-7 max-w-52 shrink-0 items-center gap-1.5 rounded-[8px] px-2.5 text-[13px] text-muted-foreground outline-none transition-colors hover:bg-muted/60 hover:text-foreground data-[state=active]:bg-muted data-[state=active]:text-foreground"
                   data-tab-id={tab.id}
                   data-closable={tab.closable === true ? "true" : undefined}
                 >
                   <span className="relative flex size-4 shrink-0 items-center justify-center">
                     {tab.closable === true ? (
                       <span
-                        className="absolute inset-0 z-10 hidden items-center justify-center rounded-sm bg-muted text-muted-foreground hover:text-foreground group-hover:flex"
+                        className="absolute inset-0 z-10 hidden items-center justify-center rounded-full bg-muted-foreground/65 text-background hover:bg-muted-foreground group-hover:flex"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleCloseTab(tab.id);
@@ -361,7 +361,7 @@ export const SlotPanel = React.forwardRef<SlotPanelHandle, SlotPanelProps>(
             </Tabs.List>
             {tabOverflow.canScrollRight ? (
               <ShadcnButton
-                className="shrink-0 text-muted-foreground"
+                className="size-7 shrink-0 rounded-[8px] text-muted-foreground"
                 size="icon"
                 variant="ghost"
                 type="button"
@@ -373,7 +373,7 @@ export const SlotPanel = React.forwardRef<SlotPanelHandle, SlotPanelProps>(
             ) : null}
             {launcherItems.length > 0 && (
               <DropdownMenu>
-                <DropdownMenuTrigger render={<ShadcnButton className="shrink-0 text-muted-foreground" size="icon" variant="ghost" type="button" aria-label="Add tab" />}>
+                <DropdownMenuTrigger render={<ShadcnButton className="size-7 shrink-0 rounded-[8px] text-muted-foreground" size="icon" variant="ghost" type="button" aria-label="Add tab" />}>
                     <Plus size={15} strokeWidth={1.8} />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="min-w-52" side="bottom">
@@ -389,9 +389,9 @@ export const SlotPanel = React.forwardRef<SlotPanelHandle, SlotPanelProps>(
             )}
           </div>
           {onClose && (
-            <div className="flex shrink-0 items-center border-l">
+            <div className="flex shrink-0 items-center pl-1">
               <ShadcnButton
-                className="text-muted-foreground"
+                className="size-7 rounded-[8px] text-muted-foreground"
                 size="icon"
                 variant="ghost"
                 type="button"

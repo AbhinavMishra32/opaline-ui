@@ -131,9 +131,9 @@ export function AgentContextSurface({
                 if (mode === "floating" && !(event.target as HTMLElement).closest("button, a")) dragControls.start(event);
               }}
             >
-              <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground"><Sparkles size={14} /></span>
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-[7px] bg-muted text-muted-foreground"><Sparkles size={14} /></span>
               <div className="min-w-0 flex-1">
-                {eyebrow ? <small className="block truncate text-[10px] uppercase tracking-wide text-muted-foreground">{eyebrow}</small> : null}
+                {eyebrow ? <small className="block truncate text-xs font-medium text-muted-foreground">{eyebrow}</small> : null}
                 {title ? <strong className="block truncate text-sm font-medium">{title}</strong> : null}
               </div>
               <div className="flex shrink-0 items-center gap-0.5 [&_button]:flex [&_button]:size-7 [&_button]:items-center [&_button]:justify-center [&_button]:rounded-md [&_button]:text-muted-foreground [&_button:hover]:bg-muted [&_button:hover]:text-foreground">
@@ -164,8 +164,8 @@ export type AgentContextActionProps = HTMLAttributes<HTMLButtonElement> & {
 
 export function AgentContextAction({ icon, label, description, className = "", ...props }: AgentContextActionProps) {
   return (
-    <button className={cn("flex w-full items-start gap-3 rounded-md p-2 text-left hover:bg-muted", className)} type="button" {...props}>
-      <span className="flex size-7 shrink-0 items-center justify-center rounded-md border bg-background text-muted-foreground">{icon ?? <Sparkles size={14} />}</span>
+    <button className={cn("flex w-full items-start gap-3 rounded-[7px] p-2 text-left hover:bg-muted", className)} type="button" {...props}>
+      <span className="flex size-7 shrink-0 items-center justify-center rounded-[7px] border bg-background text-muted-foreground">{icon ?? <Sparkles size={14} />}</span>
       <span className="min-w-0"><strong className="block text-sm font-medium">{label}</strong>{description ? <small className="mt-0.5 block text-xs text-muted-foreground">{description}</small> : null}</span>
     </button>
   );
@@ -177,10 +177,10 @@ export function AgentContextSources({ sources, label = "Sources" }: { sources: A
   if (sources.length === 0) return null;
   return (
     <section className="mt-3 border-t pt-3">
-      <small className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">{label}</small>
+      <small className="text-xs font-medium text-muted-foreground">{label}</small>
       <div className="mt-2 flex flex-wrap gap-1.5">
         {sources.map((source, index) => (
-          <a className="inline-flex items-center gap-1 rounded-md border bg-background px-2 py-1 text-xs hover:bg-muted" href={source.url} key={source.id} target="_blank" rel="noreferrer">
+          <a className="inline-flex items-center gap-1 rounded-full border bg-background/70 px-2 py-1 text-xs hover:bg-muted" href={source.url} key={source.id} target="_blank" rel="noreferrer">
             <span className="text-muted-foreground">{index + 1}</span>
             <b className="font-medium">{source.domain ?? source.title}</b>
             <ArrowUpRight size={11} />

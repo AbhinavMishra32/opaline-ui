@@ -69,7 +69,7 @@ export function Sidebar({
   sectionLabels = { items: "Items", projects: "Projects" },
 }: SidebarProps) {
   return (
-    <aside className="flex h-full min-h-0 flex-col bg-sidebar/80 text-sidebar-foreground backdrop-blur-xl backdrop-saturate-150">
+    <aside className="flex h-full min-h-0 flex-col bg-sidebar/25 text-sidebar-foreground backdrop-blur-xl backdrop-saturate-150">
       {primaryItems.length > 0 ? (
         <>
           <SidebarPrimary>
@@ -177,13 +177,13 @@ export function SidebarBottomSlot({
 
   return (
     <section
-      className={cn("relative flex min-h-0 flex-col border-t", isCollapsed ? "h-auto" : "h-[var(--opaline-v2-sidebar-slot-height)]", className)}
+      className={cn("relative flex min-h-0 flex-col border-t bg-sidebar/20 backdrop-blur-xl", isCollapsed ? "h-auto" : "h-[var(--opaline-v2-sidebar-slot-height)]", className)}
       data-collapsed={isCollapsed ? "true" : "false"}
       style={{ ...style, "--opaline-v2-sidebar-slot-height": `${height}px` } as CSSProperties}
       {...props}
     >
       <div className={cn("absolute inset-x-0 -top-1 h-2 cursor-row-resize touch-none", isCollapsed && "pointer-events-none")} onPointerDown={beginResize} onPointerMove={resize} onPointerCancel={endResize} onPointerUp={endResize} />
-      <Button className="w-full justify-start" variant="ghost" onClick={() => setCollapsed(!isCollapsed)}>
+      <Button className="h-8 w-full justify-start rounded-[7px] px-2" variant="ghost" onClick={() => setCollapsed(!isCollapsed)}>
         {header}
       </Button>
       <div className={cn("min-h-0 flex-1 overflow-hidden", isCollapsed && "hidden")}>{children}</div>
@@ -194,14 +194,14 @@ export function SidebarBottomSlot({
 export function SidebarNavItemRow({ className, item, type = "button", ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { item: SidebarNavItem }) {
   return (
     <Button
-      className={cn("h-9 w-full justify-start gap-2 px-2 data-[active=true]:bg-sidebar-accent", className)}
+      className={cn("h-8 w-full justify-start gap-2 px-2 text-[13px] data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground", className)}
       data-active={item.active === true ? "true" : undefined}
       onClick={item.onClick}
       type={type}
       variant="ghost"
       {...props}
     >
-      {item.icon != null ? <span data-icon="inline-start" aria-hidden="true">{item.icon}</span> : null}
+      {item.icon != null ? <span className="grid size-[18px] shrink-0 place-items-center" data-icon="inline-start" aria-hidden="true">{item.icon}</span> : null}
       <span>{item.label}</span>
     </Button>
   );
@@ -210,7 +210,7 @@ export function SidebarNavItemRow({ className, item, type = "button", ...props }
 export function SidebarSection({ children, heading }: { children: ReactNode; heading: string }) {
   return (
     <section className="flex flex-col gap-1" {...appActionAttributes.sidebarSection({ collapsed: false, heading })}>
-      <div className="px-2 py-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">{heading}</div>
+      <div className="px-2 py-1 text-xs font-medium text-muted-foreground">{heading}</div>
       {children}
     </section>
   );
@@ -221,7 +221,7 @@ export function SidebarProjectRow({ onSelect, project, renderItem }: { onSelect?
   const expanded = project.collapsed !== true && project.threads != null;
   return (
     <div className="flex flex-col gap-1" data-active={project.active === true ? "true" : "false"} data-muted={project.muted === true ? "true" : "false"} {...appActionAttributes.sidebarProjectRow({ collapsed: project.collapsed === true, label, projectId: project.id })}>
-      <Button className="h-9 w-full justify-start gap-2 px-2" onClick={() => onSelect?.(project.id)} variant="ghost" {...appActionAttributes.sidebarProjectSelect}>
+      <Button className="h-8 w-full justify-start gap-2 px-2 text-[13px]" onClick={() => onSelect?.(project.id)} variant="ghost" {...appActionAttributes.sidebarProjectSelect}>
         {project.icon != null ? <span aria-hidden="true">{project.icon}</span> : null}
         <span>{project.label}</span>
       </Button>
@@ -234,7 +234,7 @@ export function SidebarThreadRow({ inset = false, item }: { inset?: boolean; ite
   const trailing = item.time ?? item.meta;
   const title = typeof item.title === "string" ? item.title : item.label ?? item.id;
   return (
-    <Button className={cn("h-9 w-full justify-between px-2 data-[active=true]:bg-sidebar-accent", inset && "pl-6")} data-active={item.active === true ? "true" : "false"} data-inset={inset ? "true" : "false"} variant="ghost" {...appActionAttributes.sidebarThreadRow({ active: item.active === true, hostId: item.hostId, id: item.id, kind: item.kind ?? "local", pinned: item.pinned === true, title })}>
+    <Button className={cn("h-8 w-full justify-between px-2 text-[13px] data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground", inset && "pl-6")} data-active={item.active === true ? "true" : "false"} data-inset={inset ? "true" : "false"} variant="ghost" {...appActionAttributes.sidebarThreadRow({ active: item.active === true, hostId: item.hostId, id: item.id, kind: item.kind ?? "local", pinned: item.pinned === true, title })}>
       <span className="truncate">{item.title}</span>
       {trailing != null ? <span className="shrink-0 text-xs text-muted-foreground">{trailing}</span> : null}
     </Button>

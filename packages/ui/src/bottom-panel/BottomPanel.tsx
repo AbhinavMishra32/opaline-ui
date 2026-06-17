@@ -200,10 +200,14 @@ export interface TerminalSurfaceProps {
 export function TerminalSurface({ children, className, cwd }: TerminalSurfaceProps) {
   return (
     <div
-      className={cn("h-full min-h-0 overflow-hidden bg-background font-mono text-sm text-foreground", className)}
+      className={cn(className, "grid h-full min-h-0 grid-rows-[30px_minmax(0,1fr)] overflow-hidden bg-background font-mono text-xs text-foreground")}
       data-opaline-terminal="true"
     >
-      {children}
+      <div className="flex min-w-0 items-center gap-2 border-b px-2.5 text-muted-foreground">
+        <span className="size-[7px] shrink-0 rounded-full bg-emerald-500" aria-hidden="true" />
+        <span className="truncate">{cwd ?? "~"}</span>
+      </div>
+      <div className="min-h-0 overflow-hidden">{children}</div>
     </div>
   );
 }

@@ -171,7 +171,7 @@ export function AdaptiveSidecarSurface({
 
   return (
     <motion.article
-      className={cn("flex min-h-11 max-h-full w-full flex-col overflow-hidden rounded-lg border bg-card text-card-foreground shadow-lg", className)}
+      className={cn("flex min-h-11 max-h-full w-full flex-col overflow-hidden rounded-[8px] border bg-card text-card-foreground shadow-md", className)}
       data-collapsed={collapsed ? "true" : "false"}
       data-pinned={pinned ? "true" : "false"}
       data-draggable={draggable ? "true" : "false"}
@@ -191,7 +191,7 @@ export function AdaptiveSidecarSurface({
         }}
       >
         <div className="min-w-0 flex-1">
-          {eyebrow ? <span className="block truncate text-[10px] font-medium uppercase tracking-wide text-muted-foreground">{eyebrow}</span> : null}
+          {eyebrow ? <span className="block truncate text-xs font-medium text-muted-foreground">{eyebrow}</span> : null}
           <strong className="block truncate text-sm font-medium">{title}</strong>
         </div>
         <div className="flex shrink-0 items-center gap-0.5 [&_button]:flex [&_button]:size-7 [&_button]:items-center [&_button]:justify-center [&_button]:rounded-md [&_button]:text-muted-foreground [&_button:hover]:bg-muted [&_button:hover]:text-foreground">

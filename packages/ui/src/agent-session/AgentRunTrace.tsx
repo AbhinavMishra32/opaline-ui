@@ -124,7 +124,7 @@ function traceRowLabel(entry: AgentRunTraceEntry): string {
 function TraceDetail({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex min-w-0 flex-col gap-0.5">
-      <span className="text-[10px] font-semibold uppercase tracking-wide">{label}</span>
+      <span className="text-[10px] font-semibold">{label}</span>
       <pre className="max-h-28 overflow-auto whitespace-pre-wrap break-words font-mono text-[10px] text-foreground/80">{value}</pre>
     </div>
   );

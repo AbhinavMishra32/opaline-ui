@@ -90,11 +90,11 @@ export function FileTree({
         tabIndex={-1}
       >
         {search ? (
-          <div className="shrink-0 p-2" data-file-tree-search-container="true">
+          <div className="shrink-0 px-2 pb-2 pt-1" data-file-tree-search-container="true">
             <label className="sr-only" htmlFor="opaline-file-tree-search">
               {searchLabel}
             </label>
-            <div className="flex h-8 items-center gap-2 rounded-md border bg-background px-2 text-muted-foreground focus-within:ring-2 focus-within:ring-ring/30">
+            <div className="flex h-7 items-center gap-2 rounded-lg border bg-background/70 px-2 text-muted-foreground focus-within:ring-2 focus-within:ring-ring/30">
               <SearchIcon />
               <input
                 id="opaline-file-tree-search"
@@ -107,7 +107,7 @@ export function FileTree({
           </div>
         ) : null}
         <div className="min-h-0 flex-1 overflow-y-auto" data-file-tree-virtualized-scroll="true">
-          <div className="py-1" data-file-tree-virtualized-list="true">
+          <div className="flex flex-col gap-0.5 px-2 pb-2 pt-1" data-file-tree-virtualized-list="true">
             {normalizedItems.map((item) => (
               <FileTreeRow
                 gitLane={gitLane}
@@ -159,7 +159,7 @@ function FileTreeRow({
   if (item.isEditing) {
     return (
       <div
-        className="relative flex h-7 w-full items-center gap-1.5 pr-2 text-xs"
+        className="relative flex h-[26px] w-full items-center gap-1.5 pr-2 text-xs"
         aria-expanded={isDirectory ? (item.expanded !== false ? "true" : "false") : undefined}
         style={
           {
@@ -194,7 +194,7 @@ function FileTreeRow({
           )}
         </span>
         <input
-          className="h-6 min-w-0 flex-1 rounded border bg-background px-1.5 text-xs outline-none focus:ring-2 focus:ring-ring/30"
+          className="h-6 min-w-0 flex-1 rounded-md border bg-background px-1.5 text-xs outline-none focus:ring-2 focus:ring-ring/30"
           defaultValue={item.name}
           autoFocus
           onFocus={(e) => {
@@ -223,7 +223,7 @@ function FileTreeRow({
 
   const buttonElement = (
     <button
-      className="group relative flex h-7 w-full items-center gap-1.5 pr-2 text-left text-xs text-muted-foreground outline-none hover:bg-muted hover:text-foreground data-[item-selected=true]:bg-muted data-[item-selected=true]:font-medium data-[item-selected=true]:text-foreground"
+      className="group relative flex h-[26px] w-full items-center gap-1.5 rounded-[7px] pr-2 text-left text-xs text-muted-foreground outline-none hover:bg-muted hover:text-foreground data-[item-selected=true]:bg-muted data-[item-selected=true]:font-medium data-[item-selected=true]:text-foreground"
       data-file-tree-sticky-path={level === 1 ? item.path : undefined}
       data-file-tree-sticky-row={level === 1 && isDirectory ? "true" : undefined}
       data-path={item.path}

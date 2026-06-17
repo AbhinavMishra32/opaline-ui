@@ -39,9 +39,9 @@ export function IconButton(props: OpalineV2ButtonProps) {
 }
 
 export function Pill({ children }: { children: React.ReactNode }) {
-  return <span className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">{children}</span>;
+  return <span className="inline-flex h-[22px] items-center rounded-full border border-border bg-background/70 px-2 text-xs text-muted-foreground shadow-sm">{children}</span>;
 }
 
 export function StatusDot({ tone = "neutral" }: { tone?: "green" | "neutral" | "orange" }) {
-  return <span aria-hidden="true" className={cn("size-2 rounded-full", tone === "green" ? "bg-primary" : tone === "orange" ? "bg-destructive" : "bg-muted-foreground")} data-tone={tone} />;
+  return <span aria-hidden="true" className={cn("size-[7px] rounded-full", tone === "green" ? "bg-emerald-500" : tone === "orange" ? "bg-amber-500" : "bg-muted-foreground")} data-tone={tone} />;
 }
