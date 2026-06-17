@@ -108,7 +108,7 @@ export function AgentContextSurface({
           ref={surfaceRef}
           layout
           layoutId="opaline-agent-context-surface"
-          className={cn("fixed z-50 flex w-[min(520px,calc(100vw-24px))] flex-col overflow-hidden rounded-lg border bg-popover text-popover-foreground shadow-lg", className)}
+          className={cn("opaline-overlay-shadow fixed z-50 flex w-[min(520px,calc(100vw-24px))] flex-col overflow-hidden rounded-lg border bg-popover text-popover-foreground", className)}
           data-mode={mode}
           data-stage={stage}
           style={{ left: position.left, top: position.top }}

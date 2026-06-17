@@ -107,7 +107,7 @@ export function AgentSessionThinkingRow({
   showReasoningSummaries: boolean;
 }) {
   return (
-    <div data-slot="session-turn-thinking" className="flex w-fit max-w-full flex-col gap-1 rounded-lg bg-muted/20 px-2.5 py-2 text-xs text-muted-foreground ring-1 ring-border/30">
+    <div data-slot="session-turn-thinking" className="flex w-fit max-w-full flex-col gap-1 rounded-[14px] bg-muted/18 px-2.5 py-2 text-xs text-muted-foreground ring-1 ring-border/25">
       <div className="inline-flex items-center gap-2">
         <SpinnerIcon className="size-3.5 animate-spin" />
         <span className="animate-pulse font-medium">{label}</span>
@@ -274,7 +274,7 @@ export function AgentSessionDisclosure({
   return (
     <div data-component={component}>
       <button
-        className="flex w-fit max-w-full items-start justify-between gap-3 rounded-lg bg-muted/20 px-2.5 py-2 text-left text-xs text-muted-foreground ring-1 ring-border/30 transition-colors hover:bg-muted/35 hover:text-foreground"
+        className="flex w-fit max-w-full items-start justify-between gap-3 rounded-[14px] bg-muted/15 px-2.5 py-1.5 text-left text-xs text-muted-foreground ring-1 ring-border/25 transition-colors hover:bg-muted/28 hover:text-foreground"
         type="button"
         aria-expanded={expandable ? open : undefined}
         onClick={() => expandable && setOpen((value) => !value)}
@@ -308,7 +308,7 @@ export function AgentSessionDisclosure({
 
 export function AgentSessionToolEntryRow({ entry }: { entry: AgentSessionToolEntry }) {
   return (
-    <div data-slot="context-tool-group-item" className="ml-3 border-l border-border/60 py-1.5 pl-3 text-xs">
+    <div data-slot="context-tool-group-item" className="py-1 pl-2 text-xs">
       <AgentSessionToolTrigger entry={entry} />
     </div>
   );
@@ -329,7 +329,7 @@ export function AgentSessionToolCard({ tool }: { tool: AgentSessionToolEntry }) 
       label={tool.title}
       summary={<>{statusLabel}{tool.subtitle ? <> · {tool.subtitle}</> : null}</>}
     >
-      {expandable ? <div className="pb-1 pl-5 pt-2 text-xs">{tool.content}</div> : null}
+      {expandable ? <div className="pb-1 pl-3 pt-2 text-xs">{tool.content}</div> : null}
     </AgentSessionDisclosure>
   );
 }
@@ -350,7 +350,7 @@ export function AgentSessionDock({
 
   return (
     <div
-      className={cn("overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm", className)}
+      className={cn("overflow-hidden rounded-[18px] bg-card/80 text-card-foreground shadow-[0_6px_18px_color-mix(in_srgb,var(--foreground)_5%,transparent)] ring-1 ring-border/35", className)}
       data-component="agent-session-dock"
       data-collapsed={collapsed || undefined}
       {...props}
@@ -378,12 +378,12 @@ export function AgentSessionDock({
             exit={{ height: 0, opacity: 0 }}
             transition={disclosureTransition}
           >
-            <div className="border-t px-3 py-2 text-xs">{children}</div>
+            <div className="px-3 pb-2 pt-1 text-xs">{children}</div>
           </motion.div>
         ) : null}
       </AnimatePresence>
       {actions?.length ? (
-        <div className="flex justify-end gap-2 border-t px-3 py-2">
+        <div className="flex justify-end gap-2 px-3 pb-2 pt-1">
           {actions.map((action) => (
             <Button
               key={action.id}

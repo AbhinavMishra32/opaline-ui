@@ -60,7 +60,7 @@ export function AgentSessionSurface({
 }: AgentSessionSurfaceProps) {
   const header = (eyebrow != null || title != null || lead != null) ? (
     <header
-      className="mb-5 border-l-2 border-border/80 pl-3 pr-1"
+      className="mb-4 rounded-[16px] bg-muted/25 px-3 py-2 ring-1 ring-border/30"
       data-component="agent-session-header"
     >
       {eyebrow != null ? <p className="text-xs font-medium text-muted-foreground">{eyebrow}</p> : null}
@@ -81,7 +81,7 @@ export function AgentSessionSurface({
         scrollKey={scrollKey}
       />
 
-      {composer ? <div className="shrink-0 bg-background/95 px-3 pb-3 pt-1 backdrop-blur">{composer}</div> : null}
+      {composer ? <div className="shrink-0 bg-background/70 px-3 pb-3 pt-2 backdrop-blur">{composer}</div> : null}
     </section>
   );
 }
@@ -110,7 +110,7 @@ export function AgentSessionTimeline({
   return (
     <div
       ref={scrollRef}
-      className={cn("px-4 pb-6 pt-3 [&_[data-slot=session-turn-content]]:mx-auto [&_[data-slot=session-turn-content]]:w-full [&_[data-slot=session-turn-content]]:max-w-[820px] [&_[data-component=assistant-message]]:flex [&_[data-component=assistant-message]]:flex-col [&_[data-component=assistant-message]]:gap-2 [&_[data-component=text-part]]:text-[13px] [&_[data-slot=text-part-body]]:leading-[1.65] [&_[data-component=user-message]]:ml-auto [&_[data-component=user-message]]:max-w-[77%] [&_[data-slot=user-message-body]]:rounded-2xl [&_[data-slot=user-message-body]]:bg-muted/75 [&_[data-slot=user-message-body]]:px-3 [&_[data-slot=user-message-body]]:py-2 [&_[data-slot=user-message-body]]:ring-1 [&_[data-slot=user-message-body]]:ring-border/40 [&_[data-slot=user-message-text]]:whitespace-pre-wrap [&_[data-slot=user-message-text]]:break-words [&_[data-slot=user-message-text]]:text-[13px] [&_[data-slot=user-message-text]]:leading-5 [&_[data-slot=text-part-meta]]:mt-2 [&_[data-slot=text-part-meta]]:inline-flex [&_[data-slot=text-part-meta]]:w-fit [&_[data-slot=text-part-meta]]:rounded-full [&_[data-slot=text-part-meta]]:bg-muted/45 [&_[data-slot=text-part-meta]]:px-2 [&_[data-slot=text-part-meta]]:py-0.5 [&_[data-slot=text-part-meta]]:text-[10px] [&_[data-slot=text-part-meta]]:leading-4 [&_[data-slot=text-part-meta]]:text-muted-foreground", className)}
+      className={cn("px-4 pb-6 pt-3 [&_[data-slot=session-turn-content]]:mx-auto [&_[data-slot=session-turn-content]]:w-full [&_[data-slot=session-turn-content]]:max-w-[780px] [&_[data-component=assistant-message]]:flex [&_[data-component=assistant-message]]:flex-col [&_[data-component=assistant-message]]:gap-2.5 [&_[data-component=text-part]]:text-[13px] [&_[data-slot=text-part-body]]:leading-[1.6] [&_[data-component=user-message]]:ml-auto [&_[data-component=user-message]]:max-w-[77%] [&_[data-slot=user-message-body]]:rounded-[18px] [&_[data-slot=user-message-body]]:bg-muted/70 [&_[data-slot=user-message-body]]:px-3 [&_[data-slot=user-message-body]]:py-2 [&_[data-slot=user-message-body]]:ring-1 [&_[data-slot=user-message-body]]:ring-border/35 [&_[data-slot=user-message-text]]:whitespace-pre-wrap [&_[data-slot=user-message-text]]:break-words [&_[data-slot=user-message-text]]:text-[13px] [&_[data-slot=user-message-text]]:leading-5 [&_[data-slot=text-part-meta]]:mt-2 [&_[data-slot=text-part-meta]]:inline-flex [&_[data-slot=text-part-meta]]:w-fit [&_[data-slot=text-part-meta]]:rounded-full [&_[data-slot=text-part-meta]]:bg-muted/40 [&_[data-slot=text-part-meta]]:px-2 [&_[data-slot=text-part-meta]]:py-0.5 [&_[data-slot=text-part-meta]]:text-[10px] [&_[data-slot=text-part-meta]]:leading-4 [&_[data-slot=text-part-meta]]:text-muted-foreground", className)}
       data-component="agent-session-timeline"
       {...props}
       onScroll={(event) => {
@@ -125,7 +125,7 @@ export function AgentSessionTimeline({
       ) : (
         <div data-component="session-turn">
           <div data-slot="session-turn-content">
-            <div className="flex flex-col gap-5" data-slot="session-turn-message-container">
+            <div className="flex flex-col gap-4" data-slot="session-turn-message-container">
               {timelineRows.map((group) => {
                 if (group.kind === "activity-group") {
                   if (group.entries.length === 1) {
@@ -138,7 +138,7 @@ export function AgentSessionTimeline({
                   }
                   const hasActive = group.entries.some((e) => e.status === "running" || e.status === "pending");
                   return (
-                    <div key={group.rows[0].id} className="border-l border-border/40 pl-2 pr-1" data-slot="session-turn-message-container">
+                    <div key={group.rows[0].id} className="pl-1 pr-1" data-slot="session-turn-message-container">
                       <AgentRunTrace
                         state={hasActive ? "thinking" : "thought"}
                         entries={group.entries}
@@ -172,7 +172,7 @@ export function AgentSessionComposer({
   const accessibleSubmitLabel = typeof submitLabel === "string" ? submitLabel : "Send";
 
   return (
-    <div className={cn("mx-auto w-full max-w-[840px] overflow-hidden rounded-3xl bg-card shadow-[0_12px_36px_color-mix(in_srgb,var(--foreground)_10%,transparent)] ring-1 ring-border transition-[box-shadow,background-color] focus-within:ring-ring/70", className)}>
+    <div className={cn("mx-auto w-full max-w-[840px] overflow-hidden rounded-3xl bg-card shadow-[0_8px_24px_color-mix(in_srgb,var(--foreground)_6%,transparent)] ring-1 ring-border/65 transition-[box-shadow,background-color] focus-within:ring-ring/70", className)}>
       <Textarea
         {...props}
         className="min-h-16 max-h-36 resize-none border-0 bg-transparent px-4 pb-1 pt-3 text-[13px] leading-5 shadow-none focus-visible:border-transparent focus-visible:ring-0"
