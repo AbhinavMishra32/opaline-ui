@@ -16,7 +16,7 @@
 
 .opaline-agent-thinking-shimmer {
   display: inline-flex;
-  background-image: linear-gradient(90deg, var(--muted-foreground) 0%, var(--muted-foreground) 40%, var(--foreground) 50%, var(--muted-foreground) 60%, var(--muted-foreground) 100%);
+  background-image: linear-gradient(90deg, var(--muted-foreground) 0%, var(--muted-foreground) 40%, #fff 50%, var(--muted-foreground) 60%, var(--muted-foreground) 100%);
   background-size: 250% 100%;
   background-clip: text;
   color: transparent;

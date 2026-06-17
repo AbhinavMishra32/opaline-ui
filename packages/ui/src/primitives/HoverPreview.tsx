@@ -96,7 +96,7 @@ export function HoverPreview({
       {trigger}
       {open && typeof document !== "undefined"
         ? createPortal(
-            <div ref={previewRef} className={cn("fixed z-50 max-h-[min(420px,calc(100vh-32px))] overflow-auto rounded-lg border bg-popover p-3 text-popover-foreground shadow-md", contentClassName)} style={style} role="tooltip">
+            <div ref={previewRef} className={cn("opaline-overlay-shadow fixed z-50 max-h-[min(420px,calc(100vh-32px))] overflow-auto rounded-lg border bg-popover p-3 text-popover-foreground", contentClassName)} style={style} role="tooltip">
               {content}
             </div>,
             document.body
