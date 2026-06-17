@@ -44,7 +44,12 @@ const SIDE_WIDTH = 300;
 const SIDE_GAP = 16;
 const OVERLAY_THRESHOLD = 1096;
 const GUTTER_THRESHOLD = 1536;
-const panelSpring = { type: "spring" as const, duration: 0.3, bounce: 0.01 };
+const panelSpring = {
+  type: "spring" as const,
+  stiffness: 220,
+  damping: 23,
+  mass: 0.8
+};
 const SidecarBoundsContext = createContext<RefObject<HTMLElement | null> | null>(null);
 
 export function getAdaptiveSidecarMode(
@@ -166,8 +171,7 @@ export function AdaptiveSidecarSurface({
 
   return (
     <motion.article
-      layout
-      className={cn("flex max-h-full w-full flex-col overflow-hidden rounded-lg border bg-card text-card-foreground shadow-lg", className)}
+      className={cn("flex min-h-11 max-h-full w-full flex-col overflow-hidden rounded-lg border bg-card text-card-foreground shadow-lg", className)}
       data-collapsed={collapsed ? "true" : "false"}
       data-pinned={pinned ? "true" : "false"}
       data-draggable={draggable ? "true" : "false"}
@@ -219,21 +223,21 @@ export function AdaptiveSidecarSurface({
           ) : null}
         </div>
       </header>
-      <AnimatePresence initial={false}>
-        {!collapsed ? (
-          <motion.div
-            key="content"
-            className="flex min-h-0 flex-1 flex-col overflow-hidden"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={transition}
-          >
-            <div className="min-h-0 flex-1 overflow-y-auto p-3">{children}</div>
-            {footer ? <footer className="shrink-0 border-t p-3">{footer}</footer> : null}
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+      <motion.div
+        className="flex min-h-0 flex-col overflow-hidden"
+        style={{ flexShrink: 0 }}
+        initial={false}
+        animate={{
+          height: collapsed ? 0 : "auto",
+          opacity: collapsed ? 0 : 1,
+          flexGrow: collapsed ? 0 : 1,
+          flexBasis: collapsed ? "0px" : "auto"
+        }}
+        transition={transition}
+      >
+        <div className="min-h-0 flex-1 overflow-y-auto p-3">{children}</div>
+        {footer ? <footer className="shrink-0 border-t p-3">{footer}</footer> : null}
+      </motion.div>
     </motion.article>
   );
 }
