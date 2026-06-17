@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { Button } from "../components/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../components/tooltip";
 import { cn } from "../lib/utils";
+import { AgentRunTraceRow } from "./AgentRunTrace";
 import type {
   AgentSessionActionEntry,
   AgentSessionDockProps,
@@ -159,6 +160,14 @@ export function AgentSessionPartView({ part }: { part: AgentSessionMessagePart }
         defaultOpen={part.defaultOpen}
         summary={part.summary}
       />
+    );
+  }
+
+  if (part.type === "activity") {
+    return (
+      <div className="ml-1.5 border-l border-border/70 pl-3 pr-1" data-component="activity-part">
+        <AgentRunTraceRow entry={part.entry} defaultOpen={part.defaultOpen} />
+      </div>
     );
   }
 

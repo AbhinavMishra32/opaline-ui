@@ -48,6 +48,12 @@ export type AgentSessionMessagePart =
       defaultOpen?: boolean;
     }
   | {
+      type: "activity";
+      id: string;
+      entry: AgentRunTraceEntry;
+      defaultOpen?: boolean;
+    }
+  | {
       type: "tool";
       id: string;
       tool: AgentSessionToolEntry;
