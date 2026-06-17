@@ -44,11 +44,19 @@ const SIDE_WIDTH = 300;
 const SIDE_GAP = 16;
 const OVERLAY_THRESHOLD = 1096;
 const GUTTER_THRESHOLD = 1536;
+const MIN_SIDE_WIDTH = 220;
+const MAX_SIDE_WIDTH = 720;
 const panelSpring = {
   type: "spring" as const,
-  stiffness: 220,
-  damping: 23,
+  stiffness: 260,
+  damping: 28,
   mass: 0.8
+};
+const collapseSpring = {
+  type: "spring" as const,
+  stiffness: 280,
+  damping: 30,
+  mass: 0.7
 };
 const SidecarBoundsContext = createContext<RefObject<HTMLElement | null> | null>(null);
 
@@ -86,18 +94,19 @@ export function AdaptiveSidecarLayout({
       const saved = localStorage.getItem("opaline-sidecar-width");
       if (saved) {
         const parsed = parseInt(saved, 10);
-        if (!isNaN(parsed) && parsed >= 200 && parsed <= 800) return parsed;
+        if (!isNaN(parsed)) return clampSidecarWidth(parsed);
       }
     }
-    return sidecarWidth;
+    return clampSidecarWidth(sidecarWidth);
   });
   const [isResizing, setIsResizing] = useState(false);
 
   useEffect(() => {
     setCurrentWidth((prev) => {
+      if (typeof window === "undefined") return clampSidecarWidth(sidecarWidth);
       const saved = localStorage.getItem("opaline-sidecar-width");
       if (!saved) {
-        return sidecarWidth;
+        return clampSidecarWidth(sidecarWidth);
       }
       return prev;
     });
@@ -120,6 +129,7 @@ export function AdaptiveSidecarLayout({
   const inline = open && pinned && mode !== "overlay";
   const shift = inline && mode === "shift" ? -(currentWidth + gap) / 2 : 0;
   const transition = isResizing || reduceMotion ? { duration: 0 } : panelSpring;
+  const railOffset = currentWidth + gap;
 
   const widthRef = useRef(currentWidth);
   widthRef.current = currentWidth;
@@ -132,7 +142,7 @@ export function AdaptiveSidecarLayout({
 
     const handlePointerMove = (moveEvent: PointerEvent) => {
       const deltaX = moveEvent.clientX - startX;
-      const newWidth = Math.max(200, Math.min(800, startWidth - deltaX));
+      const newWidth = clampSidecarWidth(startWidth - deltaX);
       setCurrentWidth(newWidth);
     };
 
@@ -142,7 +152,7 @@ export function AdaptiveSidecarLayout({
       document.removeEventListener("pointerup", handlePointerUp);
 
       const deltaX = upEvent.clientX - startX;
-      const finalWidth = Math.max(200, Math.min(800, startWidth - deltaX));
+      const finalWidth = clampSidecarWidth(startWidth - deltaX);
       localStorage.setItem("opaline-sidecar-width", String(finalWidth));
     };
 
@@ -171,8 +181,8 @@ export function AdaptiveSidecarLayout({
       >
         {children}
       </motion.div>
-      {keepMounted || open ? (
-        <SidecarBoundsContext.Provider value={railRef}>
+      <AnimatePresence initial={false}>
+        {keepMounted || open ? (
           <motion.aside
             ref={railRef}
             className="absolute inset-y-0 right-0 z-30 flex w-[var(--opaline-sidecar-width)] items-stretch p-[var(--opaline-sidecar-gap)] data-[inline=true]:relative data-[inline=true]:z-auto data-[visible=false]:pointer-events-none"
@@ -182,27 +192,35 @@ export function AdaptiveSidecarLayout({
             initial={false}
             animate={{
               opacity: open ? 1 : 0,
-              translateX: open ? 0 : "100%",
-              scale: open ? 1 : 0.8,
+              x: open ? 0 : railOffset,
+              scale: open ? 1 : 0.98
+            }}
+            exit={{
+              opacity: 0,
+              x: railOffset,
+              scale: 0.98
             }}
             transition={transition}
           >
-            {/* Horizontal Resize Handle */}
             <div
-              className="absolute left-0 top-0 bottom-0 w-6 cursor-col-resize z-40 -translate-x-1/2 flex items-center justify-center group"
-              onPointerDown={handlePointerDown}
+              className="group absolute bottom-3 left-0 top-3 z-40 flex w-5 -translate-x-1/2 cursor-col-resize items-center justify-center rounded-full"
+              data-visible={open ? "true" : "false"}
+              onPointerDown={open ? handlePointerDown : undefined}
+              aria-hidden={!open}
             >
               <div
                 className={cn(
-                  "w-[2px] h-12 rounded-full bg-muted-foreground/30 opacity-0 group-hover:opacity-100 transition-all duration-150 hover:bg-primary/50",
-                  isResizing && "opacity-100 bg-primary h-full rounded-none w-[3px]"
+                  "h-10 w-px rounded-full bg-border opacity-0 transition-[height,opacity,background-color,width] duration-150 group-hover:h-16 group-hover:w-0.5 group-hover:bg-muted-foreground/45 group-hover:opacity-100",
+                  isResizing && "h-full w-0.5 bg-primary opacity-100"
                 )}
               />
             </div>
-            {sidecar}
+            <SidecarBoundsContext.Provider value={railRef}>
+              {sidecar}
+            </SidecarBoundsContext.Provider>
           </motion.aside>
-        </SidecarBoundsContext.Provider>
-      ) : null}
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }
@@ -231,10 +249,15 @@ export function AdaptiveSidecarSurface({
   const dragControls = useDragControls();
   const dragBounds = useContext(SidecarBoundsContext);
   const transition = reduceMotion ? { duration: 0 } : panelSpring;
+  const bodyTransition = reduceMotion ? { duration: 0 } : collapseSpring;
 
   return (
     <motion.article
-      className={cn("flex min-h-11 max-h-full w-full flex-col overflow-hidden rounded-[8px] border bg-card text-card-foreground shadow-md", className)}
+      layout
+      className={cn(
+        "opaline-overlay-shadow flex min-h-11 max-h-full w-full flex-col overflow-hidden rounded-[8px] border border-border/80 bg-popover/92 text-popover-foreground backdrop-blur-xl backdrop-saturate-150",
+        className
+      )}
       data-collapsed={collapsed ? "true" : "false"}
       data-pinned={pinned ? "true" : "false"}
       data-draggable={draggable ? "true" : "false"}
@@ -248,22 +271,26 @@ export function AdaptiveSidecarSurface({
       {...props}
     >
       <header
-        className="flex min-h-11 shrink-0 items-center justify-between gap-3 border-b px-3 py-2"
+        className={cn(
+          "flex min-h-11 shrink-0 items-center justify-between gap-3 border-b border-border/70 bg-background/35 px-3 py-2",
+          draggable && "cursor-grab active:cursor-grabbing"
+        )}
         onPointerDown={(event: ReactPointerEvent<HTMLElement>) => {
           if (draggable && !(event.target as HTMLElement).closest("button, a")) dragControls.start(event);
         }}
       >
         <div className="min-w-0 flex-1">
-          {eyebrow ? <span className="block truncate text-xs font-medium text-muted-foreground">{eyebrow}</span> : null}
-          <strong className="block truncate text-sm font-medium">{title}</strong>
+          {eyebrow ? <span className="block truncate text-[11px] font-medium uppercase tracking-normal text-muted-foreground">{eyebrow}</span> : null}
+          <strong className="block truncate text-sm font-semibold">{title}</strong>
         </div>
-        <div className="flex shrink-0 items-center gap-0.5 [&_button]:flex [&_button]:size-7 [&_button]:items-center [&_button]:justify-center [&_button]:rounded-md [&_button]:text-muted-foreground [&_button:hover]:bg-muted [&_button:hover]:text-foreground">
+        <div className="flex shrink-0 items-center gap-0.5 [&_button]:flex [&_button]:size-7 [&_button]:items-center [&_button]:justify-center [&_button]:rounded-[7px] [&_button]:text-muted-foreground [&_button]:transition-colors [&_button:hover]:bg-muted [&_button:hover]:text-foreground">
           {actions}
           {onCollapsedChange ? (
             <button
               type="button"
               onClick={() => onCollapsedChange(!collapsed)}
               aria-label={collapsed ? expandLabel : collapseLabel}
+              aria-expanded={!collapsed}
               title={collapsed ? expandLabel : collapseLabel}
             >
               {collapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
@@ -286,22 +313,27 @@ export function AdaptiveSidecarSurface({
           ) : null}
         </div>
       </header>
-      <motion.div
-        className="flex min-h-0 flex-1 flex-col overflow-hidden"
-        style={{ flexShrink: 0 }}
-        initial={false}
-        animate={{
-          height: collapsed ? 0 : "auto",
-          opacity: collapsed ? 0 : 1,
-          flexGrow: collapsed ? 0 : 1,
-          flexBasis: collapsed ? "0px" : "0%",
-          transitionEnd: collapsed ? {} : { height: "" }
-        }}
-        transition={transition}
-      >
-        <div className="min-h-0 flex-1 overflow-y-auto p-3">{children}</div>
-        {footer ? <footer className="shrink-0 border-t p-3">{footer}</footer> : null}
-      </motion.div>
+      <AnimatePresence initial={false}>
+        {!collapsed ? (
+          <motion.div
+            key="opaline-sidecar-body"
+            className="min-h-0 overflow-hidden"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={bodyTransition}
+          >
+            <div className="flex max-h-[calc(100vh-7rem)] min-h-0 flex-col">
+              <div className="min-h-0 flex-1 overflow-y-auto p-3">{children}</div>
+              {footer ? <footer className="shrink-0 border-t border-border/70 bg-background/30 p-3">{footer}</footer> : null}
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </motion.article>
   );
+}
+
+function clampSidecarWidth(width: number): number {
+  return Math.max(MIN_SIDE_WIDTH, Math.min(MAX_SIDE_WIDTH, width));
 }

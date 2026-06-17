@@ -28,6 +28,7 @@
   --opaline-radius-composer: 24px;
   --opaline-corner-shape: squircle;
   --opaline-shadow-float: 0 12px 36px #00000016;
+  --opaline-shadow-overlay: 0 12px 32px #00000024;
   --opaline-shadow-card: 0 1px 2px #00000008;
   --shadow-xl: 0px 8px 16px -4px #0000001f;
   --shadow-xl-spread: 0px 0px 0px 0.5px var(--opaline-border-subtle), var(--shadow-xl);
@@ -106,6 +107,7 @@
     --opaline-border-strong: #ffffff24;
     --opaline-accent-soft: #12382f;
     --opaline-shadow-float: 0 18px 42px #00000066;
+    --opaline-shadow-overlay: 0 12px 32px #00000024;
     --color-background-surface: var(--gray-900);
     --color-background-surface-under: black;
     --color-background-editor-opaque: var(--gray-800);
@@ -133,6 +135,7 @@
   --opaline-border-strong: #ffffff24;
   --opaline-accent-soft: #12382f;
   --opaline-shadow-float: 0 18px 42px #00000066;
+  --opaline-shadow-overlay: 0 12px 32px #00000024;
   --color-background-surface: var(--gray-900);
   --color-background-surface-under: black;
   --color-background-editor-opaque: var(--gray-800);
@@ -185,6 +188,10 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+.opaline-overlay-shadow {
+  box-shadow: var(--opaline-shadow-overlay) !important;
+}
+
 [data-opaline-window-type="electron"] body {
   overscroll-behavior: none;
   overflow: hidden;
@@ -198,4 +205,77 @@ button,
 textarea,
 input {
   font: inherit;
+}
+
+@keyframes opaline-overlay-spring-in {
+  0% {
+    opacity: 0;
+    transform: translate3d(var(--opaline-overlay-enter-x, 0), var(--opaline-overlay-enter-y, -0.1875rem), 0) scale(0.985);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes opaline-overlay-spring-out {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--opaline-overlay-exit-x, 0), var(--opaline-overlay-exit-y, -0.1875rem), 0) scale(0.985);
+  }
+}
+
+.opaline-overlay-spring {
+  --opaline-overlay-enter-x: 0;
+  --opaline-overlay-enter-y: -0.1875rem;
+  --opaline-overlay-exit-x: 0;
+  --opaline-overlay-exit-y: -0.125rem;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform, opacity;
+}
+
+.opaline-overlay-spring[data-side="top"] {
+  --opaline-overlay-enter-y: 0.1875rem;
+  --opaline-overlay-exit-y: 0.125rem;
+}
+
+.opaline-overlay-spring[data-side="left"],
+.opaline-overlay-spring[data-side="inline-start"] {
+  --opaline-overlay-enter-x: 0.375rem;
+  --opaline-overlay-enter-y: 0;
+  --opaline-overlay-exit-x: 0.1875rem;
+  --opaline-overlay-exit-y: 0;
+}
+
+.opaline-overlay-spring[data-side="right"],
+.opaline-overlay-spring[data-side="inline-end"] {
+  --opaline-overlay-enter-x: -0.375rem;
+  --opaline-overlay-enter-y: 0;
+  --opaline-overlay-exit-x: -0.1875rem;
+  --opaline-overlay-exit-y: 0;
+}
+
+.opaline-overlay-spring[data-state="open"],
+.opaline-overlay-spring[data-open] {
+  animation: opaline-overlay-spring-in 180ms cubic-bezier(0.18, 0.9, 0.24, 1) both !important;
+}
+
+.opaline-overlay-spring[data-state="closed"],
+.opaline-overlay-spring[data-closed] {
+  animation: opaline-overlay-spring-out 110ms cubic-bezier(0.32, 0, 0.67, 0) both !important;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .opaline-overlay-spring[data-state="open"],
+  .opaline-overlay-spring[data-state="closed"],
+  .opaline-overlay-spring[data-open],
+  .opaline-overlay-spring[data-closed] {
+    animation-duration: 1ms !important;
+  }
 }
