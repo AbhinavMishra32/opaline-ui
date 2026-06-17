@@ -1,4 +1,4 @@
-import { CaretRightIcon, PencilSimpleLine } from "@phosphor-icons/react";
+import { CaretRightIcon, CheckIcon, PencilSimpleLine, TerminalWindowIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import { AnimatePresence, motion, useReducedMotion, useSpring, useTransform, type MotionValue } from "framer-motion";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 
@@ -71,7 +71,8 @@ export function AgentRunTrace({
 
 export function AgentRunTraceRow({ entry, defaultOpen = false }: { entry: AgentRunTraceEntry; defaultOpen?: boolean }) {
   const fileChanges = useMemo(() => readFileChanges(entry), [entry]);
-  const [open, setOpen] = useState(defaultOpen || fileChanges.length > 0);
+  const commandRun = useMemo(() => readCommandRun(entry), [entry]);
+  const [open, setOpen] = useState(defaultOpen || fileChanges.length > 0 || commandRun?.failed === true);
   const disclosureTransition = useFileTreeDisclosureTransition();
   const reasoningText = entry.kind === "thought" ? entry.output : undefined;
   const expandable = Boolean(reasoningText || entry.input || entry.output);
@@ -85,6 +86,18 @@ export function AgentRunTraceRow({ entry, defaultOpen = false }: { entry: AgentR
         changes={fileChanges}
         entry={entry}
         open={open}
+        setOpen={setOpen}
+        transition={disclosureTransition}
+      />
+    );
+  }
+
+  if (commandRun) {
+    return (
+      <AgentRunCommandRow
+        entry={entry}
+        open={open}
+        run={commandRun}
         setOpen={setOpen}
         transition={disclosureTransition}
       />
@@ -135,6 +148,85 @@ export function AgentRunTraceRow({ entry, defaultOpen = false }: { entry: AgentR
                   {entry.output ? <TraceDetail label="Result" value={entry.output} /> : null}
                 </>
               )}
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+type CommandRunSummary = {
+  command: string;
+  cwd?: string;
+  stdout?: string;
+  stderr?: string;
+  exitCode?: number | string | null;
+  failed: boolean;
+  blocked: boolean;
+  truncated: boolean;
+};
+
+function AgentRunCommandRow({
+  entry,
+  open,
+  run,
+  setOpen,
+  transition
+}: {
+  entry: AgentRunTraceEntry;
+  open: boolean;
+  run: CommandRunSummary;
+  setOpen: (value: boolean | ((current: boolean) => boolean)) => void;
+  transition: ReturnType<typeof useFileTreeDisclosureTransition>;
+}) {
+  const active = entry.status === "pending" || entry.status === "running";
+  const label = run.blocked ? "Blocked command" : run.failed ? "Command failed" : "Ran command";
+  const statusLabel = run.blocked ? "Blocked" : run.failed ? "Failed" : "Success";
+  const output = [
+    run.command ? `$ ${run.command}` : "",
+    run.cwd ? `# ${run.cwd}` : "",
+    run.stdout?.trim() ? run.stdout.trimEnd() : "",
+    run.stderr?.trim() ? run.stderr.trimEnd() : "",
+    run.truncated ? "... [truncated]" : ""
+  ].filter(Boolean).join("\n\n");
+
+  return (
+    <div className="flex min-w-0 flex-col gap-1.5 animate-in fade-in-0 slide-in-from-left-1 duration-200 group/row" data-slot="agent-run-trace-entry" data-kind={entry.kind}>
+      <button
+        type="button"
+        className="inline-flex w-fit max-w-full min-w-0 items-center gap-2 rounded-md p-0 text-left text-xs text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/30"
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+      >
+        <TerminalWindowIcon className="size-3.5 shrink-0" />
+        <span className={cn("font-semibold", active && "opaline-agent-thinking-shimmer")}>{label}</span>
+        <span className="min-w-0 truncate text-muted-foreground">{run.command}</span>
+        <TraceChevron open={open} transition={transition} className="opacity-70" />
+      </button>
+
+      <AnimatePresence initial={false}>
+        {open ? (
+          <motion.div
+            key={`${entry.id}:command-run`}
+            className="overflow-hidden"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={transition}
+          >
+            <div className="ml-6 max-w-full overflow-hidden rounded-[10px] bg-muted/45 p-3 text-[12px] leading-relaxed text-muted-foreground ring-1 ring-border/30">
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <span className="font-medium text-foreground/80">Shell</span>
+                <span className={cn(
+                  "inline-flex items-center gap-1 text-xs",
+                  run.failed || run.blocked ? "text-destructive" : "text-emerald-600 dark:text-emerald-400"
+                )}>
+                  {run.failed || run.blocked ? <WarningCircleIcon className="size-3.5" /> : <CheckIcon className="size-3.5" />}
+                  {statusLabel}{run.exitCode != null ? ` (${run.exitCode})` : ""}
+                </span>
+              </div>
+              <pre className="max-h-72 overflow-auto whitespace-pre-wrap break-words font-mono text-[12px] leading-5 text-foreground/80">{output || "No output."}</pre>
             </div>
           </motion.div>
         ) : null}
@@ -321,6 +413,33 @@ function readFileChanges(entry: AgentRunTraceEntry): FileChangeSummary[] {
   }];
 }
 
+function readCommandRun(entry: AgentRunTraceEntry): CommandRunSummary | null {
+  if (entry.kind !== "tool" || entry.icon !== "terminal") return null;
+  const input = parseTraceJson(entry.input);
+  const output = parseTraceJson(entry.output);
+  const inputRecord = typeof input === "object" && input !== null ? input as Record<string, unknown> : {};
+  const outputRecord = typeof output === "object" && output !== null ? output as Record<string, unknown> : {};
+  const command = readString(outputRecord.command) || readString(inputRecord.command) || entry.title;
+  const stdout = readString(outputRecord.stdout);
+  const stderr = readString(outputRecord.stderr)
+    || readString(outputRecord.reason)
+    || (entry.status === "error" && !output ? entry.output : undefined);
+  const rawStatus = (readString(outputRecord.status) ?? "").toLowerCase();
+  const blocked = rawStatus === "blocked";
+  const failed = entry.status === "error" || rawStatus === "failed" || blocked;
+
+  return {
+    command,
+    cwd: readString(outputRecord.cwd) || readString(inputRecord.cwd),
+    stdout,
+    stderr,
+    exitCode: readString(outputRecord.exitCode) || readNumberOrNull(outputRecord.exitCode),
+    failed,
+    blocked,
+    truncated: outputRecord.truncated === true
+  };
+}
+
 function readFileChangeSummary(value: unknown, entry: AgentRunTraceEntry): FileChangeSummary | null {
   if (typeof value !== "object" || value === null) return null;
   const record = value as {
@@ -363,6 +482,14 @@ function readNumber(value: unknown): number {
   return typeof value === "number" && Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
 }
 
+function readNumberOrNull(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function readString(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim() ? value : undefined;
+}
+
 function basename(path: string): string {
   return path.split(/[\\/]/).pop() || path;
 }
@@ -378,7 +505,7 @@ function traceRowLabel(entry: AgentRunTraceEntry): string {
   if (entry.kind === "thought") return "Thinking";
   switch (entry.icon) {
     case "terminal":
-      return entry.status === "error" ? "Shell failed" : "Ran shell command";
+      return entry.status === "error" ? "Command failed" : "Ran command";
     case "search":
       return "Searched code";
     case "file":
@@ -421,7 +548,7 @@ function summarizeTraceGroup(entries: AgentRunTraceEntry[]): string | null {
   if (readCount) segments.push(`read ${countLabel(readCount, "file")}`);
   if (searchCount) segments.push(searchCount === 1 ? "searched code" : `searched code ${searchCount} times`);
   if (editedCount) segments.push(`changed ${countLabel(editedCount, "file")}`);
-  if (terminalCount) segments.push(`ran ${countLabel(terminalCount, "shell command")}`);
+  if (terminalCount) segments.push(`ran ${countLabel(terminalCount, "command")}`);
   if (memoryCount) segments.push(`updated ${countLabel(memoryCount, "memory item")}`);
   if (otherCount) segments.push(`used ${countLabel(otherCount, "tool")}`);
 
