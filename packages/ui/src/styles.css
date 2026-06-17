@@ -1,13 +1,4 @@
 @import "./tokens/opaline-theme.css";
-@import "./app-shell/app-shell.css";
-@import "./composer/composer.css";
-@import "./file-browser/file-browser-panel.css";
-@import "./primitives/button.css";
-@import "./primitives/context-menu.css";
-@import "./primitives/dialog.css";
-@import "./primitives/dropdown-menu.css";
-@import "./sidebar/sidebar.css";
-@import "./thread/thread-surface.css";
 
 @keyframes opaline-agent-thinking-shimmer {
   from { background-position: 100% center; }
