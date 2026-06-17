@@ -1,7 +1,7 @@
 import { AnimatePresence, motion, useDragControls, useReducedMotion } from "framer-motion";
 import { ChevronDown, ChevronUp, Pin, PinOff, X } from "lucide-react";
 import type { CSSProperties, HTMLAttributes, PointerEvent as ReactPointerEvent, ReactNode, RefObject } from "react";
-import { createContext, useContext, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { cn } from "../lib/utils";
 
 export type AdaptiveSidecarMode = "overlay" | "shift" | "gutter";
@@ -81,6 +81,28 @@ export function AdaptiveSidecarLayout({
   const [width, setWidth] = useState(0);
   const reduceMotion = useReducedMotion();
 
+  const [currentWidth, setCurrentWidth] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("opaline-sidecar-width");
+      if (saved) {
+        const parsed = parseInt(saved, 10);
+        if (!isNaN(parsed) && parsed >= 200 && parsed <= 800) return parsed;
+      }
+    }
+    return sidecarWidth;
+  });
+  const [isResizing, setIsResizing] = useState(false);
+
+  useEffect(() => {
+    setCurrentWidth((prev) => {
+      const saved = localStorage.getItem("opaline-sidecar-width");
+      if (!saved) {
+        return sidecarWidth;
+      }
+      return prev;
+    });
+  }, [sidecarWidth]);
+
   useLayoutEffect(() => {
     const root = rootRef.current;
     if (!root) return;
@@ -96,8 +118,37 @@ export function AdaptiveSidecarLayout({
     [gutterThreshold, overlayThreshold, width],
   );
   const inline = open && pinned && mode !== "overlay";
-  const shift = inline && mode === "shift" ? -(sidecarWidth + gap) / 2 : 0;
-  const transition = reduceMotion ? { duration: 0 } : panelSpring;
+  const shift = inline && mode === "shift" ? -(currentWidth + gap) / 2 : 0;
+  const transition = isResizing || reduceMotion ? { duration: 0 } : panelSpring;
+
+  const widthRef = useRef(currentWidth);
+  widthRef.current = currentWidth;
+
+  const handlePointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsResizing(true);
+    const startX = e.clientX;
+    const startWidth = widthRef.current;
+
+    const handlePointerMove = (moveEvent: PointerEvent) => {
+      const deltaX = moveEvent.clientX - startX;
+      const newWidth = Math.max(200, Math.min(800, startWidth - deltaX));
+      setCurrentWidth(newWidth);
+    };
+
+    const handlePointerUp = (upEvent: PointerEvent) => {
+      setIsResizing(false);
+      document.removeEventListener("pointermove", handlePointerMove);
+      document.removeEventListener("pointerup", handlePointerUp);
+
+      const deltaX = upEvent.clientX - startX;
+      const finalWidth = Math.max(200, Math.min(800, startWidth - deltaX));
+      localStorage.setItem("opaline-sidecar-width", String(finalWidth));
+    };
+
+    document.addEventListener("pointermove", handlePointerMove);
+    document.addEventListener("pointerup", handlePointerUp);
+  };
 
   return (
     <div
@@ -108,7 +159,7 @@ export function AdaptiveSidecarLayout({
       data-pinned={pinned ? "true" : "false"}
       style={{
         ...style,
-        "--opaline-sidecar-width": `${sidecarWidth}px`,
+        "--opaline-sidecar-width": `${currentWidth}px`,
         "--opaline-sidecar-gap": `${gap}px`,
       } as CSSProperties}
       {...props}
@@ -124,7 +175,7 @@ export function AdaptiveSidecarLayout({
         <SidecarBoundsContext.Provider value={railRef}>
           <motion.aside
             ref={railRef}
-            className="absolute inset-y-0 right-0 z-30 flex w-[var(--opaline-sidecar-width)] items-start p-[var(--opaline-sidecar-gap)] data-[inline=true]:relative data-[inline=true]:z-auto data-[visible=false]:pointer-events-none"
+            className="absolute inset-y-0 right-0 z-30 flex w-[var(--opaline-sidecar-width)] items-stretch p-[var(--opaline-sidecar-gap)] data-[inline=true]:relative data-[inline=true]:z-auto data-[visible=false]:pointer-events-none"
             data-inline={inline ? "true" : "false"}
             data-visible={open ? "true" : "false"}
             aria-hidden={!open}
@@ -136,6 +187,18 @@ export function AdaptiveSidecarLayout({
             }}
             transition={transition}
           >
+            {/* Horizontal Resize Handle */}
+            <div
+              className="absolute left-0 top-0 bottom-0 w-6 cursor-col-resize z-40 -translate-x-1/2 flex items-center justify-center group"
+              onPointerDown={handlePointerDown}
+            >
+              <div
+                className={cn(
+                  "w-[2px] h-12 rounded-full bg-muted-foreground/30 opacity-0 group-hover:opacity-100 transition-all duration-150 hover:bg-primary/50",
+                  isResizing && "opacity-100 bg-primary h-full rounded-none w-[3px]"
+                )}
+              />
+            </div>
             {sidecar}
           </motion.aside>
         </SidecarBoundsContext.Provider>
@@ -224,14 +287,15 @@ export function AdaptiveSidecarSurface({
         </div>
       </header>
       <motion.div
-        className="flex min-h-0 flex-col overflow-hidden"
+        className="flex min-h-0 flex-1 flex-col overflow-hidden"
         style={{ flexShrink: 0 }}
         initial={false}
         animate={{
           height: collapsed ? 0 : "auto",
           opacity: collapsed ? 0 : 1,
           flexGrow: collapsed ? 0 : 1,
-          flexBasis: collapsed ? "0px" : "auto"
+          flexBasis: collapsed ? "0px" : "0%",
+          transitionEnd: collapsed ? {} : { height: "" }
         }}
         transition={transition}
       >
