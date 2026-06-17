@@ -305,7 +305,7 @@ export const SlotPanel = React.forwardRef<SlotPanelHandle, SlotPanelProps>(
         value={activeTabId || ""}
         onValueChange={(val) => commitActiveTabId(val || null)}
       >
-        <div className="flex h-10 shrink-0 items-center justify-between border-b bg-background px-2">
+        <div className="flex h-10 shrink-0 items-center justify-between bg-transparent px-2">
           <div className="flex min-w-0 flex-1 items-center gap-1 overflow-hidden">
             {tabOverflow.canScrollLeft ? (
               <ShadcnButton
@@ -330,7 +330,7 @@ export const SlotPanel = React.forwardRef<SlotPanelHandle, SlotPanelProps>(
                 <Tabs.Trigger
                   key={tab.id}
                   value={tab.id}
-                  className="group relative flex h-7 max-w-52 shrink-0 items-center gap-1.5 rounded-[8px] px-2.5 text-[13px] text-muted-foreground outline-none transition-colors hover:bg-muted/60 hover:text-foreground data-[state=active]:bg-muted data-[state=active]:text-foreground"
+                  className="group relative flex h-7 max-w-52 shrink-0 items-center gap-1.5 rounded-[10px] px-2.5 text-[13px] text-muted-foreground outline-none transition-[background-color,color,box-shadow,transform] duration-150 hover:bg-muted/55 hover:text-foreground active:translate-y-px data-[state=active]:bg-muted/85 data-[state=active]:text-foreground data-[state=active]:shadow-[inset_0_0_0_0.5px_color-mix(in_srgb,var(--border)_55%,transparent)]"
                   data-tab-id={tab.id}
                   data-closable={tab.closable === true ? "true" : undefined}
                 >

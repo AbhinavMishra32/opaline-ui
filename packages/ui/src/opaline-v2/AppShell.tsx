@@ -182,6 +182,7 @@ export function OpalineV2Shell({
 
   const sidebarOpen = controlledSidebarOpen ?? uncontrolledSidebarOpen;
   const inspectorOpen = controlledInspectorOpen ?? uncontrolledInspectorOpen;
+  const sidebarCollapsed = sidebar != null && !sidebarOpen;
   const resolvedCanNavigateBack = canNavigateBack ?? history?.canGoBack ?? false;
   const resolvedCanNavigateForward = canNavigateForward ?? history?.canGoForward ?? false;
 
@@ -372,7 +373,7 @@ export function OpalineV2Shell({
         {sidebar != null ? (
           <aside
             className={cn(
-              "relative h-full min-h-0 shrink-0 overflow-visible border-r border-sidebar-border/70 bg-sidebar/40 backdrop-blur-[30px] backdrop-saturate-[1.75] transition-[width,opacity] duration-200 data-[resizing=true]:transition-none",
+              "relative h-full min-h-0 shrink-0 overflow-visible border-r border-sidebar-border/60 bg-sidebar/45 backdrop-blur-[30px] backdrop-saturate-[1.75] transition-[width,opacity,background-color] duration-300 ease-[cubic-bezier(0.19,1,0.22,1)] data-[resizing=true]:transition-none",
               sidebarOpen ? "w-[var(--opaline-v2-sidebar-width)] opacity-100" : "pointer-events-none w-0 opacity-0"
             )}
             data-open={sidebarOpen ? "true" : "false"}
@@ -391,10 +392,23 @@ export function OpalineV2Shell({
             </div>
           </aside>
         ) : null}
-        <section className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-background">
-          <header className="relative z-30 flex h-11 min-h-11 min-w-0 items-end justify-between gap-3 border-b bg-background px-3 pb-1.5 select-none [-webkit-app-region:drag]">
-            {sidebar != null ? <div className={cn("absolute left-24 top-2 z-40 flex items-center gap-1 [-webkit-app-region:no-drag]", sidebarOpen && "pointer-events-none opacity-0")}>{collapsedTriggerContent}</div> : null}
-            <div className="flex min-w-0 flex-1 items-center gap-3 overflow-hidden">
+        <section className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-background/95">
+          <header className="relative z-30 flex h-11 min-h-11 min-w-0 items-end justify-between gap-3 bg-background/95 px-3 pb-1.5 select-none backdrop-blur supports-[backdrop-filter]:bg-background/85 [-webkit-app-region:drag]">
+            {sidebar != null ? (
+              <div
+                className={cn(
+                  "absolute left-24 top-2 z-40 flex items-center gap-1 transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.19,1,0.22,1)] [-webkit-app-region:no-drag]",
+                  sidebarOpen && "pointer-events-none -translate-x-1 opacity-0",
+                  !sidebarOpen && "translate-x-0 opacity-100"
+                )}
+              >
+                {collapsedTriggerContent}
+              </div>
+            ) : null}
+            <div className={cn(
+              "flex min-w-0 flex-1 items-center gap-3 overflow-hidden transition-[padding] duration-300 ease-[cubic-bezier(0.19,1,0.22,1)]",
+              sidebarCollapsed && "pl-36"
+            )}>
               {headerTabs.length > 0 ? (
                 <div className="flex h-full min-w-0 items-center gap-1 [-webkit-app-region:no-drag]">
                   {headerTabs.map((tab) => (
@@ -419,16 +433,16 @@ export function OpalineV2Shell({
           <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_auto] overflow-hidden max-[980px]:grid-cols-1">
             <section className="relative flex min-h-0 min-w-0 flex-col overflow-hidden">
               <main className="min-h-0 min-w-0 flex-1 overflow-hidden">{main}</main>
-              {composer != null ? <footer className="border-t">{composer}</footer> : null}
+              {composer != null ? <footer>{composer}</footer> : null}
               {bottomPanelContent != null ? (
-                <section className={cn("relative z-30 min-h-0 w-full overflow-hidden border-t", bottomPanelOpen ? "h-[var(--opaline-v2-bottom-panel-height,260px)] basis-[var(--opaline-v2-bottom-panel-height,260px)] opacity-100" : "pointer-events-none h-0 basis-0 opacity-0")} data-open={bottomPanelOpen ? "true" : "false"}>
+                <section className={cn("relative z-40 min-h-0 w-full overflow-hidden shadow-[0_-5px_16px_color-mix(in_srgb,var(--foreground)_3.5%,transparent)] transition-[height,flex-basis,opacity] duration-300 ease-[cubic-bezier(0.19,1,0.22,1)]", bottomPanelOpen ? "h-[var(--opaline-v2-bottom-panel-height,260px)] basis-[var(--opaline-v2-bottom-panel-height,260px)] opacity-100" : "pointer-events-none h-0 basis-0 opacity-0")} data-open={bottomPanelOpen ? "true" : "false"}>
                   {bottomPanelContent}
                 </section>
               ) : null}
             </section>
             {resolvedInspector != null ? (
               <aside
-                className={cn("relative z-40 h-full min-h-0 shrink-0 overflow-visible transition-[width,opacity] duration-200 data-[resizing=true]:transition-none max-[980px]:hidden", inspectorOpen ? "w-[var(--opaline-v2-inspector-width)] opacity-100" : "pointer-events-none w-0 opacity-0")}
+                className={cn("relative z-20 h-full min-h-0 shrink-0 overflow-visible transition-[width,opacity] duration-300 ease-[cubic-bezier(0.19,1,0.22,1)] data-[resizing=true]:transition-none max-[980px]:hidden", inspectorOpen ? "w-[var(--opaline-v2-inspector-width)] opacity-100" : "pointer-events-none w-0 opacity-0")}
                 data-open={inspectorOpen ? "true" : "false"}
                 data-resizing={inspectorResizing ? "true" : "false"}
               >
@@ -441,7 +455,7 @@ export function OpalineV2Shell({
                 >
                   <div className="m-auto h-full w-px bg-border opacity-0 transition-opacity hover:opacity-100" />
                 </div>
-                <div className="absolute inset-0 flex min-h-0 min-w-0 flex-col overflow-hidden border-l bg-background">{resolvedInspector}</div>
+                <div className="absolute inset-0 flex min-h-0 min-w-0 flex-col overflow-hidden bg-card/78 shadow-[inset_1px_0_0_color-mix(in_srgb,var(--border)_40%,transparent),-6px_0_16px_color-mix(in_srgb,var(--foreground)_2.5%,transparent)] backdrop-blur supports-[backdrop-filter]:bg-card/68">{resolvedInspector}</div>
               </aside>
             ) : null}
           </div>
@@ -536,11 +550,11 @@ export function OpalineV2NavigationControls({
 }
 
 export function OpalineV2ChromeButton({ className, type = "button", ...props }: OpalineV2ShellButtonProps) {
-  return <Button className={cn("text-muted-foreground data-[active=true]:bg-muted data-[active=true]:text-foreground", className)} size="icon" type={type} variant="ghost" {...props} />;
+  return <Button className={cn("rounded-[10px] text-muted-foreground data-[active=true]:bg-muted data-[active=true]:text-foreground", className)} size="icon" type={type} variant="ghost" {...props} />;
 }
 
 export function OpalineV2CollapsedSidebarTrigger({ className, type = "button", ...props }: OpalineV2ShellButtonProps) {
-  return <Button className={cn("text-muted-foreground", className)} size="icon" type={type} variant="ghost" {...props} />;
+  return <Button className={cn("rounded-[10px] text-muted-foreground", className)} size="icon" type={type} variant="ghost" {...props} />;
 }
 
 export function OpalineV2HeaderToolButton({
@@ -558,7 +572,7 @@ export function OpalineV2HeaderToolButton({
     <Button
       aria-label={label}
       aria-pressed={pressed}
-      className={cn("text-muted-foreground data-[active=true]:bg-muted data-[active=true]:text-foreground", className)}
+      className={cn("rounded-[10px] text-muted-foreground data-[active=true]:bg-muted data-[active=true]:text-foreground", className)}
       size="icon"
       variant="ghost"
       type={type}
@@ -611,7 +625,7 @@ export function AppShellNavigationControls({ onHome, state, variant = "sidebar" 
 }
 
 export function AppShellHeader(props: AppShellSlotProps) {
-  return <ShellSlot {...props} as="header" className={cn("flex h-11 items-center justify-between gap-3 border-b px-3", props.className)} />;
+  return <ShellSlot {...props} as="header" className={cn("flex h-11 items-center justify-between gap-3 px-3", props.className)} />;
 }
 
 export function AppShellHeaderContextSurface(props: AppShellSlotProps) {
@@ -651,11 +665,11 @@ export function AppShellContent(props: AppShellSlotProps) {
 }
 
 export function AppShellComposer(props: AppShellSlotProps) {
-  return <ShellSlot {...props} as="section" className={cn("border-t", props.className)} />;
+  return <ShellSlot {...props} as="section" className={cn(props.className)} />;
 }
 
 export function AppShellRightPanel(props: AppShellSlotProps) {
-  return <ShellSlot {...props} className={cn("flex min-h-0 flex-col overflow-hidden border-l bg-card", props.className)} />;
+  return <ShellSlot {...props} className={cn("flex min-h-0 flex-col overflow-hidden bg-card/85 shadow-[inset_1px_0_0_color-mix(in_srgb,var(--border)_55%,transparent)]", props.className)} />;
 }
 
 export function AppShellBottomPanel(props: AppShellSlotProps) {

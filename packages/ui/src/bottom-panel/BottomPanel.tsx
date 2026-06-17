@@ -149,7 +149,7 @@ export const BottomPanel = React.forwardRef<SlotPanelHandle, BottomPanelProps>(
     return (
       <div
         ref={rootRef}
-        className="relative flex h-full min-h-0 w-full shrink-0 flex-col overflow-hidden border-t bg-background"
+        className="relative flex h-full min-h-0 w-full shrink-0 flex-col overflow-hidden bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80"
         data-app-shell-focus-area="bottom-panel"
         data-fullscreen={isFullscreen ? "true" : "false"}
         style={{
@@ -158,7 +158,7 @@ export const BottomPanel = React.forwardRef<SlotPanelHandle, BottomPanelProps>(
         } as CSSProperties}
       >
         <div
-          className="absolute inset-x-0 top-0 z-50 h-2 cursor-row-resize touch-none after:absolute after:inset-x-0 after:top-0 after:h-px after:bg-border hover:after:bg-primary"
+          className="absolute inset-x-0 top-0 z-50 h-3 cursor-row-resize touch-none after:absolute after:left-1/2 after:top-1 after:h-1 after:w-10 after:-translate-x-1/2 after:rounded-full after:bg-border/0 after:transition-[width,background-color] after:duration-200 hover:after:w-16 hover:after:bg-border/65"
           aria-label="Resize bottom panel"
           role="separator"
           onPointerDown={startResize}
