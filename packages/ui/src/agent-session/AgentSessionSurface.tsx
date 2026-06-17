@@ -1,16 +1,19 @@
 import { ArrowUpIcon, SpinnerIcon } from "@phosphor-icons/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 import { Button } from "../components/button";
 import { Textarea } from "../components/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../components/tooltip";
 import { cn } from "../lib/utils";
+import { AgentRunTrace } from "./AgentRunTrace";
 import { AgentSessionTimelineRowView } from "./AgentSessionPrimitives";
 import { buildAgentSessionTimeline } from "./timeline";
 import type {
+  AgentRunTraceEntry,
   AgentSessionComposerProps,
   AgentSessionSurfaceProps,
-  AgentSessionTimelineProps
+  AgentSessionTimelineProps,
+  AgentSessionTimelineRow
 } from "./types";
 
 export { AgentRunTrace } from "./AgentRunTrace";
@@ -93,7 +96,8 @@ export function AgentSessionTimeline({
   className = "",
   ...props
 }: AgentSessionTimelineProps) {
-  const timelineRows = rows ?? buildAgentSessionTimeline(messages);
+  const rawTimelineRows = rows ?? buildAgentSessionTimeline(messages);
+  const timelineRows = useMemo(() => groupConsecutiveActivityRows(rawTimelineRows), [rawTimelineRows]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const shouldFollowRef = useRef(true);
 
@@ -122,9 +126,29 @@ export function AgentSessionTimeline({
         <div data-component="session-turn">
           <div data-slot="session-turn-content">
             <div className="flex flex-col gap-5" data-slot="session-turn-message-container">
-              {timelineRows.map((row) => (
-                <AgentSessionTimelineRowView key={row.id} row={row} showReasoningSummaries={showReasoningSummaries} />
-              ))}
+              {timelineRows.map((group) => {
+                if (group.kind === "activity-group") {
+                  if (group.entries.length === 1) {
+                    const row = group.rows[0];
+                    return (
+                      <div key={row.id} className="flex flex-col pl-1 pr-1" data-slot="session-turn-message-container">
+                        <AgentSessionTimelineRowView row={row} showReasoningSummaries={showReasoningSummaries} />
+                      </div>
+                    );
+                  }
+                  const hasActive = group.entries.some((e) => e.status === "running" || e.status === "pending");
+                  return (
+                    <div key={group.rows[0].id} className="border-l border-border/40 pl-2 pr-1" data-slot="session-turn-message-container">
+                      <AgentRunTrace
+                        state={hasActive ? "thinking" : "thought"}
+                        entries={group.entries}
+                        defaultOpen={false}
+                      />
+                    </div>
+                  );
+                }
+                return <AgentSessionTimelineRowView key={group.row.id} row={group.row} showReasoningSummaries={showReasoningSummaries} />;
+              })}
             </div>
           </div>
         </div>
@@ -186,4 +210,40 @@ export function AgentSessionComposer({
       </div>
     </div>
   );
+}
+
+type TimelineRowGroup =
+  | { kind: "single"; row: AgentSessionTimelineRow }
+  | { kind: "activity-group"; rows: AgentSessionTimelineRow[]; entries: AgentRunTraceEntry[] };
+
+function isActivityPartRow(row: AgentSessionTimelineRow): row is Extract<AgentSessionTimelineRow, { type: "assistant-part" }> & { part: { type: "activity"; entry: AgentRunTraceEntry } } {
+  return row.type === "assistant-part" && row.part.type === "activity";
+}
+
+function groupConsecutiveActivityRows(rows: AgentSessionTimelineRow[]): TimelineRowGroup[] {
+  const groups: TimelineRowGroup[] = [];
+  let i = 0;
+
+  while (i < rows.length) {
+    const row = rows[i];
+    if (isActivityPartRow(row)) {
+      const activityRows: AgentSessionTimelineRow[] = [row];
+      const entries: AgentRunTraceEntry[] = [row.part.entry];
+      let j = i + 1;
+      while (j < rows.length) {
+        const nextRow = rows[j];
+        if (!isActivityPartRow(nextRow)) break;
+        activityRows.push(nextRow);
+        entries.push(nextRow.part.entry);
+        j++;
+      }
+      groups.push({ kind: "activity-group", rows: activityRows, entries });
+      i = j;
+    } else {
+      groups.push({ kind: "single", row });
+      i++;
+    }
+  }
+
+  return groups;
 }

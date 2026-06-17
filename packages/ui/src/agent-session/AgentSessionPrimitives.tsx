@@ -1,11 +1,13 @@
 import { CaretDownIcon, CaretRightIcon, MagnifyingGlassIcon, SpinnerIcon } from "@phosphor-icons/react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 
 import { Button } from "../components/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../components/tooltip";
 import { cn } from "../lib/utils";
-import { AgentRunTraceRow } from "./AgentRunTrace";
+import { AgentRunTrace, AgentRunTraceRow } from "./AgentRunTrace";
+import type { AgentRunTraceEntry } from "./types";
 import type {
   AgentSessionActionEntry,
   AgentSessionDockProps,
@@ -165,7 +167,7 @@ export function AgentSessionPartView({ part }: { part: AgentSessionMessagePart }
 
   if (part.type === "activity") {
     return (
-      <div className="ml-1.5 border-l border-border/70 pl-3 pr-1" data-component="activity-part">
+      <div className="pl-1 pr-1" data-component="activity-part">
         <AgentRunTraceRow entry={part.entry} defaultOpen={part.defaultOpen} />
       </div>
     );
@@ -267,6 +269,7 @@ export function AgentSessionDisclosure({
 }) {
   const [open, setOpen] = useState(defaultOpen);
   const expandable = children != null;
+  const disclosureTransition = useFileTreeDisclosureTransition();
 
   return (
     <div data-component={component}>
@@ -285,7 +288,20 @@ export function AgentSessionDisclosure({
         </span>
         {expandable ? <CaretRightIcon className={cn("size-3.5 shrink-0 transition-transform", open && "rotate-90")} /> : null}
       </button>
-      {expandable && open ? children : null}
+      <AnimatePresence initial={false}>
+        {expandable && open ? (
+          <motion.div
+            key="agent-session-disclosure-content"
+            className="overflow-hidden"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={disclosureTransition}
+          >
+            {children}
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }
@@ -330,6 +346,7 @@ export function AgentSessionDock({
 }: AgentSessionDockProps) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const expandable = children != null;
+  const disclosureTransition = useFileTreeDisclosureTransition();
 
   return (
     <div
@@ -351,7 +368,20 @@ export function AgentSessionDock({
         </span>
         {expandable ? <CaretDownIcon className={cn("size-3.5 shrink-0 transition-transform", collapsed && "rotate-180")} /> : null}
       </button>
-      {expandable && !collapsed ? <div className="border-t px-3 py-2 text-xs">{children}</div> : null}
+      <AnimatePresence initial={false}>
+        {expandable && !collapsed ? (
+          <motion.div
+            key="agent-session-dock-content"
+            className="overflow-hidden"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={disclosureTransition}
+          >
+            <div className="border-t px-3 py-2 text-xs">{children}</div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
       {actions?.length ? (
         <div className="flex justify-end gap-2 border-t px-3 py-2">
           {actions.map((action) => (
@@ -370,6 +400,13 @@ export function AgentSessionDock({
       ) : null}
     </div>
   );
+}
+
+function useFileTreeDisclosureTransition() {
+  const reduceMotion = useReducedMotion();
+  return reduceMotion
+    ? { duration: 0 }
+    : { type: "spring" as const, duration: 0.28, bounce: 0.02 };
 }
 
 function AgentSessionToolTrigger({ entry }: { entry: AgentSessionToolEntry }) {

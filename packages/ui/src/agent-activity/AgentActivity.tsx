@@ -1,4 +1,5 @@
 import { AlertCircle, Check, ChevronRight, Circle, LoaderCircle } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { HTMLAttributes, ReactNode } from "react";
 import { memo, useState } from "react";
 import { cn } from "../lib/utils";
@@ -37,6 +38,7 @@ export const AgentThinking = memo(function AgentThinking({
   const isControlled = expanded !== undefined;
   const isOpen = isControlled ? expanded : internalOpen;
   const expandable = content != null;
+  const disclosureTransition = useFileTreeDisclosureTransition();
 
   function toggle() {
     if (!expandable) return;
@@ -51,7 +53,20 @@ export const AgentThinking = memo(function AgentThinking({
         <span className={cn(state === "thinking" && "animate-pulse")}>{label ?? (state === "thinking" ? "Thinking" : "Thought")}</span>
         {expandable ? <ChevronRight size={13} className={cn("transition-transform", isOpen && "rotate-90")} /> : null}
       </button>
-      {expandable && isOpen ? <div className="border-l pl-3 text-foreground">{content}</div> : null}
+      <AnimatePresence initial={false}>
+        {expandable && isOpen ? (
+          <motion.div
+            key="agent-thinking-content"
+            className="overflow-hidden"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={disclosureTransition}
+          >
+            <div className="border-l pl-3 text-foreground">{content}</div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 });
@@ -107,6 +122,7 @@ export function AgentActivity({
   const isControlled = expanded !== undefined;
   const isOpen = isControlled ? expanded : internalOpen;
   const expandable = entries.length > 0;
+  const disclosureTransition = useFileTreeDisclosureTransition();
 
   function toggle() {
     if (!expandable) return;
@@ -125,9 +141,29 @@ export function AgentActivity({
         </span>
         {expandable ? <ChevronRight size={14} className={cn("shrink-0 text-muted-foreground transition-transform", isOpen && "rotate-90")} /> : null}
       </button>
-      {expandable && isOpen ? <AgentActivityList entries={entries} /> : null}
+      <AnimatePresence initial={false}>
+        {expandable && isOpen ? (
+          <motion.div
+            key="agent-activity-list"
+            className="overflow-hidden"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={disclosureTransition}
+          >
+            <AgentActivityList entries={entries} />
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
+}
+
+function useFileTreeDisclosureTransition() {
+  const reduceMotion = useReducedMotion();
+  return reduceMotion
+    ? { duration: 0 }
+    : { type: "spring" as const, duration: 0.28, bounce: 0.02 };
 }
 
 export type AgentSuggestionProps = Omit<HTMLAttributes<HTMLDivElement>, "title"> & {
