@@ -76,6 +76,7 @@ export const BottomPanel = React.forwardRef<SlotPanelHandle, BottomPanelProps>(
   ) {
     const [panelHeight, setPanelHeight] = useState(() => clampBottomPanelHeight(height, mainContentHeight));
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const rootRef = useRef<HTMLDivElement | null>(null);
     const lastWindowedHeightRef = useRef(panelHeight);
 
     useEffect(() => {
@@ -120,14 +121,21 @@ export const BottomPanel = React.forwardRef<SlotPanelHandle, BottomPanelProps>(
         event.currentTarget.setPointerCapture(event.pointerId);
         const startY = event.clientY;
         const startHeight = panelHeight;
+        const shell = document.querySelector(".opaline-app-shell") as HTMLElement | null;
+        let nextCommittedHeight = panelHeight;
         document.documentElement.dataset.opalineBottomPanelResizing = "true";
 
         function move(pointerEvent: PointerEvent) {
-          commitHeight(startHeight + (startY - pointerEvent.clientY));
+          nextCommittedHeight = clampBottomPanelHeight(startHeight + (startY - pointerEvent.clientY), mainContentHeight);
+          rootRef.current?.style.setProperty("--app-shell-bottom-panel-height", `${nextCommittedHeight}px`);
+          rootRef.current?.style.setProperty("--opaline-v2-bottom-panel-height", `${nextCommittedHeight}px`);
+          shell?.style.setProperty("--app-shell-bottom-panel-height", `${nextCommittedHeight}px`);
+          shell?.style.setProperty("--opaline-v2-bottom-panel-height", `${nextCommittedHeight}px`);
         }
 
         function stop() {
           document.documentElement.dataset.opalineBottomPanelResizing = "false";
+          commitHeight(nextCommittedHeight);
           window.removeEventListener("pointermove", move);
           window.removeEventListener("pointerup", stop);
         }
@@ -140,6 +148,7 @@ export const BottomPanel = React.forwardRef<SlotPanelHandle, BottomPanelProps>(
 
     return (
       <div
+        ref={rootRef}
         className="relative flex h-full min-h-0 w-full shrink-0 flex-col overflow-hidden border-t bg-background"
         data-app-shell-focus-area="bottom-panel"
         data-fullscreen={isFullscreen ? "true" : "false"}
@@ -200,14 +209,11 @@ export interface TerminalSurfaceProps {
 export function TerminalSurface({ children, className, cwd }: TerminalSurfaceProps) {
   return (
     <div
-      className={cn(className, "grid h-full min-h-0 grid-rows-[30px_minmax(0,1fr)] overflow-hidden bg-background font-mono text-xs text-foreground")}
+      className={cn(className, "h-full min-h-0 w-full overflow-hidden bg-background font-mono text-xs text-foreground")}
       data-opaline-terminal="true"
+      aria-label={cwd}
     >
-      <div className="flex min-w-0 items-center gap-2 border-b px-2.5 text-muted-foreground">
-        <span className="size-[7px] shrink-0 rounded-full bg-emerald-500" aria-hidden="true" />
-        <span className="truncate">{cwd ?? "~"}</span>
-      </div>
-      <div className="min-h-0 overflow-hidden">{children}</div>
+      {children}
     </div>
   );
 }

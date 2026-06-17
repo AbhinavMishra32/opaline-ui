@@ -69,7 +69,7 @@ export function Sidebar({
   sectionLabels = { items: "Items", projects: "Projects" },
 }: SidebarProps) {
   return (
-    <aside className="flex h-full min-h-0 flex-col bg-sidebar/25 text-sidebar-foreground backdrop-blur-xl backdrop-saturate-150">
+    <aside className="flex h-full min-h-0 flex-col bg-transparent text-sidebar-foreground">
       {primaryItems.length > 0 ? (
         <>
           <SidebarPrimary>
@@ -149,6 +149,7 @@ export function SidebarBottomSlot({
 }: SidebarBottomSlotProps) {
   const [internalCollapsed, setInternalCollapsed] = useState(defaultCollapsed);
   const [height, setHeight] = useState(defaultHeight);
+  const rootRef = useRef<HTMLElement | null>(null);
   const dragRef = useRef<{ pointerId: number; startHeight: number; startY: number } | null>(null);
   const isCollapsed = collapsed ?? internalCollapsed;
 
@@ -159,6 +160,7 @@ export function SidebarBottomSlot({
 
   function beginResize(event: ReactPointerEvent<HTMLDivElement>) {
     if (isCollapsed) return;
+    event.preventDefault();
     dragRef.current = { pointerId: event.pointerId, startHeight: height, startY: event.clientY };
     event.currentTarget.setPointerCapture(event.pointerId);
   }
@@ -166,18 +168,23 @@ export function SidebarBottomSlot({
   function resize(event: ReactPointerEvent<HTMLDivElement>) {
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId) return;
-    setHeight(Math.max(minHeight, Math.min(maxHeight, drag.startHeight + drag.startY - event.clientY)));
+    const nextHeight = Math.max(minHeight, Math.min(maxHeight, drag.startHeight + drag.startY - event.clientY));
+    rootRef.current?.style.setProperty("--opaline-v2-sidebar-slot-height", `${nextHeight}px`);
   }
 
   function endResize(event: ReactPointerEvent<HTMLDivElement>) {
     if (dragRef.current?.pointerId !== event.pointerId) return;
+    const drag = dragRef.current;
+    const nextHeight = Math.max(minHeight, Math.min(maxHeight, drag.startHeight + drag.startY - event.clientY));
     dragRef.current = null;
+    setHeight(nextHeight);
     event.currentTarget.releasePointerCapture(event.pointerId);
   }
 
   return (
     <section
-      className={cn("relative flex min-h-0 flex-col border-t bg-sidebar/20 backdrop-blur-xl", isCollapsed ? "h-auto" : "h-[var(--opaline-v2-sidebar-slot-height)]", className)}
+      ref={rootRef}
+      className={cn("relative flex min-h-0 flex-col border-t bg-transparent", isCollapsed ? "h-auto" : "h-[var(--opaline-v2-sidebar-slot-height)]", className)}
       data-collapsed={isCollapsed ? "true" : "false"}
       style={{ ...style, "--opaline-v2-sidebar-slot-height": `${height}px` } as CSSProperties}
       {...props}

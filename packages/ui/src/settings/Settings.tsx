@@ -111,7 +111,7 @@ function SettingsSidebar({
   query,
 }: SettingsSidebarProps) {
   return (
-    <aside className="flex h-full min-h-0 flex-col bg-sidebar/25 text-sidebar-foreground backdrop-blur-xl backdrop-saturate-150">
+    <aside className="flex h-full min-h-0 flex-col bg-transparent text-sidebar-foreground">
       <div className="flex flex-col gap-1 px-3 py-2">
         {onBack && (
           <Button variant="ghost" className="h-8 w-full justify-start gap-2 px-2 text-[13px]" onClick={onBack}>

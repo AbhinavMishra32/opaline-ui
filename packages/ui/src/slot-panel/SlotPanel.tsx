@@ -337,7 +337,7 @@ export const SlotPanel = React.forwardRef<SlotPanelHandle, SlotPanelProps>(
                   <span className="relative flex size-4 shrink-0 items-center justify-center">
                     {tab.closable === true ? (
                       <span
-                        className="absolute inset-0 z-10 hidden items-center justify-center rounded-full bg-muted-foreground/65 text-background hover:bg-muted-foreground group-hover:flex"
+                        className="absolute -inset-1 z-10 hidden items-center justify-center rounded-full group-hover:flex"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleCloseTab(tab.id);
@@ -345,14 +345,16 @@ export const SlotPanel = React.forwardRef<SlotPanelHandle, SlotPanelProps>(
                         title="Close tab"
                         aria-label="Close tab"
                       >
-                        <svg viewBox="0 0 10 10" width="8" height="8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                          <line x1="2.5" y1="2.5" x2="7.5" y2="7.5" />
-                          <line x1="7.5" y1="2.5" x2="2.5" y2="7.5" />
-                        </svg>
+                        <span className="flex size-4 items-center justify-center rounded-full bg-muted-foreground/70 text-background hover:bg-muted-foreground">
+                          <svg viewBox="0 0 10 10" width="8" height="8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                            <line x1="2.5" y1="2.5" x2="7.5" y2="7.5" />
+                            <line x1="7.5" y1="2.5" x2="2.5" y2="7.5" />
+                          </svg>
+                        </span>
                       </span>
                     ) : null}
                     {tab.icon != null ? (
-                      <span className="flex items-center justify-center [&_svg]:size-3.5">{tab.icon}</span>
+                      <span className={cn("flex items-center justify-center transition-opacity [&_svg]:size-3.5", tab.closable === true && "group-hover:opacity-0")}>{tab.icon}</span>
                     ) : null}
                   </span>
                   <span className="truncate">{tab.title}</span>

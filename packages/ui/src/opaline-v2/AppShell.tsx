@@ -178,6 +178,7 @@ export function OpalineV2Shell({
   const [inspectorWidth, setInspectorWidth] = React.useState(resolvedDefaultInspectorWidth);
   const [sidebarResizing, setSidebarResizing] = React.useState(false);
   const [inspectorResizing, setInspectorResizing] = React.useState(false);
+  const shellRef = React.useRef<HTMLDivElement | null>(null);
 
   const sidebarOpen = controlledSidebarOpen ?? uncontrolledSidebarOpen;
   const inspectorOpen = controlledInspectorOpen ?? uncontrolledInspectorOpen;
@@ -264,24 +265,30 @@ export function OpalineV2Shell({
 
   const startSidebarResize = React.useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
+      event.preventDefault();
       event.currentTarget.setPointerCapture(event.pointerId);
       setSidebarResizing(true);
       const startX = event.clientX;
       const startWidth = sidebarWidth;
+      let nextCommittedWidth = sidebarWidth;
+      let nextOpen = sidebarOpen;
 
       function move(pointerEvent: PointerEvent) {
         const nextWidth = Math.max(0, Math.min(sidebarMaxWidth, startWidth + pointerEvent.clientX - startX));
+        shellRef.current?.style.setProperty("--opaline-v2-sidebar-width", `${nextWidth}px`);
         if (nextWidth < sidebarMinWidth) {
-          setSidebarOpen(false);
+          nextOpen = false;
           return;
         }
 
-        setSidebarOpen(true);
-        setSidebarWidth(nextWidth);
+        nextOpen = true;
+        nextCommittedWidth = nextWidth;
       }
 
       function stop() {
         setSidebarResizing(false);
+        setSidebarOpen(nextOpen);
+        setSidebarWidth(nextCommittedWidth);
         window.removeEventListener("pointermove", move);
         window.removeEventListener("pointerup", stop);
       }
@@ -289,29 +296,35 @@ export function OpalineV2Shell({
       window.addEventListener("pointermove", move);
       window.addEventListener("pointerup", stop, { once: true });
     },
-    [setSidebarOpen, sidebarMaxWidth, sidebarMinWidth, sidebarWidth],
+    [setSidebarOpen, sidebarMaxWidth, sidebarMinWidth, sidebarOpen, sidebarWidth],
   );
 
   const startInspectorResize = React.useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
+      event.preventDefault();
       event.currentTarget.setPointerCapture(event.pointerId);
       setInspectorResizing(true);
       const startX = event.clientX;
       const startWidth = inspectorWidth;
+      let nextCommittedWidth = inspectorWidth;
+      let nextOpen = inspectorOpen;
 
       function move(pointerEvent: PointerEvent) {
         const nextWidth = Math.max(0, Math.min(resolvedInspectorMaxWidth, startWidth - (pointerEvent.clientX - startX)));
+        shellRef.current?.style.setProperty("--opaline-v2-inspector-width", `${nextWidth}px`);
         if (nextWidth < resolvedInspectorMinWidth) {
-          setInspectorOpen(false);
+          nextOpen = false;
           return;
         }
 
-        setInspectorOpen(true);
-        setInspectorWidth(nextWidth);
+        nextOpen = true;
+        nextCommittedWidth = nextWidth;
       }
 
       function stop() {
         setInspectorResizing(false);
+        setInspectorOpen(nextOpen);
+        setInspectorWidth(nextCommittedWidth);
         window.removeEventListener("pointermove", move);
         window.removeEventListener("pointerup", stop);
       }
@@ -319,7 +332,7 @@ export function OpalineV2Shell({
       window.addEventListener("pointermove", move);
       window.addEventListener("pointerup", stop, { once: true });
     },
-    [inspectorWidth, resolvedInspectorMaxWidth, resolvedInspectorMinWidth, setInspectorOpen],
+    [inspectorOpen, inspectorWidth, resolvedInspectorMaxWidth, resolvedInspectorMinWidth, setInspectorOpen],
   );
 
   const actionContent = resolveSlot(actions ?? headerActions, state);
@@ -342,7 +355,8 @@ export function OpalineV2Shell({
   const shell = (
     <TooltipProvider>
       <div
-        className={cn("opaline-app-shell flex h-full min-h-0 w-full overflow-hidden bg-background text-foreground antialiased", className)}
+        ref={shellRef}
+        className={cn("opaline-app-shell flex h-full min-h-0 w-full overflow-hidden bg-transparent text-foreground antialiased", className)}
         data-bottom-panel-open={bottomPanel != null && bottomPanelOpen ? "true" : "false"}
         data-inspector-open={resolvedInspector != null && inspectorOpen ? "true" : "false"}
         data-sidebar-open={sidebar != null && sidebarOpen ? "true" : "false"}
@@ -358,13 +372,13 @@ export function OpalineV2Shell({
         {sidebar != null ? (
           <aside
             className={cn(
-              "relative h-full min-h-0 shrink-0 overflow-visible border-r border-sidebar-border bg-sidebar/55 backdrop-blur-2xl backdrop-saturate-150 transition-[width,opacity] duration-200",
+              "relative h-full min-h-0 shrink-0 overflow-visible border-r border-sidebar-border/70 bg-sidebar/40 backdrop-blur-[30px] backdrop-saturate-[1.75] transition-[width,opacity] duration-200 data-[resizing=true]:transition-none",
               sidebarOpen ? "w-[var(--opaline-v2-sidebar-width)] opacity-100" : "pointer-events-none w-0 opacity-0"
             )}
             data-open={sidebarOpen ? "true" : "false"}
             data-resizing={sidebarResizing ? "true" : "false"}
           >
-            {showSidebarChrome ? <div className="flex h-11 items-center gap-1 bg-sidebar/20 px-3 pl-24 [-webkit-app-region:drag] [&>*]:[-webkit-app-region:no-drag]">{sidebarChromeContent}</div> : null}
+            {showSidebarChrome ? <div className="flex h-11 items-center gap-1 bg-transparent px-3 pl-24 [-webkit-app-region:drag] [&>*]:[-webkit-app-region:no-drag]">{sidebarChromeContent}</div> : null}
             <div className="absolute inset-x-0 bottom-0 top-11 flex min-h-0 flex-col overflow-hidden">{sidebar}</div>
             <div
               aria-disabled={!sidebarOpen}
@@ -407,14 +421,14 @@ export function OpalineV2Shell({
               <main className="min-h-0 min-w-0 flex-1 overflow-hidden">{main}</main>
               {composer != null ? <footer className="border-t">{composer}</footer> : null}
               {bottomPanelContent != null ? (
-                <section className={cn("relative z-30 min-h-0 w-full overflow-hidden border-t transition-[height,flex-basis,opacity] duration-200", bottomPanelOpen ? "h-[var(--opaline-v2-bottom-panel-height,260px)] basis-[var(--opaline-v2-bottom-panel-height,260px)] opacity-100" : "pointer-events-none h-0 basis-0 opacity-0")} data-open={bottomPanelOpen ? "true" : "false"}>
+                <section className={cn("relative z-30 min-h-0 w-full overflow-hidden border-t", bottomPanelOpen ? "h-[var(--opaline-v2-bottom-panel-height,260px)] basis-[var(--opaline-v2-bottom-panel-height,260px)] opacity-100" : "pointer-events-none h-0 basis-0 opacity-0")} data-open={bottomPanelOpen ? "true" : "false"}>
                   {bottomPanelContent}
                 </section>
               ) : null}
             </section>
             {resolvedInspector != null ? (
               <aside
-                className={cn("relative z-40 h-full min-h-0 shrink-0 overflow-visible transition-[width,opacity] duration-200 max-[980px]:hidden", inspectorOpen ? "w-[var(--opaline-v2-inspector-width)] opacity-100" : "pointer-events-none w-0 opacity-0")}
+                className={cn("relative z-40 h-full min-h-0 shrink-0 overflow-visible transition-[width,opacity] duration-200 data-[resizing=true]:transition-none max-[980px]:hidden", inspectorOpen ? "w-[var(--opaline-v2-inspector-width)] opacity-100" : "pointer-events-none w-0 opacity-0")}
                 data-open={inspectorOpen ? "true" : "false"}
                 data-resizing={inspectorResizing ? "true" : "false"}
               >
