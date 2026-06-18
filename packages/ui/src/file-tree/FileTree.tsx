@@ -223,7 +223,7 @@ function FileTreeRow({
 
   const buttonElement = (
     <button
-      className="group relative flex h-[26px] w-full items-center gap-1.5 rounded-[7px] pr-2 text-left text-xs text-muted-foreground outline-none hover:bg-muted hover:text-foreground data-[item-selected=true]:bg-muted data-[item-selected=true]:font-medium data-[item-selected=true]:text-foreground"
+      className="group relative flex h-[26px] w-full items-center gap-1.5 rounded-[7px] pr-2 text-left text-xs text-foreground outline-none hover:bg-muted hover:text-foreground data-[item-selected=true]:bg-muted data-[item-selected=true]:font-medium data-[item-selected=true]:text-foreground"
       data-file-tree-sticky-path={level === 1 ? item.path : undefined}
       data-file-tree-sticky-row={level === 1 && isDirectory ? "true" : undefined}
       data-path={item.path}

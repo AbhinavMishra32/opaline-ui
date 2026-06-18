@@ -11,14 +11,16 @@ export type AgentRunTraceProps = {
   durationMs?: number;
   defaultOpen?: boolean;
   className?: string;
+  onOpenFile?: (path: string) => void;
 };
 
 export function AgentRunTrace({
   state = "thinking",
   entries,
   durationMs,
-  defaultOpen = state === "thinking",
-  className
+  defaultOpen = false,
+  className,
+  onOpenFile
 }: AgentRunTraceProps) {
   const [open, setOpen] = useState(defaultOpen);
   const disclosureTransition = useFileTreeDisclosureTransition();
@@ -60,7 +62,7 @@ export function AgentRunTrace({
             transition={disclosureTransition}
           >
             <div className="flex flex-col gap-2 pl-2 pr-1" data-slot="agent-run-trace-list">
-              {displayEntries.map((entry) => <AgentRunTraceRow entry={entry} key={entry.id} />)}
+              {displayEntries.map((entry) => <AgentRunTraceRow entry={entry} key={entry.id} onOpenFile={onOpenFile} />)}
             </div>
           </motion.div>
         ) : null}
@@ -69,7 +71,15 @@ export function AgentRunTrace({
   );
 }
 
-export function AgentRunTraceRow({ entry, defaultOpen = false }: { entry: AgentRunTraceEntry; defaultOpen?: boolean }) {
+export function AgentRunTraceRow({
+  entry,
+  defaultOpen = false,
+  onOpenFile
+}: {
+  entry: AgentRunTraceEntry;
+  defaultOpen?: boolean;
+  onOpenFile?: (path: string) => void;
+}) {
   const fileChanges = useMemo(() => readFileChanges(entry), [entry]);
   const commandRun = useMemo(() => readCommandRun(entry), [entry]);
   const [open, setOpen] = useState(defaultOpen || fileChanges.length > 0 || commandRun?.failed === true);
@@ -78,13 +88,14 @@ export function AgentRunTraceRow({ entry, defaultOpen = false }: { entry: AgentR
   const expandable = Boolean(reasoningText || entry.input || entry.output);
   const active = entry.status === "pending" || entry.status === "running";
   const label = traceRowLabel(entry);
-  const title = shouldShowTraceRowTitle(entry, label) ? entry.title : undefined;
+  const title = computeTraceRowTitle(entry, label);
 
   if (fileChanges.length > 0) {
     return (
       <AgentRunFileChangeRow
         changes={fileChanges}
         entry={entry}
+        onOpenFile={onOpenFile}
         open={open}
         setOpen={setOpen}
         transition={disclosureTransition}
@@ -117,7 +128,16 @@ export function AgentRunTraceRow({ entry, defaultOpen = false }: { entry: AgentR
         onClick={() => expandable && setOpen((value) => !value)}
       >
         <span className="min-w-0">
-          <span className={cn("font-semibold text-foreground/95", active && "opaline-agent-thinking-shimmer")} data-slot="agent-run-trace-row-label">{label}</span>
+          <span
+            className={cn(
+              entry.kind === "thought" ? "font-normal text-muted-foreground" : "font-medium text-foreground/90",
+              active && entry.kind === "thought" && "opaline-agent-thinking-shimmer",
+              active && entry.kind !== "thought" && "opaline-agent-thinking-shimmer"
+            )}
+            data-slot="agent-run-trace-row-label"
+          >
+            {label}
+          </span>
           {title ? <span className="ml-1.5 text-muted-foreground" data-slot="agent-run-trace-row-title">{title}</span> : null}
           {entry.subtitle ? <span className="ml-1.5 text-muted-foreground" data-slot="agent-run-trace-row-subtitle">{entry.subtitle}</span> : null}
         </span>
@@ -266,12 +286,14 @@ type FileChangeSummary = {
 function AgentRunFileChangeRow({
   changes,
   entry,
+  onOpenFile,
   open,
   setOpen,
   transition
 }: {
   changes: FileChangeSummary[];
   entry: AgentRunTraceEntry;
+  onOpenFile?: (path: string) => void;
   open: boolean;
   setOpen: (value: boolean | ((current: boolean) => boolean)) => void;
   transition: ReturnType<typeof useFileTreeDisclosureTransition>;
@@ -309,7 +331,18 @@ function AgentRunFileChangeRow({
               {changes.map((change) => (
                 <div key={`${change.action}:${change.path}`} className="flex min-w-0 items-center gap-2 text-sm leading-6">
                   <span className="shrink-0 text-muted-foreground">{change.action === "wrote" ? "Wrote" : "Edited"}</span>
-                  <span className="min-w-0 truncate font-medium text-blue-600 dark:text-blue-400">{basename(change.path)}</span>
+                  {onOpenFile ? (
+                    <button
+                      type="button"
+                      className="min-w-0 truncate rounded-[5px] px-1 text-left font-medium text-blue-600 transition-colors hover:bg-muted hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/35 dark:text-blue-400 dark:hover:text-blue-300"
+                      title={change.path}
+                      onClick={() => onOpenFile(change.path)}
+                    >
+                      {basename(change.path)}
+                    </button>
+                  ) : (
+                    <span className="min-w-0 truncate font-medium text-blue-600 dark:text-blue-400">{basename(change.path)}</span>
+                  )}
                   <span className="inline-flex shrink-0 items-center gap-1 font-mono text-[13px] tabular-nums">
                     <span className="inline-flex items-center text-emerald-600 dark:text-emerald-400">+<RollingTraceNumber value={change.additions} /></span>
                     <span className="inline-flex items-center text-red-600 dark:text-red-400">-<RollingTraceNumber value={change.deletions} /></span>
@@ -473,6 +506,20 @@ function parseTraceJson(value: string | undefined): unknown {
   }
 }
 
+function extractPathFromTraceJson(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  const parsed = parseTraceJson(value);
+  if (typeof parsed !== "object" || parsed === null) return undefined;
+  const record = parsed as Record<string, unknown>;
+  const path = readString(record.path) || readString(record.file) || readString(record.filePath);
+  if (path) return path;
+  if (typeof record.input === "object" && record.input !== null) {
+    const inputRecord = record.input as Record<string, unknown>;
+    return readString(inputRecord.path) || readString(inputRecord.file) || readString(inputRecord.filePath) || undefined;
+  }
+  return undefined;
+}
+
 function inferPathFromTitle(title: string): string | null {
   const match = title.match(/^(?:edited|wrote|write|changed|created)\s+(.+)$/i);
   return match?.[1]?.trim() || null;
@@ -515,7 +562,7 @@ function traceRowLabel(entry: AgentRunTraceEntry): string {
     case "memory":
       return "Updated memory";
     case "read":
-      return "Read file";
+      return "Read";
     default:
       return "Used tool";
   }
@@ -523,8 +570,26 @@ function traceRowLabel(entry: AgentRunTraceEntry): string {
 
 function shouldShowTraceRowTitle(entry: AgentRunTraceEntry, label: string): boolean {
   if (entry.kind === "thought" || label === entry.title) return false;
-  if (entry.icon === "terminal" || entry.icon === "search" || entry.icon === "read") return false;
+  if (entry.icon === "terminal" || entry.icon === "search") return false;
   return !/^tool\b/i.test(entry.title);
+}
+
+function computeTraceRowTitle(entry: AgentRunTraceEntry, label: string): string | undefined {
+  if (entry.icon === "read") {
+    const match = entry.title.match(/^(?:Read|Viewed)\s+(.+)$/i);
+    if (match) {
+      const fp = match[1];
+      if (fp.includes(".") || fp.includes("/") || fp.includes("\\")) {
+        return basename(fp);
+      }
+    }
+    const inputPath = extractPathFromTraceJson(entry.input);
+    if (inputPath) return basename(inputPath);
+    const outputPath = extractPathFromTraceJson(entry.output);
+    if (outputPath) return basename(outputPath);
+    return undefined;
+  }
+  return shouldShowTraceRowTitle(entry, label) ? entry.title : undefined;
 }
 
 function traceGroupLabel(entries: AgentRunTraceEntry[], durationMs: number): string {

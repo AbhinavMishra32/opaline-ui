@@ -7,7 +7,9 @@
 
 .opaline-agent-thinking-shimmer {
   display: inline-flex;
-  background-image: linear-gradient(90deg, var(--muted-foreground) 0%, var(--muted-foreground) 40%, #fff 50%, var(--muted-foreground) 60%, var(--muted-foreground) 100%);
+  --opaline-thinking-base: color-mix(in srgb, var(--muted-foreground) 72%, transparent);
+  --opaline-thinking-glint: color-mix(in srgb, var(--foreground) 82%, var(--background));
+  background-image: linear-gradient(90deg, var(--opaline-thinking-base) 0%, var(--opaline-thinking-base) 40%, var(--opaline-thinking-glint) 50%, var(--opaline-thinking-base) 60%, var(--opaline-thinking-base) 100%);
   background-size: 250% 100%;
   background-clip: text;
   color: transparent;

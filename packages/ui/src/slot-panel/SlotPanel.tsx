@@ -1,6 +1,6 @@
 import * as Tabs from "@radix-ui/react-tabs";
 import type { ReactNode } from "react";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button as ShadcnButton } from "../components/button";
 import {
   DropdownMenu,
@@ -167,7 +167,12 @@ export const SlotPanel = React.forwardRef<SlotPanelHandle, SlotPanelProps>(
     });
 
     const initialTabsSignature = initialTabs?.map((tab) => tab.id).join("\u0000") ?? "";
+    const incomingTabIds = useMemo(() => new Set(initialTabs?.map((tab) => tab.id) ?? []), [initialTabsSignature]);
     const commitActiveTabId = useCallback((id: string | null) => {
+      if (id === activeTabId) {
+        return;
+      }
+
       if (controlledActiveTabId === undefined) {
         setUncontrolledActiveTabId(id);
       }
@@ -177,7 +182,7 @@ export const SlotPanel = React.forwardRef<SlotPanelHandle, SlotPanelProps>(
       }
 
       onActiveTabChange?.(id, openTabs.find((tab) => tab.id === id) ?? null);
-    }, [controlledActiveTabId, onActiveTabChange, onTabChange, openTabs]);
+    }, [activeTabId, controlledActiveTabId, onActiveTabChange, onTabChange, openTabs]);
 
     // Treat inline `tabs` as initial input by default; controlled file-tab surfaces
     // can opt into by-id syncing without wiping launcher-created tabs.
@@ -220,8 +225,12 @@ export const SlotPanel = React.forwardRef<SlotPanelHandle, SlotPanelProps>(
         return;
       }
 
+      if (syncTabs && incomingTabIds.has(activeTabId)) {
+        return;
+      }
+
       commitActiveTabId(openTabs[0]?.id ?? null);
-    }, [activeTabId, commitActiveTabId, openTabs]);
+    }, [activeTabId, commitActiveTabId, incomingTabIds, openTabs, syncTabs]);
 
     useEffect(() => {
       const tabList = tabsRef.current;

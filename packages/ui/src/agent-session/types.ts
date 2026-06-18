@@ -51,6 +51,7 @@ export type AgentSessionMessagePart =
       type: "activity";
       id: string;
       entry: AgentRunTraceEntry;
+      onOpenFile?: (path: string) => void;
       defaultOpen?: boolean;
     }
   | {

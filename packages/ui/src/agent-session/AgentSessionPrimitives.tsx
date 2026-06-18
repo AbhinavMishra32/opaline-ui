@@ -168,7 +168,7 @@ export function AgentSessionPartView({ part }: { part: AgentSessionMessagePart }
   if (part.type === "activity") {
     return (
       <div className="pl-1 pr-1" data-component="activity-part">
-        <AgentRunTraceRow entry={part.entry} defaultOpen={part.defaultOpen} />
+        <AgentRunTraceRow entry={part.entry} defaultOpen={part.defaultOpen} onOpenFile={part.onOpenFile}/>
       </div>
     );
   }

@@ -222,19 +222,23 @@ function isActivityPartRow(row: AgentSessionTimelineRow): row is Extract<AgentSe
   return row.type === "assistant-part" && row.part.type === "activity";
 }
 
+function isGroupableActivityPartRow(row: AgentSessionTimelineRow): row is Extract<AgentSessionTimelineRow, { type: "assistant-part" }> & { part: { type: "activity"; entry: AgentRunTraceEntry } } {
+  return isActivityPartRow(row) && row.part.entry.kind === "tool";
+}
+
 function groupConsecutiveActivityRows(rows: AgentSessionTimelineRow[]): TimelineRowGroup[] {
   const groups: TimelineRowGroup[] = [];
   let i = 0;
 
   while (i < rows.length) {
     const row = rows[i];
-    if (isActivityPartRow(row)) {
+    if (isGroupableActivityPartRow(row)) {
       const activityRows: AgentSessionTimelineRow[] = [row];
       const entries: AgentRunTraceEntry[] = [row.part.entry];
       let j = i + 1;
       while (j < rows.length) {
         const nextRow = rows[j];
-        if (!isActivityPartRow(nextRow)) break;
+        if (!isGroupableActivityPartRow(nextRow)) break;
         activityRows.push(nextRow);
         entries.push(nextRow.part.entry);
         j++;
