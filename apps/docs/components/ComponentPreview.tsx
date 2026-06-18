@@ -226,7 +226,7 @@ function renderPreview(name: PreviewName) {
     case "dropdown-menu":
       return <PreviewStage><ShadcnDropdownMenu><ShadcnDropdownMenuTrigger render={<Button variant="secondary">Open menu</Button>} /><ShadcnDropdownMenuContent><ShadcnDropdownMenuItem>Pin thread</ShadcnDropdownMenuItem><ShadcnDropdownMenuItem>Rename</ShadcnDropdownMenuItem><ShadcnDropdownMenuSeparator /><ShadcnDropdownMenuItem>Copy link</ShadcnDropdownMenuItem></ShadcnDropdownMenuContent></ShadcnDropdownMenu></PreviewStage>;
     case "context-menu":
-      return <PreviewStage><ContextMenu><ContextMenuTrigger asChild><button className="opaline-button opaline-button-secondary" type="button">Right-click this surface</button></ContextMenuTrigger><ContextMenuContent><ContextMenuItem>Open in new tab</ContextMenuItem><ContextMenuItem>Reveal in file tree</ContextMenuItem><ContextMenuSeparator /><ContextMenuItem>Copy path</ContextMenuItem></ContextMenuContent></ContextMenu></PreviewStage>;
+      return <PreviewStage><ContextMenu><ContextMenuTrigger render={<button className="opaline-button opaline-button-secondary" type="button">Right-click this surface</button>} /><ContextMenuContent><ContextMenuItem>Open in new tab</ContextMenuItem><ContextMenuItem>Reveal in file tree</ContextMenuItem><ContextMenuSeparator /><ContextMenuItem>Copy path</ContextMenuItem></ContextMenuContent></ContextMenu></PreviewStage>;
     case "dialog":
       return <PreviewStage><ShadcnDialog><ShadcnDialogTrigger render={<Button variant="primary">Open dialog</Button>} /><ShadcnDialogContent><ShadcnDialogHeader><ShadcnDialogTitle>Create workspace</ShadcnDialogTitle></ShadcnDialogHeader><div className="p-4">Choose a directory and Opaline will keep the shell state caller-owned.</div><ShadcnDialogFooter><Button variant="secondary">Cancel</Button><Button variant="primary">Create</Button></ShadcnDialogFooter></ShadcnDialogContent></ShadcnDialog></PreviewStage>;
     case "hover-preview":
@@ -316,11 +316,12 @@ function HistoryDemo() {
 
 function SettingsDemo() {
   const [enabled, setEnabled] = useState(true);
+  const [tabSize, setTabSize] = useState("2");
   return (
     <div className="docs-preview-stage" data-size="wide">
       <div className="docs-settings-demo">
         <SettingsPanel title="Editor" subtitle="Workspace defaults for code editing.">
-          <SettingsSection title="Behavior"><SettingsCard><SettingsRow title="Format on save" description="Run the configured formatter after writes." control={<SettingsToggle checked={enabled} onCheckedChange={setEnabled} />} /><SettingsRow title="Tab size" control={<SettingsSelect defaultValue="2"><option value="2">2 spaces</option><option value="4">4 spaces</option></SettingsSelect>} /></SettingsCard></SettingsSection>
+          <SettingsSection title="Behavior"><SettingsCard><SettingsRow title="Format on save" description="Run the configured formatter after writes." control={<SettingsToggle checked={enabled} onCheckedChange={setEnabled} />} /><SettingsRow title="Tab size" control={<SettingsSelect value={tabSize} onValueChange={setTabSize} options={[{ label: "2 spaces", value: "2" }, { label: "4 spaces", value: "4" }]} />} /></SettingsCard></SettingsSection>
         </SettingsPanel>
       </div>
     </div>
