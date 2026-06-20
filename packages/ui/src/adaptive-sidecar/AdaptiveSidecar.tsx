@@ -185,7 +185,7 @@ export function AdaptiveSidecarLayout({
         {keepMounted || open ? (
           <motion.aside
             ref={railRef}
-            className="absolute inset-y-0 right-0 z-30 flex w-[var(--opaline-sidecar-width)] items-stretch p-[var(--opaline-sidecar-gap)] data-[inline=true]:relative data-[inline=true]:z-auto data-[visible=false]:pointer-events-none"
+            className="absolute inset-y-0 right-0 z-30 flex w-[var(--opaline-sidecar-width)] items-stretch p-[var(--opaline-sidecar-gap)] pb-[calc(var(--opaline-sidecar-gap)+0.5rem)] data-[inline=true]:relative data-[inline=true]:z-auto data-[visible=false]:pointer-events-none"
             data-inline={inline ? "true" : "false"}
             data-visible={open ? "true" : "false"}
             aria-hidden={!open}
@@ -255,7 +255,7 @@ export function AdaptiveSidecarSurface({
     <motion.article
       layout
       className={cn(
-        "opaline-overlay-shadow flex min-h-11 max-h-full w-full flex-col overflow-hidden rounded-[8px] border border-border/80 bg-popover/92 text-popover-foreground backdrop-blur-xl backdrop-saturate-150",
+        "opaline-overlay-shadow flex min-h-11 max-h-full w-full flex-col overflow-hidden rounded-[18px] border border-border/80 bg-popover/92 text-popover-foreground backdrop-blur-xl backdrop-saturate-150",
         className
       )}
       data-collapsed={collapsed ? "true" : "false"}

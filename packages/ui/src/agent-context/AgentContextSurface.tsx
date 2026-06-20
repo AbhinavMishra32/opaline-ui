@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, useDragControls } from "framer-motion";
-import { ArrowUpRight, Expand, Sparkles, X } from "lucide-react";
+import { ArrowUpRight, Expand, Lightbulb, X } from "lucide-react";
 import type { HTMLAttributes, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -131,7 +131,7 @@ export function AgentContextSurface({
                 if (mode === "floating" && !(event.target as HTMLElement).closest("button, a")) dragControls.start(event);
               }}
             >
-              <span className="flex size-7 shrink-0 items-center justify-center rounded-[7px] bg-muted text-muted-foreground"><Sparkles size={14} /></span>
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-[7px] bg-muted text-muted-foreground"><Lightbulb size={14} /></span>
               <div className="min-w-0 flex-1">
                 {eyebrow ? <small className="block truncate text-xs font-medium text-muted-foreground">{eyebrow}</small> : null}
                 {title ? <strong className="block truncate text-sm font-medium">{title}</strong> : null}
@@ -165,7 +165,7 @@ export type AgentContextActionProps = HTMLAttributes<HTMLButtonElement> & {
 export function AgentContextAction({ icon, label, description, className = "", ...props }: AgentContextActionProps) {
   return (
     <button className={cn("flex w-full items-start gap-3 rounded-[7px] p-2 text-left hover:bg-muted", className)} type="button" {...props}>
-      <span className="flex size-7 shrink-0 items-center justify-center rounded-[7px] border bg-background text-muted-foreground">{icon ?? <Sparkles size={14} />}</span>
+      <span className="flex size-7 shrink-0 items-center justify-center rounded-[7px] border bg-background text-muted-foreground">{icon ?? <Lightbulb size={14} />}</span>
       <span className="min-w-0"><strong className="block text-sm font-medium">{label}</strong>{description ? <small className="mt-0.5 block text-xs text-muted-foreground">{description}</small> : null}</span>
     </button>
   );
