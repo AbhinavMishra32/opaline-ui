@@ -65,6 +65,9 @@ export type OpalineV2ShellProps = {
   defaultInspectorOpen?: boolean;
   defaultRightPanelOpen?: boolean;
   onInspectorOpenChange?: (open: boolean) => void;
+  inspectorExpanded?: boolean;
+  defaultInspectorExpanded?: boolean;
+  onInspectorExpandedChange?: (expanded: boolean) => void;
   defaultInspectorWidth?: number;
   defaultRightPanelWidth?: number;
   inspectorMinWidth?: number;
@@ -96,6 +99,7 @@ export type OpalineV2ShellState = {
   canNavigateHome: boolean;
   history?: ShellHistoryController<any>;
   inspectorOpen: boolean;
+  inspectorExpanded: boolean;
   sidebarOpen: boolean;
   bottomPanelOpen: boolean;
   isBottomPanelOpen: boolean;
@@ -104,6 +108,7 @@ export type OpalineV2ShellState = {
   setSidebarOpen: (open: boolean) => void;
   setInspectorOpen: (open: boolean) => void;
   setRightPanelOpen: (open: boolean) => void;
+  setInspectorExpanded: (expanded: boolean) => void;
   setBottomPanelOpen: (open: boolean) => void;
   toggleSidebar: () => void;
   toggleInspector: () => void;
@@ -149,6 +154,9 @@ export function OpalineV2Shell({
   rightPanelMaxWidth,
   rightPanelMinWidth,
   inspectorOpen: controlledInspectorOpen,
+  inspectorExpanded: controlledInspectorExpanded,
+  defaultInspectorExpanded,
+  onInspectorExpandedChange,
   main,
   onInspectorOpenChange,
   onNavigateBack,
@@ -173,6 +181,7 @@ export function OpalineV2Shell({
   const resolvedDefaultInspectorWidth = defaultRightPanelWidth ?? defaultInspectorWidth;
   const [uncontrolledSidebarOpen, setUncontrolledSidebarOpen] = React.useState(defaultSidebarOpen);
   const [uncontrolledInspectorOpen, setUncontrolledInspectorOpen] = React.useState(resolvedDefaultInspectorOpen);
+  const [uncontrolledInspectorExpanded, setUncontrolledInspectorExpanded] = React.useState(defaultInspectorExpanded ?? false);
   const [bottomPanelOpen, setBottomPanelOpen] = React.useState(defaultBottomPanelOpen ?? bottomPanel != null);
   const [sidebarWidth, setSidebarWidth] = React.useState(defaultSidebarWidth);
   const [inspectorWidth, setInspectorWidth] = React.useState(resolvedDefaultInspectorWidth);
@@ -182,6 +191,7 @@ export function OpalineV2Shell({
 
   const sidebarOpen = controlledSidebarOpen ?? uncontrolledSidebarOpen;
   const inspectorOpen = controlledInspectorOpen ?? uncontrolledInspectorOpen;
+  const inspectorExpanded = controlledInspectorExpanded ?? uncontrolledInspectorExpanded;
   const sidebarCollapsed = sidebar != null && !sidebarOpen;
   const resolvedCanNavigateBack = canNavigateBack ?? history?.canGoBack ?? false;
   const resolvedCanNavigateForward = canNavigateForward ?? history?.canGoForward ?? false;
@@ -200,6 +210,14 @@ export function OpalineV2Shell({
       onInspectorOpenChange?.(open);
     },
     [onInspectorOpenChange],
+  );
+
+  const setInspectorExpanded = React.useCallback(
+    (expanded: boolean) => {
+      setUncontrolledInspectorExpanded(expanded);
+      onInspectorExpandedChange?.(expanded);
+    },
+    [onInspectorExpandedChange],
   );
 
   const navigateBack = React.useCallback(() => {
@@ -232,6 +250,7 @@ export function OpalineV2Shell({
       canNavigateHome: onNavigateHome != null,
       history,
       inspectorOpen,
+      inspectorExpanded,
       isBottomPanelOpen: bottomPanelOpen,
       isRightPanelOpen: inspectorOpen,
       isSidebarOpen: sidebarOpen,
@@ -240,6 +259,7 @@ export function OpalineV2Shell({
       navigateHome,
       setBottomPanelOpen,
       setInspectorOpen,
+      setInspectorExpanded,
       setRightPanelOpen: setInspectorOpen,
       setSidebarOpen,
       sidebarOpen,
@@ -252,6 +272,7 @@ export function OpalineV2Shell({
       bottomPanelOpen,
       history,
       inspectorOpen,
+      inspectorExpanded,
       navigateBack,
       navigateForward,
       navigateHome,
@@ -259,6 +280,7 @@ export function OpalineV2Shell({
       resolvedCanNavigateBack,
       resolvedCanNavigateForward,
       setInspectorOpen,
+      setInspectorExpanded,
       setSidebarOpen,
       sidebarOpen,
     ],
@@ -363,10 +385,10 @@ export function OpalineV2Shell({
         data-sidebar-open={sidebar != null && sidebarOpen ? "true" : "false"}
         style={
           {
-            "--opaline-v2-inspector-width": `${inspectorWidth}px`,
+            "--opaline-v2-inspector-width": (inspectorExpanded && inspectorOpen) ? "calc(100vw - var(--opaline-v2-sidebar-width))" : `${inspectorWidth}px`,
             "--opaline-v2-sidebar-max-width": `${sidebarMaxWidth}px`,
             "--opaline-v2-sidebar-min-content": `${sidebarMinWidth + 96}px`,
-            "--opaline-v2-sidebar-width": `${sidebarWidth}px`,
+            "--opaline-v2-sidebar-width": sidebarOpen ? `${sidebarWidth}px` : "0px",
           } as React.CSSProperties
         }
       >
@@ -430,7 +452,13 @@ export function OpalineV2Shell({
               {actionContent}
             </div>
           </header>
-          <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_auto] overflow-hidden max-[980px]:grid-cols-1">
+          <div
+            className="grid min-h-0 flex-1 overflow-hidden max-[980px]:grid-cols-1"
+            style={{
+              gridTemplateColumns: !inspectorOpen ? "minmax(0, 1fr) 0px" : "minmax(0, 1fr) var(--opaline-v2-inspector-width)",
+              transition: "grid-template-columns 300ms cubic-bezier(0.19, 1, 0.22, 1)",
+            }}
+          >
             <section className="relative flex min-h-0 min-w-0 flex-col overflow-hidden">
               <main className="min-h-0 min-w-0 flex-1 overflow-hidden">{main}</main>
               {composer != null ? <footer>{composer}</footer> : null}
@@ -442,19 +470,24 @@ export function OpalineV2Shell({
             </section>
             {resolvedInspector != null ? (
               <aside
-                className={cn("relative z-20 h-full min-h-0 shrink-0 overflow-visible transition-[width,opacity] duration-300 ease-[cubic-bezier(0.19,1,0.22,1)] data-[resizing=true]:transition-none max-[980px]:hidden", inspectorOpen ? "w-[var(--opaline-v2-inspector-width)] opacity-100" : "pointer-events-none w-0 opacity-0")}
+                className={cn(
+                  "relative z-20 h-full min-h-0 shrink-0 overflow-visible transition-[width,opacity] duration-300 ease-[cubic-bezier(0.19,1,0.22,1)] data-[resizing=true]:transition-none max-[980px]:hidden",
+                  inspectorOpen ? "w-[var(--opaline-v2-inspector-width)] opacity-100" : "pointer-events-none w-0 opacity-0"
+                )}
                 data-open={inspectorOpen ? "true" : "false"}
                 data-resizing={inspectorResizing ? "true" : "false"}
               >
-                <div
-                  aria-disabled={!inspectorOpen}
-                  aria-orientation="vertical"
-                  className="absolute inset-y-0 -left-2 z-50 flex w-4 cursor-col-resize touch-none select-none"
-                  onPointerDown={inspectorOpen ? startInspectorResize : undefined}
-                  role="separator"
-                >
-                  <div className="m-auto h-full w-px bg-border opacity-0 transition-opacity hover:opacity-100" />
-                </div>
+                {!(inspectorExpanded && inspectorOpen) && (
+                  <div
+                    aria-disabled={!inspectorOpen}
+                    aria-orientation="vertical"
+                    className="absolute inset-y-0 -left-2 z-50 flex w-4 cursor-col-resize touch-none select-none"
+                    onPointerDown={inspectorOpen ? startInspectorResize : undefined}
+                    role="separator"
+                  >
+                    <div className="m-auto h-full w-px bg-border opacity-0 transition-opacity hover:opacity-100" />
+                  </div>
+                )}
                 <div className="absolute inset-0 flex min-h-0 min-w-0 flex-col overflow-hidden bg-card/78 shadow-[inset_1px_0_0_color-mix(in_srgb,var(--border)_40%,transparent),-6px_0_16px_color-mix(in_srgb,var(--foreground)_2.5%,transparent)] backdrop-blur supports-[backdrop-filter]:bg-card/68">{resolvedInspector}</div>
               </aside>
             ) : null}
