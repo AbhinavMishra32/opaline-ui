@@ -201,6 +201,10 @@ export {
   DropdownMenuLabel as ShadcnDropdownMenuLabel,
   DropdownMenuSeparator as ShadcnDropdownMenuSeparator,
   DropdownMenuTrigger as ShadcnDropdownMenuTrigger,
+  DropdownMenuSub as ShadcnDropdownMenuSub,
+  DropdownMenuSubTrigger as ShadcnDropdownMenuSubTrigger,
+  DropdownMenuSubContent as ShadcnDropdownMenuSubContent,
+  DropdownMenuPortal as ShadcnDropdownMenuPortal,
 } from "./components/dropdown-menu";
 export { ScrollArea as ShadcnScrollArea, ScrollBar as ShadcnScrollBar } from "./components/scroll-area";
 export { Separator as ShadcnSeparator } from "./components/separator";

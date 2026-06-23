@@ -339,7 +339,7 @@ export const SlotPanel = React.forwardRef<SlotPanelHandle, SlotPanelProps>(
                 <Tabs.Trigger
                   key={tab.id}
                   value={tab.id}
-                  className="group relative flex h-7 max-w-52 shrink-0 items-center gap-1.5 rounded-[10px] px-2.5 text-[13px] text-muted-foreground outline-none transition-[background-color,color,box-shadow,transform] duration-150 hover:bg-muted/55 hover:text-foreground active:translate-y-px data-[state=active]:bg-muted/85 data-[state=active]:text-foreground data-[state=active]:shadow-[inset_0_0_0_0.5px_color-mix(in_srgb,var(--border)_55%,transparent)]"
+                  className="group relative flex h-7 max-w-52 shrink-0 items-center gap-1.5 rounded-[10px] px-2.5 text-[13px] text-muted-foreground outline-none hover:bg-muted/55 hover:text-foreground active:translate-y-px data-[state=active]:bg-muted/85 data-[state=active]:text-foreground data-[state=active]:shadow-[inset_0_0_0_0.5px_color-mix(in_srgb,var(--border)_55%,transparent)]"
                   data-tab-id={tab.id}
                   data-closable={tab.closable === true ? "true" : undefined}
                 >
@@ -354,7 +354,7 @@ export const SlotPanel = React.forwardRef<SlotPanelHandle, SlotPanelProps>(
                         title="Close tab"
                         aria-label="Close tab"
                       >
-                        <span className="flex size-3 items-center justify-center rounded-full bg-muted-foreground/70 text-background group-hover/close:bg-muted-foreground">
+                        <span className="flex size-3 items-center justify-center rounded-full bg-muted-foreground/70 text-background group-hover/close:bg-black group-hover/close:text-white dark:group-hover/close:bg-white dark:group-hover/close:text-black">
                           <svg viewBox="0 0 10 10" width="6" height="6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
                             <line x1="2.5" y1="2.5" x2="7.5" y2="7.5" />
                             <line x1="7.5" y1="2.5" x2="2.5" y2="7.5" />

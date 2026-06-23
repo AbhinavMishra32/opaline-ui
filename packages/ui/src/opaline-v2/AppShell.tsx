@@ -84,6 +84,9 @@ export type OpalineV2ShellProps = {
   composer?: React.ReactNode;
   bottomPanel?: React.ReactNode | ((state: OpalineV2ShellState) => React.ReactNode);
   defaultBottomPanelOpen?: boolean;
+  bottomPanelExpanded?: boolean;
+  defaultBottomPanelExpanded?: boolean;
+  onBottomPanelExpandedChange?: (expanded: boolean) => void;
   history?: ShellHistoryController<any>;
   canNavigateBack?: boolean;
   canNavigateForward?: boolean;
@@ -102,6 +105,7 @@ export type OpalineV2ShellState = {
   inspectorExpanded: boolean;
   sidebarOpen: boolean;
   bottomPanelOpen: boolean;
+  bottomPanelExpanded: boolean;
   isBottomPanelOpen: boolean;
   isRightPanelOpen: boolean;
   isSidebarOpen: boolean;
@@ -110,10 +114,12 @@ export type OpalineV2ShellState = {
   setRightPanelOpen: (open: boolean) => void;
   setInspectorExpanded: (expanded: boolean) => void;
   setBottomPanelOpen: (open: boolean) => void;
+  setBottomPanelExpanded: (expanded: boolean) => void;
   toggleSidebar: () => void;
   toggleInspector: () => void;
   toggleRightPanel: () => void;
   toggleBottomPanel: () => void;
+  toggleBottomPanelExpanded: () => void;
   navigateBack: () => void;
   navigateForward: () => void;
   navigateHome: () => void;
@@ -132,6 +138,9 @@ export function OpalineV2Shell({
   actions,
   headerActions,
   bottomPanel,
+  bottomPanelExpanded: controlledBottomPanelExpanded,
+  defaultBottomPanelExpanded,
+  onBottomPanelExpandedChange,
   canNavigateBack,
   canNavigateForward,
   className,
@@ -182,6 +191,7 @@ export function OpalineV2Shell({
   const [uncontrolledSidebarOpen, setUncontrolledSidebarOpen] = React.useState(defaultSidebarOpen);
   const [uncontrolledInspectorOpen, setUncontrolledInspectorOpen] = React.useState(resolvedDefaultInspectorOpen);
   const [uncontrolledInspectorExpanded, setUncontrolledInspectorExpanded] = React.useState(defaultInspectorExpanded ?? false);
+  const [uncontrolledBottomPanelExpanded, setUncontrolledBottomPanelExpanded] = React.useState(defaultBottomPanelExpanded ?? false);
   const [bottomPanelOpen, setBottomPanelOpen] = React.useState(defaultBottomPanelOpen ?? bottomPanel != null);
   const [sidebarWidth, setSidebarWidth] = React.useState(defaultSidebarWidth);
   const [inspectorWidth, setInspectorWidth] = React.useState(resolvedDefaultInspectorWidth);
@@ -192,6 +202,7 @@ export function OpalineV2Shell({
   const sidebarOpen = controlledSidebarOpen ?? uncontrolledSidebarOpen;
   const inspectorOpen = controlledInspectorOpen ?? uncontrolledInspectorOpen;
   const inspectorExpanded = controlledInspectorExpanded ?? uncontrolledInspectorExpanded;
+  const bottomPanelExpanded = controlledBottomPanelExpanded ?? uncontrolledBottomPanelExpanded;
   const sidebarCollapsed = sidebar != null && !sidebarOpen;
   const resolvedCanNavigateBack = canNavigateBack ?? history?.canGoBack ?? false;
   const resolvedCanNavigateForward = canNavigateForward ?? history?.canGoForward ?? false;
@@ -220,6 +231,14 @@ export function OpalineV2Shell({
     [onInspectorExpandedChange],
   );
 
+  const setBottomPanelExpanded = React.useCallback(
+    (expanded: boolean) => {
+      setUncontrolledBottomPanelExpanded(expanded);
+      onBottomPanelExpandedChange?.(expanded);
+    },
+    [onBottomPanelExpandedChange],
+  );
+
   const navigateBack = React.useCallback(() => {
     if (onNavigateBack != null) {
       onNavigateBack();
@@ -245,6 +264,7 @@ export function OpalineV2Shell({
   const state = React.useMemo<OpalineV2ShellState>(
     () => ({
       bottomPanelOpen,
+      bottomPanelExpanded,
       canNavigateBack: resolvedCanNavigateBack,
       canNavigateForward: resolvedCanNavigateForward,
       canNavigateHome: onNavigateHome != null,
@@ -260,16 +280,19 @@ export function OpalineV2Shell({
       setBottomPanelOpen,
       setInspectorOpen,
       setInspectorExpanded,
+      setBottomPanelExpanded,
       setRightPanelOpen: setInspectorOpen,
       setSidebarOpen,
       sidebarOpen,
       toggleBottomPanel: () => setBottomPanelOpen((open) => !open),
+      toggleBottomPanelExpanded: () => setBottomPanelExpanded(!bottomPanelExpanded),
       toggleInspector: () => setInspectorOpen(!inspectorOpen),
       toggleRightPanel: () => setInspectorOpen(!inspectorOpen),
       toggleSidebar: () => setSidebarOpen(!sidebarOpen),
     }),
     [
       bottomPanelOpen,
+      bottomPanelExpanded,
       history,
       inspectorOpen,
       inspectorExpanded,
@@ -281,6 +304,7 @@ export function OpalineV2Shell({
       resolvedCanNavigateForward,
       setInspectorOpen,
       setInspectorExpanded,
+      setBottomPanelExpanded,
       setSidebarOpen,
       sidebarOpen,
     ],
@@ -455,7 +479,7 @@ export function OpalineV2Shell({
           <div
             className="grid min-h-0 flex-1 overflow-hidden max-[980px]:grid-cols-1"
             style={{
-              gridTemplateColumns: !inspectorOpen ? "minmax(0, 1fr) 0px" : "minmax(0, 1fr) var(--opaline-v2-inspector-width)",
+              gridTemplateColumns: (!resolvedInspector || !inspectorOpen) ? "minmax(0, 1fr) 0px" : "minmax(0, 1fr) var(--opaline-v2-inspector-width)",
               transition: "grid-template-columns 300ms cubic-bezier(0.19, 1, 0.22, 1)",
             }}
           >
@@ -463,7 +487,17 @@ export function OpalineV2Shell({
               <main className="min-h-0 min-w-0 flex-1 overflow-hidden">{main}</main>
               {composer != null ? <footer>{composer}</footer> : null}
               {bottomPanelContent != null ? (
-                <section className={cn("relative z-40 min-h-0 w-full overflow-hidden shadow-[0_-5px_16px_color-mix(in_srgb,var(--foreground)_3.5%,transparent)] transition-[height,flex-basis,opacity] duration-300 ease-[cubic-bezier(0.19,1,0.22,1)]", bottomPanelOpen ? "h-[var(--opaline-v2-bottom-panel-height,260px)] basis-[var(--opaline-v2-bottom-panel-height,260px)] opacity-100" : "pointer-events-none h-0 basis-0 opacity-0")} data-open={bottomPanelOpen ? "true" : "false"}>
+                <section
+                  className={cn(
+                    "relative z-40 min-h-0 w-full overflow-hidden border-t border-border/60 transition-[height,flex-basis,opacity] duration-300 ease-[cubic-bezier(0.19,1,0.22,1)]",
+                    bottomPanelOpen
+                      ? bottomPanelExpanded
+                        ? "h-full basis-full shrink-0 opacity-100"
+                        : "h-[var(--opaline-v2-bottom-panel-height,260px)] basis-[var(--opaline-v2-bottom-panel-height,260px)] opacity-100"
+                      : "pointer-events-none h-0 basis-0 opacity-0"
+                  )}
+                  data-open={bottomPanelOpen ? "true" : "false"}
+                >
                   {bottomPanelContent}
                 </section>
               ) : null}
@@ -488,7 +522,7 @@ export function OpalineV2Shell({
                     <div className="m-auto h-full w-px bg-border opacity-0 transition-opacity hover:opacity-100" />
                   </div>
                 )}
-                <div className="absolute inset-0 flex min-h-0 min-w-0 flex-col overflow-hidden bg-card/78 shadow-[inset_1px_0_0_color-mix(in_srgb,var(--border)_40%,transparent),-6px_0_16px_color-mix(in_srgb,var(--foreground)_2.5%,transparent)] backdrop-blur supports-[backdrop-filter]:bg-card/68">{resolvedInspector}</div>
+                <div className="absolute inset-0 flex min-h-0 min-w-0 flex-col overflow-hidden bg-card/78 border-l border-border/60 backdrop-blur supports-[backdrop-filter]:bg-card/68">{resolvedInspector}</div>
               </aside>
             ) : null}
           </div>
@@ -702,7 +736,7 @@ export function AppShellComposer(props: AppShellSlotProps) {
 }
 
 export function AppShellRightPanel(props: AppShellSlotProps) {
-  return <ShellSlot {...props} className={cn("flex min-h-0 flex-col overflow-hidden bg-card/85 shadow-[inset_1px_0_0_color-mix(in_srgb,var(--border)_55%,transparent)]", props.className)} />;
+  return <ShellSlot {...props} className={cn("flex min-h-0 flex-col overflow-hidden bg-card/85", props.className)} />;
 }
 
 export function AppShellBottomPanel(props: AppShellSlotProps) {

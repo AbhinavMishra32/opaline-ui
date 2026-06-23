@@ -46,6 +46,8 @@ export interface BottomPanelProps {
   onTabClose?: (id: string, nextTabs?: SlotTab[]) => void;
   onTabOpen?: (tab: SlotTab) => void;
   onTabsChange?: (tabs: SlotTab[]) => void;
+  expanded?: boolean;
+  onExpandChange?: (expanded: boolean) => void;
 }
 
 /**
@@ -71,11 +73,14 @@ export const BottomPanel = React.forwardRef<SlotPanelHandle, BottomPanelProps>(
       onTabClose,
       onTabOpen,
       onTabsChange,
+      expanded: expandedProp,
+      onExpandChange,
     },
     ref,
   ) {
     const [panelHeight, setPanelHeight] = useState(() => clampBottomPanelHeight(height, mainContentHeight));
-    const [isFullscreen, setIsFullscreen] = useState(false);
+    const [localExpanded, setLocalExpanded] = useState(false);
+    const isFullscreen = expandedProp !== undefined ? expandedProp : localExpanded;
     const rootRef = useRef<HTMLDivElement | null>(null);
     const lastWindowedHeightRef = useRef(panelHeight);
 
@@ -94,25 +99,32 @@ export const BottomPanel = React.forwardRef<SlotPanelHandle, BottomPanelProps>(
     function commitHeight(next: number) {
       const clamped = clampBottomPanelHeight(next, mainContentHeight);
       lastWindowedHeightRef.current = clamped;
-      setIsFullscreen(false);
+      if (onExpandChange) {
+        onExpandChange(false);
+      } else {
+        setLocalExpanded(false);
+      }
       setPanelHeight(clamped);
       onHeightChange?.(clamped);
     }
 
     function toggleFullscreen() {
-      if (isFullscreen) {
-        const restored = clampBottomPanelHeight(lastWindowedHeightRef.current, mainContentHeight);
-        setIsFullscreen(false);
-        setPanelHeight(restored);
-        onHeightChange?.(restored);
-        return;
+      const nextExpanded = !isFullscreen;
+      if (onExpandChange) {
+        onExpandChange(nextExpanded);
+      } else {
+        setLocalExpanded(nextExpanded);
+        if (nextExpanded) {
+          lastWindowedHeightRef.current = panelHeight;
+          const fullHeight = clampBottomPanelHeight(mainContentHeight, mainContentHeight);
+          setPanelHeight(fullHeight);
+          onHeightChange?.(fullHeight);
+        } else {
+          const restored = clampBottomPanelHeight(lastWindowedHeightRef.current, mainContentHeight);
+          setPanelHeight(restored);
+          onHeightChange?.(restored);
+        }
       }
-
-      lastWindowedHeightRef.current = panelHeight;
-      const fullHeight = clampBottomPanelHeight(mainContentHeight, mainContentHeight);
-      setIsFullscreen(true);
-      setPanelHeight(fullHeight);
-      onHeightChange?.(fullHeight);
     }
 
     const startResize = useCallback(

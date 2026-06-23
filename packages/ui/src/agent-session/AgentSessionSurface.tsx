@@ -163,6 +163,7 @@ export function AgentSessionComposer({
   onSubmit,
   submitLabel = "Send",
   footerStart,
+  footerEnd,
   placeholder = "Answer in your own words...",
   pending = false,
   disabled = false,
@@ -192,23 +193,26 @@ export function AgentSessionComposer({
       />
       <div className="flex items-center justify-between gap-2 px-2 pb-2 pt-0.5">
         <div className="flex min-w-0 flex-1 items-center gap-1.5">{footerStart}</div>
-        <Tooltip>
-          <TooltipTrigger
-            render={(
-              <Button
-                aria-label={pending ? "Construct Interact is thinking" : accessibleSubmitLabel}
-                className="rounded-full"
-                type="button"
-                size="icon-lg"
-                disabled={isDisabled}
-                onClick={onSubmit}
-              >
-                {pending ? <SpinnerIcon className="animate-spin" /> : <ArrowUpIcon weight="bold" />}
-              </Button>
-            )}
-          />
-          <TooltipContent>{pending ? "Thinking" : `${accessibleSubmitLabel} (Enter)`}</TooltipContent>
-        </Tooltip>
+        <div className="flex items-center gap-1.5 shrink-0">
+          {footerEnd}
+          <Tooltip>
+            <TooltipTrigger
+              render={(
+                <Button
+                  aria-label={pending ? "Construct Interact is thinking" : accessibleSubmitLabel}
+                  className="rounded-full agent-composer-submit-btn"
+                  type="button"
+                  size="icon-lg"
+                  disabled={isDisabled}
+                  onClick={onSubmit}
+                >
+                  {pending ? <SpinnerIcon className="animate-spin" /> : <ArrowUpIcon weight="bold" />}
+                </Button>
+              )}
+            />
+            <TooltipContent>{pending ? "Thinking" : `${accessibleSubmitLabel} (Enter)`}</TooltipContent>
+          </Tooltip>
+        </div>
       </div>
     </div>
   );
