@@ -1,4 +1,4 @@
-import { CaretRightIcon, CheckIcon, PencilSimpleLine, TerminalWindowIcon, WarningCircleIcon } from "@phosphor-icons/react";
+import { CaretRightIcon, CheckIcon, PencilSimpleLine, TerminalWindowIcon, WarningCircleIcon, GlobeIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
 import { AnimatePresence, motion, useReducedMotion, useSpring, useTransform, type MotionValue } from "framer-motion";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 
@@ -82,6 +82,8 @@ export function AgentRunTraceRow({
 }) {
   const fileChanges = useMemo(() => readFileChanges(entry), [entry]);
   const commandRun = useMemo(() => readCommandRun(entry), [entry]);
+  const webSearch = useMemo(() => readWebSearch(entry), [entry]);
+  const webFetch = useMemo(() => readWebFetch(entry), [entry]);
   const [open, setOpen] = useState(defaultOpen || fileChanges.length > 0 || commandRun?.failed === true);
   const disclosureTransition = useFileTreeDisclosureTransition();
   const reasoningText = entry.kind === "thought" ? entry.output : undefined;
@@ -114,6 +116,31 @@ export function AgentRunTraceRow({
       />
     );
   }
+
+  if (webSearch) {
+    return (
+      <AgentRunWebSearchRow
+        entry={entry}
+        webSearch={webSearch}
+        open={open}
+        setOpen={setOpen}
+        transition={disclosureTransition}
+      />
+    );
+  }
+
+  if (webFetch) {
+    return (
+      <AgentRunWebFetchRow
+        entry={entry}
+        webFetch={webFetch}
+        open={open}
+        setOpen={setOpen}
+        transition={disclosureTransition}
+      />
+    );
+  }
+
 
   return (
     <div className="flex min-w-0 flex-col gap-1 animate-in fade-in-0 slide-in-from-left-1 duration-200 group/row" data-slot="agent-run-trace-entry" data-kind={entry.kind}>
@@ -166,6 +193,372 @@ export function AgentRunTraceRow({
                 <>
                   {entry.input ? <TraceDetail label="Input" value={entry.input} /> : null}
                   {entry.output ? <TraceDetail label="Result" value={entry.output} /> : null}
+                </>
+              )}
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function readWebSearch(entry: AgentRunTraceEntry) {
+  const title = (entry.title ?? "").toLowerCase();
+  if (entry.kind !== "tool" || (!title.includes("searched web") && !title.includes("searched web x times"))) return null;
+  const input = parseTraceJson(entry.input);
+  const inputRecord = typeof input === "object" && input !== null ? input as Record<string, unknown> : {};
+  const query = typeof inputRecord.query === "string" ? inputRecord.query : entry.subtitle || "";
+  return { query };
+}
+
+function readWebFetch(entry: AgentRunTraceEntry) {
+  const title = (entry.title ?? "").toLowerCase();
+  if (entry.kind !== "tool" || (!title.includes("fetched web") && !title.includes("fetched page"))) return null;
+  const input = parseTraceJson(entry.input);
+  const inputRecord = typeof input === "object" && input !== null ? input as Record<string, unknown> : {};
+  const urls = Array.isArray(inputRecord.urls)
+    ? inputRecord.urls.filter((u): u is string => typeof u === "string")
+    : typeof inputRecord.urls === "string"
+      ? [inputRecord.urls]
+      : [];
+
+  const output = parseTraceJson(entry.output);
+  
+  let rawResults: any[] = [];
+  if (output && typeof output === "object") {
+    const record = output as Record<string, any>;
+    if (Array.isArray(record.results)) {
+      rawResults = record.results;
+    } else if (Array.isArray(output)) {
+      rawResults = output;
+    }
+  } else if (Array.isArray(output)) {
+    rawResults = output;
+  }
+
+  const results = rawResults.map((r: any) => ({
+    url: typeof r?.url === "string" ? r.url : "",
+    title: typeof r?.title === "string" ? r.title : typeof r?.url === "string" ? getDomain(r.url) : "Fetched page",
+    content: typeof r?.content === "string" ? r.content : "",
+    favicon: typeof r?.favicon === "string" ? r.favicon : ""
+  }));
+
+  return { urls, results };
+}
+
+function getDomain(urlStr: string): string {
+  if (!urlStr) return "";
+  let cleanUrl = urlStr.trim();
+  if (!/^https?:\/\//i.test(cleanUrl)) {
+    cleanUrl = "https://" + cleanUrl;
+  }
+  try {
+    const url = new URL(cleanUrl);
+    return url.hostname.replace(/^www\./, "");
+  } catch {
+    return cleanUrl;
+  }
+}
+
+function SearchResultItem({ res }: { res: { url: string; title: string; content: string; favicon?: string } }) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const resDomain = getDomain(res.url);
+  const resFavicon = res.favicon || (resDomain ? `https://www.google.com/s2/favicons?sz=64&domain=${resDomain}` : undefined);
+
+  return (
+    <div className="flex flex-col gap-1 border-b border-border/10 pb-2 last:border-0 last:pb-0">
+      <div className="flex items-center gap-1.5 min-w-0">
+        <span className="relative flex size-3.5 shrink-0 items-center justify-center overflow-hidden rounded-[2px] bg-muted/40 shadow-xs border border-border/20">
+          {resFavicon && !imgFailed ? (
+            <img
+              src={resFavicon}
+              alt=""
+              className="size-full object-contain"
+              onError={() => setImgFailed(true)}
+            />
+          ) : (
+            <GlobeIcon size={11} className="text-muted-foreground" />
+          )}
+        </span>
+        <a
+          href={res.url}
+          target="_blank"
+          rel="noreferrer"
+          className="truncate text-[11px] font-semibold text-primary hover:underline"
+        >
+          {res.title || res.url}
+        </a>
+      </div>
+      {res.content && (
+        <p className="text-[10px] text-foreground/80 leading-normal pl-5 font-normal select-text">
+          {res.content}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function AgentRunWebFetchRow({
+  entry,
+  webFetch,
+  open,
+  setOpen,
+  transition
+}: {
+  entry: AgentRunTraceEntry;
+  webFetch: ReturnType<typeof readWebFetch>;
+  open: boolean;
+  setOpen: (value: boolean | ((current: boolean) => boolean)) => void;
+  transition: any;
+}) {
+  const active = entry.status === "pending" || entry.status === "running";
+  const failed = entry.status === "error";
+
+  const firstResult = webFetch?.results?.[0];
+  const url = firstResult?.url || webFetch?.urls?.[0] || "";
+  const title = firstResult?.title || (url ? getDomain(url) : "Web Page");
+  const favicon = firstResult?.favicon;
+  const domain = url ? getDomain(url) : "";
+
+  const faviconSrc = favicon || (domain ? `https://www.google.com/s2/favicons?sz=64&domain=${domain}` : undefined);
+  const [imgFailed, setImgFailed] = useState(false);
+  const [showRaw, setShowRaw] = useState(false);
+
+  return (
+    <div className="flex min-w-0 flex-col gap-1 animate-in fade-in-0 slide-in-from-left-1 duration-200 group/row" data-slot="agent-run-trace-entry" data-kind="tool">
+      <button
+        type="button"
+        className="inline-flex w-fit max-w-full min-w-0 items-center gap-1.5 rounded-md p-0 text-left text-xs text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/30 cursor-pointer"
+        onClick={() => setOpen(!open)}
+      >
+        <span className="flex items-center gap-1.5 min-w-0">
+          <span className="flex items-center gap-1 shrink-0">
+            {active ? (
+              <span className="grid size-3.5 place-items-center">
+                <span className="size-2 animate-ping rounded-full bg-primary" />
+              </span>
+            ) : failed ? (
+              <WarningCircleIcon size={14} className="text-destructive shrink-0" />
+            ) : (
+              <span className="relative flex size-3.5 shrink-0 items-center justify-center overflow-hidden rounded-[2px] bg-muted/40 shadow-xs border border-border/20">
+                {faviconSrc && !imgFailed ? (
+                  <img
+                    src={faviconSrc}
+                    alt=""
+                    className="size-full object-contain"
+                    onError={() => setImgFailed(true)}
+                  />
+                ) : (
+                  <GlobeIcon size={11} className="text-muted-foreground" />
+                )}
+              </span>
+            )}
+          </span>
+          <span className="truncate font-medium text-foreground/90 max-w-[280px] md:max-w-[400px]">
+            {title}
+          </span>
+        </span>
+        <CaretRightIcon
+          size={12}
+          className={cn(
+            "shrink-0 text-muted-foreground/60 transition-transform group-hover/row:text-foreground",
+            open ? "rotate-90" : ""
+          )}
+        />
+      </button>
+
+      <AnimatePresence initial={false}>
+        {open ? (
+          <motion.div
+            key={`${entry.id}:details`}
+            className="overflow-hidden"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={transition}
+          >
+            <div className="ml-5 flex flex-col gap-2.5 rounded-md bg-muted/25 p-2.5 text-[11px] leading-relaxed text-muted-foreground ring-1 ring-border/30">
+              <div className="flex items-center justify-between border-b border-border/10 pb-1.5 mb-0.5">
+                <span className="font-semibold text-foreground/80">Page Contents</span>
+                <button
+                  type="button"
+                  className="text-[10px] text-primary/80 hover:text-primary hover:underline cursor-pointer select-none font-medium"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowRaw(!showRaw);
+                  }}
+                >
+                  {showRaw ? "Standard view" : "Advanced view"}
+                </button>
+              </div>
+
+              {showRaw ? (
+                <div className="flex flex-col gap-2 select-text">
+                  {entry.output ? <TraceDetail label="Output" value={entry.output} /> : null}
+                  {entry.input ? <TraceDetail label="Input" value={entry.input} /> : null}
+                </div>
+              ) : (
+                <>
+                  {url && (
+                    <div className="flex items-center gap-1 border-b border-border/20 pb-1.5">
+                      <span className="font-semibold text-foreground/85">URL:</span>
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="truncate hover:underline text-primary/90 font-medium"
+                      >
+                        {url}
+                      </a>
+                    </div>
+                  )}
+                  {webFetch && webFetch.results && webFetch.results.length > 0 ? (
+                    <div className="flex flex-col gap-2.5 mt-1 select-text">
+                      {webFetch.results.map((res, i) => (
+                        <div key={i} className="flex flex-col gap-1.5">
+                          {res.title && (
+                            <h4 className="text-xs font-semibold text-foreground/90 leading-tight">
+                              {res.title}
+                            </h4>
+                          )}
+                          {res.content && (
+                            <div className="relative flex flex-col gap-1 rounded-md border border-border/40 bg-background/50 p-2 font-mono text-[10px] leading-relaxed text-foreground/95 select-text max-h-48 overflow-y-auto">
+                              <pre className="whitespace-pre-wrap">{res.content}</pre>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    entry.output ? <TraceDetail label="Result" value={entry.output} /> : null
+                  )}
+                  {entry.input ? <TraceDetail label="Input" value={entry.input} /> : null}
+                </>
+              )}
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function AgentRunWebSearchRow({
+  entry,
+  webSearch,
+  open,
+  setOpen,
+  transition
+}: {
+  entry: AgentRunTraceEntry;
+  webSearch: ReturnType<typeof readWebSearch>;
+  open: boolean;
+  setOpen: (value: boolean | ((current: boolean) => boolean)) => void;
+  transition: any;
+}) {
+  const active = entry.status === "pending" || entry.status === "running";
+  const failed = entry.status === "error";
+  const rawQuery = webSearch?.query || "";
+  const query = rawQuery.trim().replace(/^[\*_`"']+|[\*_`"']+$/g, "").trim();
+  const [showRaw, setShowRaw] = useState(false);
+
+  const output = parseTraceJson(entry.output);
+  
+  let rawResults: any[] = [];
+  if (Array.isArray(output)) {
+    rawResults = output;
+  } else if (output && typeof output === "object") {
+    const record = output as Record<string, any>;
+    if (Array.isArray(record.results)) {
+      rawResults = record.results;
+    }
+  }
+
+  const searchResults = rawResults.map((r: any) => ({
+    url: typeof r?.url === "string" ? r.url : "",
+    title: typeof r?.title === "string" ? r.title : typeof r?.url === "string" ? getDomain(r.url) : "Untitled result",
+    content: typeof r?.snippet === "string" ? r.snippet : typeof r?.content === "string" ? r.content : "",
+    favicon: typeof r?.favicon === "string" ? r.favicon : ""
+  }));
+
+  return (
+    <div className="flex min-w-0 flex-col gap-1 animate-in fade-in-0 slide-in-from-left-1 duration-200 group/row" data-slot="agent-run-trace-entry" data-kind="tool">
+      <button
+        type="button"
+        className="inline-flex w-fit max-w-full min-w-0 items-center gap-1.5 rounded-md p-0 text-left text-xs text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/30 cursor-pointer"
+        onClick={() => setOpen(!open)}
+      >
+        <span className="flex items-center gap-1.5 min-w-0" style={{ fontWeight: 400, fontStyle: "normal" }}>
+          <span className="flex items-center gap-1 shrink-0">
+            {active ? (
+              <span className="grid size-3.5 place-items-center">
+                <span className="size-2 animate-ping rounded-full bg-primary" />
+              </span>
+            ) : failed ? (
+              <WarningCircleIcon size={14} className="text-destructive shrink-0" />
+            ) : (
+              <MagnifyingGlassIcon size={13} className="text-muted-foreground shrink-0" />
+            )}
+          </span>
+          <span className="font-normal text-muted-foreground" style={{ fontWeight: 400, fontStyle: "normal" }}>Searched web for</span>
+          {query && (
+            <span className="truncate font-normal text-muted-foreground max-w-[200px] md:max-w-[320px]" style={{ fontWeight: 400, fontStyle: "normal" }}>
+              "{query}"
+            </span>
+          )}
+        </span>
+        <CaretRightIcon
+          size={12}
+          className={cn(
+            "shrink-0 text-muted-foreground/60 transition-transform group-hover/row:text-foreground",
+            open ? "rotate-90" : ""
+          )}
+        />
+      </button>
+
+      <AnimatePresence initial={false}>
+        {open ? (
+          <motion.div
+            key={`${entry.id}:details`}
+            className="overflow-hidden"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={transition}
+          >
+            <div className="ml-5 flex flex-col gap-2.5 rounded-md bg-muted/25 p-2.5 text-[11px] leading-relaxed text-muted-foreground ring-1 ring-border/30">
+              <div className="flex items-center justify-between border-b border-border/10 pb-1.5 mb-0.5">
+                <span className="font-semibold text-foreground/80">Search Results</span>
+                <button
+                  type="button"
+                  className="text-[10px] text-primary/80 hover:text-primary hover:underline cursor-pointer select-none font-medium"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowRaw(!showRaw);
+                  }}
+                >
+                  {showRaw ? "Standard view" : "Advanced view"}
+                </button>
+              </div>
+
+              {showRaw ? (
+                <div className="flex flex-col gap-2 select-text">
+                  {entry.output ? <TraceDetail label="Output" value={entry.output} /> : null}
+                  {entry.input ? <TraceDetail label="Input" value={entry.input} /> : null}
+                </div>
+              ) : (
+                <>
+                  {searchResults.length > 0 ? (
+                    <div className="flex flex-col gap-3 mt-1 select-text">
+                      {searchResults.map((res, i) => (
+                        <SearchResultItem key={i} res={res} />
+                      ))}
+                    </div>
+                  ) : (
+                    entry.output ? <TraceDetail label="Result" value={entry.output} /> : null
+                  )}
+                  {entry.input ? <TraceDetail label="Input" value={entry.input} /> : null}
                 </>
               )}
             </div>
@@ -602,16 +995,20 @@ function summarizeTraceGroup(entries: AgentRunTraceEntry[]): string | null {
   const tools = entries.filter((entry) => entry.kind === "tool");
   if (!tools.length) return null;
   const readCount = tools.filter((entry) => entry.icon === "read").length;
-  const searchCount = tools.filter((entry) => entry.icon === "search").length;
+  const searchCount = tools.filter((entry) => entry.icon === "search" && entry.title !== "Searched web").length;
+  const webSearchCount = tools.filter((entry) => entry.title === "Searched web").length;
+  const webFetchCount = tools.filter((entry) => entry.title === "Fetched web page").length;
   const terminalCount = tools.filter((entry) => entry.icon === "terminal").length;
   const memoryCount = tools.filter((entry) => entry.icon === "memory").length;
   const editedCount = tools.filter((entry) => entry.icon === "file").length;
-  const knownCount = readCount + searchCount + terminalCount + memoryCount + editedCount;
+  const knownCount = readCount + searchCount + webSearchCount + webFetchCount + terminalCount + memoryCount + editedCount;
   const otherCount = Math.max(0, tools.length - knownCount);
   const segments: string[] = [];
 
   if (readCount) segments.push(`read ${countLabel(readCount, "file")}`);
   if (searchCount) segments.push(searchCount === 1 ? "searched code" : `searched code ${searchCount} times`);
+  if (webSearchCount) segments.push(webSearchCount === 1 ? "searched web" : `searched web ${webSearchCount} times`);
+  if (webFetchCount) segments.push(webFetchCount === 1 ? "fetched web page" : `fetched ${countLabel(webFetchCount, "web page")}`);
   if (editedCount) segments.push(`changed ${countLabel(editedCount, "file")}`);
   if (terminalCount) segments.push(`ran ${countLabel(terminalCount, "command")}`);
   if (memoryCount) segments.push(`updated ${countLabel(memoryCount, "memory item")}`);
@@ -657,7 +1054,10 @@ function traceCompactionBucket(entry: AgentRunTraceEntry): string | null {
     return "file-touch";
   }
   if (entry.icon === "read") return "file-read";
-  if (entry.icon === "search") return "search";
+  if (entry.icon === "search") {
+    if ((entry.title ?? "").toLowerCase().includes("searched web")) return "web-search";
+    return "search";
+  }
   return null;
 }
 
@@ -665,12 +1065,13 @@ function compactTraceGroup(bucket: string, entries: AgentRunTraceEntry[]): Agent
   const titles = entries.map((entry) => entry.title).filter(Boolean);
   const fileChanges = entries.flatMap(readFileChanges);
   const files = titles
-    .map((title) => title.replace(/^(wrote|write|created|changed|edited|read)\s+/i, "").trim())
+    .map((title) => title.replace(/^(wrote|write|created|changed|edited|read|searched)\s+/i, "").trim())
     .filter(Boolean);
   const status = entries.some((entry) => entry.status === "error") ? "error" : "completed";
   const title =
     bucket === "file-read" ? `Read ${countLabel(entries.length, "file")}`
     : bucket === "search" ? (entries.length === 1 ? "Searched code" : `Searched code ${entries.length} times`)
+    : bucket === "web-search" ? (entries.length === 1 ? "Searched web" : `Searched web ${entries.length} times`)
     : bucket === "file-write" ? `Wrote ${countLabel(entries.length, "file")}`
     : `Changed ${countLabel(entries.length, "file")}`;
 
