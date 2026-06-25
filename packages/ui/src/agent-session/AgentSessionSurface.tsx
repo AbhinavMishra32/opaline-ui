@@ -39,6 +39,7 @@ export type {
   AgentSessionMessagePart,
   AgentSessionSurfaceProps,
   AgentSessionTimelineProps,
+  AgentSessionTimelineScrollState,
   AgentSessionTimelineRow,
   AgentSessionToolEntry,
   AgentSessionToolStatus,
@@ -55,6 +56,8 @@ export function AgentSessionSurface({
   emptyState,
   showReasoningSummaries,
   scrollKey,
+  timelineScrollTop,
+  onTimelineScroll,
   className = "",
   ...props
 }: AgentSessionSurfaceProps) {
@@ -79,6 +82,8 @@ export function AgentSessionSurface({
         emptyState={emptyState}
         showReasoningSummaries={showReasoningSummaries}
         scrollKey={scrollKey}
+        initialScrollTop={timelineScrollTop}
+        onTimelineScroll={onTimelineScroll}
       />
 
       {composer ? <div className="shrink-0 bg-background/70 px-3 pb-3 pt-2 backdrop-blur">{composer}</div> : null}
@@ -93,6 +98,8 @@ export function AgentSessionTimeline({
   emptyState,
   showReasoningSummaries = false,
   scrollKey,
+  initialScrollTop,
+  onTimelineScroll,
   className = "",
   ...props
 }: AgentSessionTimelineProps) {
@@ -107,6 +114,13 @@ export function AgentSessionTimeline({
     element.scrollTo({ top: element.scrollHeight, behavior: "smooth" });
   }, [scrollKey, timelineRows.length]);
 
+  useEffect(() => {
+    const element = scrollRef.current;
+    if (!element || typeof initialScrollTop !== "number") return;
+    element.scrollTop = Math.max(0, Math.min(initialScrollTop, element.scrollHeight));
+    shouldFollowRef.current = element.scrollHeight - element.scrollTop - element.clientHeight < 80;
+  }, [initialScrollTop]);
+
   return (
     <div
       ref={scrollRef}
@@ -115,7 +129,14 @@ export function AgentSessionTimeline({
       {...props}
       onScroll={(event) => {
         const element = event.currentTarget;
-        shouldFollowRef.current = element.scrollHeight - element.scrollTop - element.clientHeight < 80;
+        const atBottom = element.scrollHeight - element.scrollTop - element.clientHeight < 80;
+        shouldFollowRef.current = atBottom;
+        onTimelineScroll?.({
+          scrollTop: element.scrollTop,
+          scrollHeight: element.scrollHeight,
+          clientHeight: element.clientHeight,
+          atBottom
+        });
         props.onScroll?.(event);
       }}
     >

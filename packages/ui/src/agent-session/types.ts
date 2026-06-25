@@ -112,6 +112,8 @@ export type AgentSessionSurfaceProps = Omit<HTMLAttributes<HTMLDivElement>, "tit
   emptyState?: ReactNode;
   showReasoningSummaries?: boolean;
   scrollKey?: string | number;
+  timelineScrollTop?: number | null;
+  onTimelineScroll?: (state: AgentSessionTimelineScrollState) => void;
 };
 
 export type AgentSessionTimelineProps = Omit<HTMLAttributes<HTMLDivElement>, "children"> & {
@@ -121,6 +123,15 @@ export type AgentSessionTimelineProps = Omit<HTMLAttributes<HTMLDivElement>, "ch
   emptyState?: ReactNode;
   showReasoningSummaries?: boolean;
   scrollKey?: string | number;
+  initialScrollTop?: number | null;
+  onTimelineScroll?: (state: AgentSessionTimelineScrollState) => void;
+};
+
+export type AgentSessionTimelineScrollState = {
+  scrollTop: number;
+  scrollHeight: number;
+  clientHeight: number;
+  atBottom: boolean;
 };
 
 export type AgentSessionComposerProps = Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "onSubmit"> & {
