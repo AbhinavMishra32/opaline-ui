@@ -219,6 +219,7 @@ export function OpalineV2Shell({
   const sidebarWidth = controlledSidebarWidth ?? uncontrolledSidebarWidth;
   const inspectorWidth = controlledInspectorWidth ?? uncontrolledInspectorWidth;
   const sidebarCollapsed = sidebar != null && !sidebarOpen;
+  const shellResizing = sidebarResizing || inspectorResizing;
   const resolvedCanNavigateBack = canNavigateBack ?? history?.canGoBack ?? false;
   const resolvedCanNavigateForward = canNavigateForward ?? history?.canGoForward ?? false;
 
@@ -343,10 +344,25 @@ export function OpalineV2Shell({
       const startWidth = sidebarWidth;
       let nextCommittedWidth = sidebarWidth;
       let nextOpen = sidebarOpen;
+      let pendingWidth = sidebarWidth;
+      let frame = 0;
+
+      document.documentElement.dataset.opalinePanelResizing = "sidebar";
+
+      function applyWidth() {
+        frame = 0;
+        shellRef.current?.style.setProperty("--opaline-v2-sidebar-width", `${pendingWidth}px`);
+      }
+
+      function scheduleWidth(width: number) {
+        pendingWidth = width;
+        if (frame) return;
+        frame = window.requestAnimationFrame(applyWidth);
+      }
 
       function move(pointerEvent: PointerEvent) {
         const nextWidth = Math.max(0, Math.min(sidebarMaxWidth, startWidth + pointerEvent.clientX - startX));
-        shellRef.current?.style.setProperty("--opaline-v2-sidebar-width", `${nextWidth}px`);
+        scheduleWidth(nextWidth);
         if (nextWidth < sidebarMinWidth) {
           nextOpen = false;
           return;
@@ -357,6 +373,14 @@ export function OpalineV2Shell({
       }
 
       function stop() {
+        if (frame) {
+          window.cancelAnimationFrame(frame);
+          frame = 0;
+        }
+        if (nextOpen) {
+          shellRef.current?.style.setProperty("--opaline-v2-sidebar-width", `${nextCommittedWidth}px`);
+        }
+        delete document.documentElement.dataset.opalinePanelResizing;
         setSidebarResizing(false);
         setSidebarOpen(nextOpen);
         setUncontrolledSidebarWidth(nextCommittedWidth);
@@ -380,10 +404,25 @@ export function OpalineV2Shell({
       const startWidth = inspectorWidth;
       let nextCommittedWidth = inspectorWidth;
       let nextOpen = inspectorOpen;
+      let pendingWidth = inspectorWidth;
+      let frame = 0;
+
+      document.documentElement.dataset.opalinePanelResizing = "inspector";
+
+      function applyWidth() {
+        frame = 0;
+        shellRef.current?.style.setProperty("--opaline-v2-inspector-width", `${pendingWidth}px`);
+      }
+
+      function scheduleWidth(width: number) {
+        pendingWidth = width;
+        if (frame) return;
+        frame = window.requestAnimationFrame(applyWidth);
+      }
 
       function move(pointerEvent: PointerEvent) {
         const nextWidth = Math.max(0, Math.min(resolvedInspectorMaxWidth, startWidth - (pointerEvent.clientX - startX)));
-        shellRef.current?.style.setProperty("--opaline-v2-inspector-width", `${nextWidth}px`);
+        scheduleWidth(nextWidth);
         if (nextWidth < resolvedInspectorMinWidth) {
           nextOpen = false;
           return;
@@ -394,6 +433,14 @@ export function OpalineV2Shell({
       }
 
       function stop() {
+        if (frame) {
+          window.cancelAnimationFrame(frame);
+          frame = 0;
+        }
+        if (nextOpen) {
+          shellRef.current?.style.setProperty("--opaline-v2-inspector-width", `${nextCommittedWidth}px`);
+        }
+        delete document.documentElement.dataset.opalinePanelResizing;
         setInspectorResizing(false);
         setInspectorOpen(nextOpen);
         setUncontrolledInspectorWidth(nextCommittedWidth);
@@ -432,6 +479,7 @@ export function OpalineV2Shell({
         className={cn("opaline-app-shell flex h-full min-h-0 w-full overflow-hidden bg-transparent text-foreground antialiased", className)}
         data-bottom-panel-open={bottomPanel != null && bottomPanelOpen ? "true" : "false"}
         data-inspector-open={resolvedInspector != null && inspectorOpen ? "true" : "false"}
+        data-resizing={shellResizing ? "true" : "false"}
         data-sidebar-open={sidebar != null && sidebarOpen ? "true" : "false"}
         style={
           {
@@ -446,6 +494,7 @@ export function OpalineV2Shell({
           <aside
             className={cn(
               "relative h-full min-h-0 shrink-0 overflow-visible border-r border-sidebar-border/60 bg-sidebar/45 backdrop-blur-[30px] backdrop-saturate-[1.75] transition-[width,opacity,background-color] duration-300 ease-[cubic-bezier(0.19,1,0.22,1)] data-[resizing=true]:transition-none",
+              "opaline-v2-sidebar-pane",
               sidebarOpen ? "w-[var(--opaline-v2-sidebar-width)] opacity-100" : "pointer-events-none w-0 opacity-0"
             )}
             data-open={sidebarOpen ? "true" : "false"}
@@ -516,6 +565,7 @@ export function OpalineV2Shell({
                 <section
                   className={cn(
                     "relative z-40 min-h-0 w-full overflow-hidden border-t border-border/60 transition-[height,flex-basis,opacity] duration-300 ease-[cubic-bezier(0.19,1,0.22,1)]",
+                    "opaline-v2-bottom-panel-frame",
                     bottomPanelOpen
                       ? bottomPanelExpanded
                         ? "h-full basis-full shrink-0 opacity-100"
@@ -532,6 +582,7 @@ export function OpalineV2Shell({
               <aside
                 className={cn(
                   "relative z-20 h-full min-h-0 shrink-0 overflow-visible transition-[width,opacity] duration-300 ease-[cubic-bezier(0.19,1,0.22,1)] data-[resizing=true]:transition-none max-[980px]:hidden",
+                  "opaline-v2-inspector-pane",
                   inspectorOpen ? "w-[var(--opaline-v2-inspector-width)] opacity-100" : "pointer-events-none w-0 opacity-0"
                 )}
                 data-open={inspectorOpen ? "true" : "false"}
@@ -548,7 +599,7 @@ export function OpalineV2Shell({
                     <div className="m-auto h-full w-px bg-border opacity-0 transition-opacity hover:opacity-100" />
                   </div>
                 )}
-                <div className="absolute inset-0 flex min-h-0 min-w-0 flex-col overflow-hidden bg-card/78 border-l border-border/60 backdrop-blur supports-[backdrop-filter]:bg-card/68">{resolvedInspector}</div>
+                <div className="opaline-v2-inspector-surface absolute inset-0 flex min-h-0 min-w-0 flex-col overflow-hidden bg-card/78 border-l border-border/60 backdrop-blur supports-[backdrop-filter]:bg-card/68">{resolvedInspector}</div>
               </aside>
             ) : null}
           </div>

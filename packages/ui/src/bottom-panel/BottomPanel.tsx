@@ -135,17 +135,36 @@ export const BottomPanel = React.forwardRef<SlotPanelHandle, BottomPanelProps>(
         const startHeight = panelHeight;
         const shell = document.querySelector(".opaline-app-shell") as HTMLElement | null;
         let nextCommittedHeight = panelHeight;
+        let pendingHeight = panelHeight;
+        let frame = 0;
         document.documentElement.dataset.opalineBottomPanelResizing = "true";
+
+        function applyHeight() {
+          frame = 0;
+          rootRef.current?.style.setProperty("--app-shell-bottom-panel-height", `${pendingHeight}px`);
+          rootRef.current?.style.setProperty("--opaline-v2-bottom-panel-height", `${pendingHeight}px`);
+          shell?.style.setProperty("--app-shell-bottom-panel-height", `${pendingHeight}px`);
+          shell?.style.setProperty("--opaline-v2-bottom-panel-height", `${pendingHeight}px`);
+        }
+
+        function scheduleHeight(height: number) {
+          pendingHeight = height;
+          if (frame) return;
+          frame = window.requestAnimationFrame(applyHeight);
+        }
 
         function move(pointerEvent: PointerEvent) {
           nextCommittedHeight = clampBottomPanelHeight(startHeight + (startY - pointerEvent.clientY), mainContentHeight);
-          rootRef.current?.style.setProperty("--app-shell-bottom-panel-height", `${nextCommittedHeight}px`);
-          rootRef.current?.style.setProperty("--opaline-v2-bottom-panel-height", `${nextCommittedHeight}px`);
-          shell?.style.setProperty("--app-shell-bottom-panel-height", `${nextCommittedHeight}px`);
-          shell?.style.setProperty("--opaline-v2-bottom-panel-height", `${nextCommittedHeight}px`);
+          scheduleHeight(nextCommittedHeight);
         }
 
         function stop() {
+          if (frame) {
+            window.cancelAnimationFrame(frame);
+            frame = 0;
+          }
+          pendingHeight = nextCommittedHeight;
+          applyHeight();
           document.documentElement.dataset.opalineBottomPanelResizing = "false";
           commitHeight(nextCommittedHeight);
           window.removeEventListener("pointermove", move);
