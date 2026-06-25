@@ -83,10 +83,16 @@ export type OpalineV2ShellProps = {
   main: React.ReactNode;
   composer?: React.ReactNode;
   bottomPanel?: React.ReactNode | ((state: OpalineV2ShellState) => React.ReactNode);
+  bottomPanelOpen?: boolean;
   defaultBottomPanelOpen?: boolean;
   bottomPanelExpanded?: boolean;
   defaultBottomPanelExpanded?: boolean;
+  sidebarWidth?: number;
+  inspectorWidth?: number;
+  onBottomPanelOpenChange?: (open: boolean) => void;
   onBottomPanelExpandedChange?: (expanded: boolean) => void;
+  onSidebarWidthChange?: (width: number) => void;
+  onInspectorWidthChange?: (width: number) => void;
   history?: ShellHistoryController<any>;
   canNavigateBack?: boolean;
   canNavigateForward?: boolean;
@@ -138,8 +144,10 @@ export function OpalineV2Shell({
   actions,
   headerActions,
   bottomPanel,
+  bottomPanelOpen: controlledBottomPanelOpen,
   bottomPanelExpanded: controlledBottomPanelExpanded,
   defaultBottomPanelExpanded,
+  onBottomPanelOpenChange,
   onBottomPanelExpandedChange,
   canNavigateBack,
   canNavigateForward,
@@ -164,14 +172,17 @@ export function OpalineV2Shell({
   rightPanelMinWidth,
   inspectorOpen: controlledInspectorOpen,
   inspectorExpanded: controlledInspectorExpanded,
+  inspectorWidth: controlledInspectorWidth,
   defaultInspectorExpanded,
   onInspectorExpandedChange,
   main,
   onInspectorOpenChange,
+  onInspectorWidthChange,
   onNavigateBack,
   onNavigateForward,
   onNavigateHome,
   onSidebarOpenChange,
+  onSidebarWidthChange,
   renderHeaderTab,
   renderHeaderTabActions,
   showSidebarChrome = true,
@@ -180,6 +191,7 @@ export function OpalineV2Shell({
   sidebarMaxWidth = 520,
   sidebarMinWidth = 240,
   sidebarOpen: controlledSidebarOpen,
+  sidebarWidth: controlledSidebarWidth,
   subtitle,
   title,
 }: OpalineV2ShellProps) {
@@ -192,9 +204,9 @@ export function OpalineV2Shell({
   const [uncontrolledInspectorOpen, setUncontrolledInspectorOpen] = React.useState(resolvedDefaultInspectorOpen);
   const [uncontrolledInspectorExpanded, setUncontrolledInspectorExpanded] = React.useState(defaultInspectorExpanded ?? false);
   const [uncontrolledBottomPanelExpanded, setUncontrolledBottomPanelExpanded] = React.useState(defaultBottomPanelExpanded ?? false);
-  const [bottomPanelOpen, setBottomPanelOpen] = React.useState(defaultBottomPanelOpen ?? bottomPanel != null);
-  const [sidebarWidth, setSidebarWidth] = React.useState(defaultSidebarWidth);
-  const [inspectorWidth, setInspectorWidth] = React.useState(resolvedDefaultInspectorWidth);
+  const [uncontrolledBottomPanelOpen, setUncontrolledBottomPanelOpen] = React.useState(defaultBottomPanelOpen ?? bottomPanel != null);
+  const [uncontrolledSidebarWidth, setUncontrolledSidebarWidth] = React.useState(defaultSidebarWidth);
+  const [uncontrolledInspectorWidth, setUncontrolledInspectorWidth] = React.useState(resolvedDefaultInspectorWidth);
   const [sidebarResizing, setSidebarResizing] = React.useState(false);
   const [inspectorResizing, setInspectorResizing] = React.useState(false);
   const shellRef = React.useRef<HTMLDivElement | null>(null);
@@ -202,7 +214,10 @@ export function OpalineV2Shell({
   const sidebarOpen = controlledSidebarOpen ?? uncontrolledSidebarOpen;
   const inspectorOpen = controlledInspectorOpen ?? uncontrolledInspectorOpen;
   const inspectorExpanded = controlledInspectorExpanded ?? uncontrolledInspectorExpanded;
+  const bottomPanelOpen = controlledBottomPanelOpen ?? uncontrolledBottomPanelOpen;
   const bottomPanelExpanded = controlledBottomPanelExpanded ?? uncontrolledBottomPanelExpanded;
+  const sidebarWidth = controlledSidebarWidth ?? uncontrolledSidebarWidth;
+  const inspectorWidth = controlledInspectorWidth ?? uncontrolledInspectorWidth;
   const sidebarCollapsed = sidebar != null && !sidebarOpen;
   const resolvedCanNavigateBack = canNavigateBack ?? history?.canGoBack ?? false;
   const resolvedCanNavigateForward = canNavigateForward ?? history?.canGoForward ?? false;
@@ -229,6 +244,14 @@ export function OpalineV2Shell({
       onInspectorExpandedChange?.(expanded);
     },
     [onInspectorExpandedChange],
+  );
+
+  const setBottomPanelOpen = React.useCallback(
+    (open: boolean) => {
+      setUncontrolledBottomPanelOpen(open);
+      onBottomPanelOpenChange?.(open);
+    },
+    [onBottomPanelOpenChange],
   );
 
   const setBottomPanelExpanded = React.useCallback(
@@ -284,7 +307,7 @@ export function OpalineV2Shell({
       setRightPanelOpen: setInspectorOpen,
       setSidebarOpen,
       sidebarOpen,
-      toggleBottomPanel: () => setBottomPanelOpen((open) => !open),
+      toggleBottomPanel: () => setBottomPanelOpen(!bottomPanelOpen),
       toggleBottomPanelExpanded: () => setBottomPanelExpanded(!bottomPanelExpanded),
       toggleInspector: () => setInspectorOpen(!inspectorOpen),
       toggleRightPanel: () => setInspectorOpen(!inspectorOpen),
@@ -302,6 +325,7 @@ export function OpalineV2Shell({
       onNavigateHome,
       resolvedCanNavigateBack,
       resolvedCanNavigateForward,
+      setBottomPanelOpen,
       setInspectorOpen,
       setInspectorExpanded,
       setBottomPanelExpanded,
@@ -335,7 +359,8 @@ export function OpalineV2Shell({
       function stop() {
         setSidebarResizing(false);
         setSidebarOpen(nextOpen);
-        setSidebarWidth(nextCommittedWidth);
+        setUncontrolledSidebarWidth(nextCommittedWidth);
+        onSidebarWidthChange?.(nextCommittedWidth);
         window.removeEventListener("pointermove", move);
         window.removeEventListener("pointerup", stop);
       }
@@ -343,7 +368,7 @@ export function OpalineV2Shell({
       window.addEventListener("pointermove", move);
       window.addEventListener("pointerup", stop, { once: true });
     },
-    [setSidebarOpen, sidebarMaxWidth, sidebarMinWidth, sidebarOpen, sidebarWidth],
+    [onSidebarWidthChange, setSidebarOpen, sidebarMaxWidth, sidebarMinWidth, sidebarOpen, sidebarWidth],
   );
 
   const startInspectorResize = React.useCallback(
@@ -371,7 +396,8 @@ export function OpalineV2Shell({
       function stop() {
         setInspectorResizing(false);
         setInspectorOpen(nextOpen);
-        setInspectorWidth(nextCommittedWidth);
+        setUncontrolledInspectorWidth(nextCommittedWidth);
+        onInspectorWidthChange?.(nextCommittedWidth);
         window.removeEventListener("pointermove", move);
         window.removeEventListener("pointerup", stop);
       }
@@ -379,7 +405,7 @@ export function OpalineV2Shell({
       window.addEventListener("pointermove", move);
       window.addEventListener("pointerup", stop, { once: true });
     },
-    [inspectorOpen, inspectorWidth, resolvedInspectorMaxWidth, resolvedInspectorMinWidth, setInspectorOpen],
+    [inspectorOpen, inspectorWidth, onInspectorWidthChange, resolvedInspectorMaxWidth, resolvedInspectorMinWidth, setInspectorOpen],
   );
 
   const actionContent = resolveSlot(actions ?? headerActions, state);
