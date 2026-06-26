@@ -2,7 +2,7 @@ import { cp, mkdir, readdir } from "node:fs/promises";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const packageRoot = dirname(fileURLToPath(import.meta.url)).replace(/\/scripts$/, "");
+const packageRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 const srcRoot = join(packageRoot, "src");
 const distRoot = join(packageRoot, "dist");
 

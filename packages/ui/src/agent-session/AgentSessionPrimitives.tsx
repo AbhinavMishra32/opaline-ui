@@ -122,8 +122,9 @@ export function AgentSessionThinkingRow({
 }
 
 export function AgentSessionPartView({ part }: { part: AgentSessionMessagePart }) {
+  let content: ReactNode = null;
   if (part.type === "text") {
-    return (
+    content = (
       <div data-component="text-part">
         <div data-slot="text-part-body">{part.content}</div>
         {part.meta ? (
@@ -133,14 +134,10 @@ export function AgentSessionPartView({ part }: { part: AgentSessionMessagePart }
         ) : null}
       </div>
     );
-  }
-
-  if (part.type === "actions") {
-    return <AgentSessionActions actions={part.actions}>{part.content}</AgentSessionActions>;
-  }
-
-  if (part.type === "reasoning") {
-    return (
+  } else if (part.type === "actions") {
+    content = <AgentSessionActions actions={part.actions}>{part.content}</AgentSessionActions>;
+  } else if (part.type === "reasoning") {
+    content = (
       <AgentSessionDisclosure
         active={part.active}
         defaultOpen={part.defaultOpen}
@@ -150,10 +147,8 @@ export function AgentSessionPartView({ part }: { part: AgentSessionMessagePart }
         {part.content}
       </AgentSessionDisclosure>
     );
-  }
-
-  if (part.type === "context") {
-    return (
+  } else if (part.type === "context") {
+    content = (
       <AgentSessionToolGroup
         active={part.active}
         activeLabel={part.activeLabel}
@@ -163,17 +158,21 @@ export function AgentSessionPartView({ part }: { part: AgentSessionMessagePart }
         summary={part.summary}
       />
     );
-  }
-
-  if (part.type === "activity") {
-    return (
+  } else if (part.type === "activity") {
+    content = (
       <div className="pl-1 pr-1" data-component="activity-part">
         <AgentRunTraceRow entry={part.entry} defaultOpen={part.defaultOpen} onOpenFile={part.onOpenFile}/>
       </div>
     );
+  } else {
+    content = <AgentSessionToolCard tool={part.tool} />;
   }
 
-  return <AgentSessionToolCard tool={part.tool} />;
+  return (
+    <div id={part.id} className="min-w-0 w-full">
+      {content}
+    </div>
+  );
 }
 
 export function AgentSessionActions({

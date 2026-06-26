@@ -108,19 +108,19 @@ export function Sidebar({
 }
 
 export function SidebarPrimary({ children, className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <nav className={cn("flex flex-col gap-1 px-2 py-1.5", className)} aria-label="Primary" {...props}>{children}</nav>;
+  return <nav className={cn("flex flex-col gap-1 px-1.5 py-1", className)} aria-label="Primary" {...props}>{children}</nav>;
 }
 
 export function SidebarScroll({ children, className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <ScrollArea className={cn("min-h-0 flex-1", className)} {...appActionAttributes.sidebarScroll} {...props}>
-      <div className="flex flex-col gap-2 p-2">{children}</div>
+      <div className="flex flex-col gap-1 p-1.5">{children}</div>
     </ScrollArea>
   );
 }
 
 export function SidebarFooter({ children, className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("flex flex-col gap-1 p-2", className)} {...props}>{children}</div>;
+  return <div className={cn("flex flex-col gap-1 p-1.5", className)} {...props}>{children}</div>;
 }
 
 export type SidebarBottomSlotProps = HTMLAttributes<HTMLDivElement> & {
@@ -201,7 +201,7 @@ export function SidebarBottomSlot({
 export function SidebarNavItemRow({ className, item, type = "button", ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { item: SidebarNavItem }) {
   return (
     <Button
-      className={cn("h-8 w-full justify-start gap-2 px-2 text-[13px] data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground", className)}
+      className={cn("h-8 w-full justify-start gap-2 rounded-[7px] px-2 text-[13px] data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground", className)}
       data-active={item.active === true ? "true" : undefined}
       onClick={item.onClick}
       type={type}
@@ -228,7 +228,7 @@ export function SidebarProjectRow({ onSelect, project, renderItem }: { onSelect?
   const expanded = project.collapsed !== true && project.threads != null;
   return (
     <div className="flex flex-col gap-1" data-active={project.active === true ? "true" : "false"} data-muted={project.muted === true ? "true" : "false"} {...appActionAttributes.sidebarProjectRow({ collapsed: project.collapsed === true, label, projectId: project.id })}>
-      <Button className="h-8 w-full justify-start gap-2 px-2 text-[13px]" onClick={() => onSelect?.(project.id)} variant="ghost" {...appActionAttributes.sidebarProjectSelect}>
+      <Button className="h-8 w-full justify-start gap-2 rounded-[7px] px-2 text-[13px]" onClick={() => onSelect?.(project.id)} variant="ghost" {...appActionAttributes.sidebarProjectSelect}>
         {project.icon != null ? <span aria-hidden="true">{project.icon}</span> : null}
         <span>{project.label}</span>
       </Button>
@@ -241,7 +241,7 @@ export function SidebarThreadRow({ inset = false, item }: { inset?: boolean; ite
   const trailing = item.time ?? item.meta;
   const title = typeof item.title === "string" ? item.title : item.label ?? item.id;
   return (
-    <Button className={cn("h-8 w-full justify-between px-2 text-[13px] data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground", inset && "pl-6")} data-active={item.active === true ? "true" : "false"} data-inset={inset ? "true" : "false"} variant="ghost" {...appActionAttributes.sidebarThreadRow({ active: item.active === true, hostId: item.hostId, id: item.id, kind: item.kind ?? "local", pinned: item.pinned === true, title })}>
+    <Button className={cn("h-8 w-full justify-between rounded-[7px] px-2 text-[13px] data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground", inset && "pl-6")} data-active={item.active === true ? "true" : "false"} data-inset={inset ? "true" : "false"} variant="ghost" {...appActionAttributes.sidebarThreadRow({ active: item.active === true, hostId: item.hostId, id: item.id, kind: item.kind ?? "local", pinned: item.pinned === true, title })}>
       <span className="truncate">{item.title}</span>
       {trailing != null ? <span className="shrink-0 text-xs text-muted-foreground">{trailing}</span> : null}
     </Button>

@@ -185,6 +185,7 @@ export function AgentSessionComposer({
   submitLabel = "Send",
   footerStart,
   footerEnd,
+  header,
   placeholder = "Answer in your own words...",
   pending = false,
   disabled = false,
@@ -196,9 +197,13 @@ export function AgentSessionComposer({
 
   return (
     <div className={cn("mx-auto w-full max-w-[840px] overflow-hidden rounded-3xl bg-card shadow-[0_8px_24px_color-mix(in_srgb,var(--foreground)_6%,transparent)] ring-1 ring-border/65 transition-[box-shadow,background-color] focus-within:ring-ring/70", className)}>
+      {header && <div>{header}</div>}
       <Textarea
         {...props}
-        className="min-h-16 max-h-36 resize-none border-0 bg-transparent px-4 pb-1 pt-3 text-[13px] leading-5 shadow-none focus-visible:border-transparent focus-visible:ring-0"
+        className={cn(
+          "min-h-16 max-h-36 resize-none border-0 bg-transparent px-4 pb-1 text-[13px] leading-5 shadow-none focus-visible:border-transparent focus-visible:ring-0",
+          header ? "pt-1.5" : "pt-3"
+        )}
         value={value}
         onChange={(event) => onValueChange(event.target.value)}
         onKeyDown={(event) => {
