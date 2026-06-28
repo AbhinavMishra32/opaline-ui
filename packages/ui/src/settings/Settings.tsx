@@ -114,7 +114,7 @@ function SettingsSidebar({
     <aside className="flex h-full min-h-0 flex-col bg-transparent text-sidebar-foreground">
       <div className="flex flex-col gap-1 px-3 py-2">
         {onBack && (
-          <Button variant="ghost" className="h-8 w-full justify-start gap-2 px-2 text-[13px]" onClick={onBack}>
+          <Button variant="ghost" className="h-8 w-full justify-start gap-2 px-2 text-[13px] rounded-[7px]" onClick={onBack}>
             <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="m12 19-7-7 7-7" />
               <path d="M19 12H5" />
@@ -149,7 +149,7 @@ function SettingsSidebar({
                   key={item.id}
                   variant="ghost"
                   data-active={activeItemId === item.id ? "true" : undefined}
-                  className="h-8 w-full justify-start gap-2 px-2 text-[13px] data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground"
+                  className="h-8 w-full justify-start gap-2 px-2 text-[13px] rounded-[7px] data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground"
                   onClick={() => onItemSelect?.(item)}
                 >
                   <span className="grid size-[18px] shrink-0 place-items-center">{item.icon}</span>

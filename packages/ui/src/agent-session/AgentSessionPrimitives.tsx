@@ -349,7 +349,7 @@ export function AgentSessionDock({
 
   return (
     <div
-      className={cn("overflow-hidden rounded-[18px] bg-card/80 text-card-foreground shadow-[0_6px_18px_color-mix(in_srgb,var(--foreground)_5%,transparent)] ring-1 ring-border/35", className)}
+      className={cn("overflow-hidden rounded-[18px] bg-card/80 text-card-foreground shadow-[0_6px_18px_color-mix(in_srgb,var(--foreground)_5%,transparent)] dark:shadow-none ring-1 ring-border/35", className)}
       data-component="agent-session-dock"
       data-collapsed={collapsed || undefined}
       {...props}

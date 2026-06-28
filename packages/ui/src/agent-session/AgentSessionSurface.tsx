@@ -196,12 +196,12 @@ export function AgentSessionComposer({
   const accessibleSubmitLabel = typeof submitLabel === "string" ? submitLabel : "Send";
 
   return (
-    <div className={cn("mx-auto w-full max-w-[840px] overflow-hidden rounded-3xl bg-card shadow-[0_8px_24px_color-mix(in_srgb,var(--foreground)_6%,transparent)] ring-1 ring-border/65 transition-[box-shadow,background-color] focus-within:ring-ring/70", className)}>
+    <div className={cn("mx-auto w-full max-w-[840px] overflow-hidden rounded-3xl bg-card shadow-[0_8px_24px_color-mix(in_srgb,var(--foreground)_6%,transparent)] dark:shadow-none ring-1 ring-border/65 transition-[box-shadow,background-color] focus-within:ring-ring/70", className)}>
       {header && <div>{header}</div>}
       <Textarea
         {...props}
         className={cn(
-          "min-h-16 max-h-36 resize-none border-0 bg-transparent px-4 pb-1 text-[13px] leading-5 shadow-none focus-visible:border-transparent focus-visible:ring-0",
+          "min-h-16 max-h-36 resize-none border-0 bg-transparent dark:bg-transparent px-4 pb-1 text-[13px] leading-5 shadow-none focus-visible:border-transparent focus-visible:ring-0",
           header ? "pt-1.5" : "pt-3"
         )}
         value={value}
