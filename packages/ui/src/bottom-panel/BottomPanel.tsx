@@ -165,7 +165,7 @@ export const BottomPanel = React.forwardRef<SlotPanelHandle, BottomPanelProps>(
           }
           pendingHeight = nextCommittedHeight;
           applyHeight();
-          document.documentElement.dataset.opalineBottomPanelResizing = "false";
+          delete document.documentElement.dataset.opalineBottomPanelResizing;
           commitHeight(nextCommittedHeight);
           window.removeEventListener("pointermove", move);
           window.removeEventListener("pointerup", stop);

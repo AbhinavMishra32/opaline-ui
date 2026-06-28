@@ -1,5 +1,4 @@
 import type { CSSProperties, ReactNode } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ContextMenu, ContextMenuTrigger } from "../components/context-menu";
 import { cn } from "../lib/utils";
 
@@ -147,12 +146,8 @@ function FileTreeRow({
   showActions: boolean;
   renderRowContextMenu?: (item: FileTreeItem) => ReactNode;
 }) {
-  const reduceMotion = useReducedMotion();
   const isDirectory = item.type === "directory" || item.children != null;
   const isExpanded = item.expanded !== false;
-  const disclosureTransition = reduceMotion
-    ? { duration: 0 }
-    : { type: "spring" as const, duration: 0.28, bounce: 0.02 };
   const iconName = isDirectory ? "file-tree-icon-chevron" : item.locked === true ? "file-tree-icon-lock" : "file-tree-icon-file";
   const iconToken = getIconToken(item.name, isDirectory);
 
@@ -258,11 +253,11 @@ function FileTreeRow({
       ))}
       {isDirectory ? (
         <span className="flex size-4 shrink-0 items-center justify-center" style={{ marginLeft: 6 + (level - 1) * 18 }}>
-          <motion.span initial={false} animate={{ rotate: isExpanded ? 0 : -90 }} transition={disclosureTransition}>
+          <span className={cn("block", isExpanded ? "rotate-0" : "-rotate-90")}>
             <svg className="size-3" data-icon-name="file-tree-icon-chevron" aria-hidden="true">
               <use href="#file-tree-icon-chevron" />
             </svg>
-          </motion.span>
+          </span>
         </span>
       ) : (
         <span className="size-4 shrink-0" style={{ marginLeft: 6 + (level - 1) * 18 }} />
@@ -317,35 +312,22 @@ function FileTreeRow({
       ) : (
         buttonElement
       )}
-      {isDirectory ? (
-        <AnimatePresence initial={false}>
-          {isExpanded ? (
-            <motion.div
-              key={`${item.path}:children`}
-              className="overflow-hidden"
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={disclosureTransition}
-            >
-              <div>
-                {item.children?.map((child) => (
-                  <FileTreeRow
-                    gitLane={gitLane}
-                    key={child.path}
-                    item={child}
-                    level={level + 1}
-                    onNodeClick={onNodeClick}
-                    onSelectionChange={onSelectionChange}
-                    onSelectPath={onSelectPath}
-                    showActions={showActions}
-                    renderRowContextMenu={renderRowContextMenu}
-                  />
-                ))}
-              </div>
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
+      {isDirectory && isExpanded ? (
+        <div>
+          {item.children?.map((child) => (
+            <FileTreeRow
+              gitLane={gitLane}
+              key={child.path}
+              item={child}
+              level={level + 1}
+              onNodeClick={onNodeClick}
+              onSelectionChange={onSelectionChange}
+              onSelectPath={onSelectPath}
+              showActions={showActions}
+              renderRowContextMenu={renderRowContextMenu}
+            />
+          ))}
+        </div>
       ) : null}
     </>
   );

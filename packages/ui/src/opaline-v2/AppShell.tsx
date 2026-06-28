@@ -493,7 +493,7 @@ export function OpalineV2Shell({
         {sidebar != null ? (
           <aside
             className={cn(
-              "relative h-full min-h-0 shrink-0 overflow-visible border-r border-sidebar-border/60 bg-sidebar/45 backdrop-blur-[30px] backdrop-saturate-[1.75] transition-[width,opacity,background-color] duration-300 ease-[cubic-bezier(0.19,1,0.22,1)] data-[resizing=true]:transition-none",
+              "relative h-full min-h-0 shrink-0 overflow-visible border-r border-sidebar-border/60 bg-sidebar/45 backdrop-blur-[30px] backdrop-saturate-[1.75] transition-none",
               "opaline-v2-sidebar-pane",
               sidebarOpen ? "w-[var(--opaline-v2-sidebar-width)] opacity-100" : "pointer-events-none w-0 opacity-0"
             )}
@@ -518,7 +518,7 @@ export function OpalineV2Shell({
             {sidebar != null ? (
               <div
                 className={cn(
-                  "absolute left-24 top-2 z-40 flex items-center gap-1 transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.19,1,0.22,1)] [-webkit-app-region:no-drag]",
+                  "absolute left-24 top-2 z-40 flex items-center gap-1 transition-none [-webkit-app-region:no-drag]",
                   sidebarOpen && "pointer-events-none -translate-x-1 opacity-0",
                   !sidebarOpen && "translate-x-0 opacity-100"
                 )}
@@ -527,7 +527,7 @@ export function OpalineV2Shell({
               </div>
             ) : null}
             <div className={cn(
-              "flex min-w-0 flex-1 items-center gap-3 overflow-hidden transition-[padding] duration-300 ease-[cubic-bezier(0.19,1,0.22,1)]",
+              "flex min-w-0 flex-1 items-center gap-3 overflow-hidden transition-none",
               sidebarCollapsed && "pl-36"
             )}>
               {headerTabs.length > 0 ? (
@@ -555,7 +555,7 @@ export function OpalineV2Shell({
             className="grid min-h-0 flex-1 overflow-hidden max-[980px]:grid-cols-1"
             style={{
               gridTemplateColumns: (!resolvedInspector || !inspectorOpen) ? "minmax(0, 1fr) 0px" : "minmax(0, 1fr) var(--opaline-v2-inspector-width)",
-              transition: "grid-template-columns 300ms cubic-bezier(0.19, 1, 0.22, 1)",
+              transition: "none",
             }}
           >
             <section className="relative flex min-h-0 min-w-0 flex-col overflow-hidden">
@@ -564,7 +564,7 @@ export function OpalineV2Shell({
               {bottomPanelContent != null ? (
                 <section
                   className={cn(
-                    "relative z-40 min-h-0 w-full overflow-hidden border-t border-border/60 transition-[height,flex-basis,opacity] duration-300 ease-[cubic-bezier(0.19,1,0.22,1)]",
+                    "relative z-40 min-h-0 w-full overflow-hidden border-t border-border/60 transition-none",
                     "opaline-v2-bottom-panel-frame",
                     bottomPanelOpen
                       ? bottomPanelExpanded
@@ -581,7 +581,7 @@ export function OpalineV2Shell({
             {resolvedInspector != null ? (
               <aside
                 className={cn(
-                  "relative z-20 h-full min-h-0 shrink-0 overflow-visible transition-[width,opacity] duration-300 ease-[cubic-bezier(0.19,1,0.22,1)] data-[resizing=true]:transition-none max-[980px]:hidden",
+                  "relative z-20 h-full min-h-0 shrink-0 overflow-visible transition-none max-[980px]:hidden",
                   "opaline-v2-inspector-pane",
                   inspectorOpen ? "w-[var(--opaline-v2-inspector-width)] opacity-100" : "pointer-events-none w-0 opacity-0"
                 )}
