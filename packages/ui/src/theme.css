@@ -132,6 +132,15 @@
     @apply font-sans;
     }
   button,
+  input,
+  optgroup,
+  select,
+  textarea {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+  }
+  button,
   [data-slot="badge"],
   [data-slot="dropdown-menu-content"],
   [data-slot="dropdown-menu-item"],

@@ -1,9 +1,10 @@
 import * as React from "react";
 import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  HouseIcon,
-} from "@phosphor-icons/react";
+  ArrowLeft,
+  ArrowRight,
+  House,
+  PanelLeft,
+} from "lucide-react";
 
 import { Button } from "../components/button";
 import { ScrollArea } from "../components/scroll-area";
@@ -464,12 +465,7 @@ export function OpalineV2Shell({
     collapsedSidebarTrigger != null ? (
       resolveSlot(collapsedSidebarTrigger, state)
     ) : (
-      <OpalineV2CollapsedSidebarTrigger
-        aria-label={state.sidebarOpen ? "Close sidebar" : "Open sidebar"}
-        onClick={state.toggleSidebar}
-      >
-        <SidebarToggleIcon active={false} />
-      </OpalineV2CollapsedSidebarTrigger>
+      <OpalineV2NavigationControls state={state} variant="collapsed" />
     );
 
   const shell = (
@@ -493,14 +489,15 @@ export function OpalineV2Shell({
         {sidebar != null ? (
           <aside
             className={cn(
-              "relative h-full min-h-0 shrink-0 overflow-visible border-r border-sidebar-border/60 bg-sidebar/45 backdrop-blur-[30px] backdrop-saturate-[1.75] transition-none",
+              "relative h-full min-h-0 shrink-0 overflow-visible border-r border-sidebar-border/60 bg-sidebar/45 backdrop-blur-[30px] backdrop-saturate-[1.75]",
+              "transition-[width,opacity] duration-300 ease-[cubic-bezier(0.2,0.9,0.2,1)]",
               "opaline-v2-sidebar-pane",
               sidebarOpen ? "w-[var(--opaline-v2-sidebar-width)] opacity-100" : "pointer-events-none w-0 opacity-0"
             )}
             data-open={sidebarOpen ? "true" : "false"}
             data-resizing={sidebarResizing ? "true" : "false"}
           >
-            {showSidebarChrome ? <div className="flex h-11 items-center gap-1 bg-transparent px-3 pl-24 [-webkit-app-region:drag] [&>*]:[-webkit-app-region:no-drag]">{sidebarChromeContent}</div> : null}
+            {showSidebarChrome ? <div className="flex h-11 items-start gap-[2px] bg-transparent px-3 pl-[83px] pt-2.5 [-webkit-app-region:drag] [&>*]:[-webkit-app-region:no-drag]">{sidebarChromeContent}</div> : null}
             <div className="absolute inset-x-0 bottom-0 top-11 flex min-h-0 flex-col overflow-hidden">{sidebar}</div>
             <div
               aria-disabled={!sidebarOpen}
@@ -518,7 +515,8 @@ export function OpalineV2Shell({
             {sidebar != null ? (
               <div
                 className={cn(
-                  "absolute left-24 top-2 z-40 flex items-center gap-1 transition-none [-webkit-app-region:no-drag]",
+                  "absolute left-[83px] top-2.5 z-40 flex items-center gap-[2px] [-webkit-app-region:no-drag]",
+                  "transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.2,0.9,0.2,1)]",
                   sidebarOpen && "pointer-events-none -translate-x-1 opacity-0",
                   !sidebarOpen && "translate-x-0 opacity-100"
                 )}
@@ -528,7 +526,7 @@ export function OpalineV2Shell({
             ) : null}
             <div className={cn(
               "flex min-w-0 flex-1 items-center gap-3 overflow-hidden transition-none",
-              sidebarCollapsed && "pl-36"
+              sidebarCollapsed && "translate-y-0.5 pl-52"
             )}>
               {headerTabs.length > 0 ? (
                 <div className="flex h-full min-w-0 items-center gap-1 [-webkit-app-region:no-drag]">
@@ -555,7 +553,7 @@ export function OpalineV2Shell({
             className="grid min-h-0 flex-1 overflow-hidden max-[980px]:grid-cols-1"
             style={{
               gridTemplateColumns: (!resolvedInspector || !inspectorOpen) ? "minmax(0, 1fr) 0px" : "minmax(0, 1fr) var(--opaline-v2-inspector-width)",
-              transition: "none",
+              transition: shellResizing ? "none" : "grid-template-columns 280ms cubic-bezier(0.2, 0.9, 0.2, 1)",
             }}
           >
             <section className="relative flex min-h-0 min-w-0 flex-col overflow-hidden">
@@ -564,7 +562,7 @@ export function OpalineV2Shell({
               {bottomPanelContent != null ? (
                 <section
                   className={cn(
-                    "relative z-40 min-h-0 w-full overflow-hidden border-t border-border/60 transition-none",
+                    "relative z-40 min-h-0 w-full overflow-hidden border-t border-border/60 transition-[height,flex-basis,opacity] duration-300 ease-[cubic-bezier(0.2,0.9,0.2,1)]",
                     "opaline-v2-bottom-panel-frame",
                     bottomPanelOpen
                       ? bottomPanelExpanded
@@ -581,7 +579,7 @@ export function OpalineV2Shell({
             {resolvedInspector != null ? (
               <aside
                 className={cn(
-                  "relative z-20 h-full min-h-0 shrink-0 overflow-visible transition-none max-[980px]:hidden",
+                  "relative z-20 h-full min-h-0 shrink-0 overflow-visible transition-[width,opacity] duration-300 ease-[cubic-bezier(0.2,0.9,0.2,1)] max-[980px]:hidden",
                   "opaline-v2-inspector-pane",
                   inspectorOpen ? "w-[var(--opaline-v2-inspector-width)] opacity-100" : "pointer-events-none w-0 opacity-0"
                 )}
@@ -678,27 +676,27 @@ export function OpalineV2NavigationControls({
   return (
     <>
       <Control aria-label={state.sidebarOpen ? "Close sidebar" : "Open sidebar"} onClick={state.toggleSidebar}>
-        <SidebarToggleIcon active={variant === "collapsed"} />
+        <SidebarToggleIcon active={false} />
       </Control>
       <Control aria-label="Home" disabled={!state.canNavigateHome} onClick={state.navigateHome}>
-        <HouseIcon />
+        <House strokeWidth={1.9} />
       </Control>
       <Control aria-label="Back" disabled={!state.canNavigateBack} onClick={state.navigateBack}>
-        <ArrowLeftIcon />
+        <ArrowLeft strokeWidth={1.9} />
       </Control>
       <Control aria-label="Forward" disabled={!state.canNavigateForward} onClick={state.navigateForward}>
-        <ArrowRightIcon />
+        <ArrowRight strokeWidth={1.9} />
       </Control>
     </>
   );
 }
 
 export function OpalineV2ChromeButton({ className, type = "button", ...props }: OpalineV2ShellButtonProps) {
-  return <Button className={cn("rounded-[10px] text-muted-foreground data-[active=true]:bg-muted data-[active=true]:text-foreground", className)} size="icon" type={type} variant="ghost" {...props} />;
+  return <Button className={cn("size-7 rounded-[8px] p-0 text-muted-foreground/85 hover:bg-transparent hover:text-foreground disabled:text-muted-foreground/35 disabled:opacity-100 data-[active=true]:bg-transparent data-[active=true]:text-foreground [&_svg:not([class*='size-'])]:size-[16px]", className)} size="icon" type={type} variant="ghost" {...props} />;
 }
 
 export function OpalineV2CollapsedSidebarTrigger({ className, type = "button", ...props }: OpalineV2ShellButtonProps) {
-  return <Button className={cn("rounded-[10px] text-muted-foreground", className)} size="icon" type={type} variant="ghost" {...props} />;
+  return <Button className={cn("size-7 rounded-[8px] p-0 text-muted-foreground/85 hover:bg-transparent hover:text-foreground disabled:text-muted-foreground/35 disabled:opacity-100 data-[active=true]:bg-transparent data-[active=true]:text-foreground [&_svg:not([class*='size-'])]:size-[16px]", className)} size="icon" type={type} variant="ghost" {...props} />;
 }
 
 export function OpalineV2HeaderToolButton({
@@ -716,7 +714,7 @@ export function OpalineV2HeaderToolButton({
     <Button
       aria-label={label}
       aria-pressed={pressed}
-      className={cn("rounded-[10px] text-muted-foreground data-[active=true]:bg-muted data-[active=true]:text-foreground", className)}
+      className={cn("size-7 rounded-[8px] p-0 text-muted-foreground/85 hover:bg-transparent hover:text-foreground disabled:text-muted-foreground/35 disabled:opacity-100 data-[active=true]:bg-transparent data-[active=true]:text-foreground [&_svg:not([class*='size-'])]:size-[16px]", className)}
       size="icon"
       variant="ghost"
       type={type}
@@ -852,19 +850,11 @@ function resolveSlot<TState>(
 
 function SidebarToggleIcon({ active }: { active: boolean }) {
   return (
-    <svg aria-hidden="true" fill="none" viewBox="0 0 20 20">
-      <rect height="11" rx="2" stroke="currentColor" strokeWidth="1.5" width="13" x="3.5" y="4.5" />
-      <path d="M7.5 4.5v11" stroke="currentColor" strokeWidth="1.5" />
+    <span className="relative inline-grid size-[16px] place-items-center">
+      <PanelLeft aria-hidden="true" className="size-[16px]" strokeWidth={1.9} />
       {active ? (
-        <circle
-          cx="16.5"
-          cy="4.5"
-          fill="#007aff"
-          r="2.5"
-          stroke="var(--background)"
-          strokeWidth="1.5"
-        />
+        <span className="absolute -right-1 -top-1 size-2 rounded-full bg-[#007aff] ring-[1.5px] ring-background" />
       ) : null}
-    </svg>
+    </span>
   );
 }
