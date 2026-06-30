@@ -89,6 +89,8 @@ export interface SlotPanelProps {
   tabs?: SlotTab[];
   /** Update incoming tab definitions by id on every render. Use for controlled file tabs. */
   syncTabs?: boolean;
+  /** When true, the incoming `tabs` prop is the complete open-tab list. */
+  controlledTabs?: boolean;
   /** Items shown in the `+` dropdown and the empty-state launcher grid. */
   launcherItems?: SlotLauncherItem[];
   /** Optional CSS class name for the root element. */
@@ -141,6 +143,7 @@ export const SlotPanel = React.forwardRef<SlotPanelHandle, SlotPanelProps>(
     activeTabId: controlledActiveTabId,
     defaultActiveTabId,
     tabs: initialTabs,
+    controlledTabs = false,
     syncTabs = false,
     launcherItems = [],
     className,
@@ -203,16 +206,17 @@ export const SlotPanel = React.forwardRef<SlotPanelHandle, SlotPanelProps>(
 
         const incomingIds = new Set(initialTabs.map((tab) => tab.id));
         const previousById = new Map(previousTabs.map((tab) => [tab.id, tab] as const));
-        const syncedTabs = syncTabs
+        const shouldSyncTabs = syncTabs || controlledTabs;
+        const syncedTabs = shouldSyncTabs
           ? initialTabs.map((tab) => ({
               ...previousById.get(tab.id),
               ...tab,
             }))
           : initialTabs;
-        const launcherTabs = syncTabs ? previousTabs.filter((tab) => !incomingIds.has(tab.id)) : [];
+        const launcherTabs = syncTabs && !controlledTabs ? previousTabs.filter((tab) => !incomingIds.has(tab.id)) : [];
         return [...syncedTabs, ...launcherTabs];
       });
-    }, [initialTabs, initialTabsSignature, syncTabs]);
+    }, [controlledTabs, initialTabs, initialTabsSignature, syncTabs]);
 
     useEffect(() => {
       if (controlledActiveTabId !== undefined) {

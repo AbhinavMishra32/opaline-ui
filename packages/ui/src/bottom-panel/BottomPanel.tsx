@@ -38,6 +38,8 @@ export interface BottomPanelProps {
   outlet?: ReactNode;
   /** Sync tabs on prop updates */
   syncTabs?: boolean;
+  /** Treat the incoming tabs prop as the complete open-tab list. */
+  controlledTabs?: boolean;
   /** Launcher items shown in the `+` dropdown and empty-state grid. */
   launcherItems?: SlotLauncherItem[];
   /** Callback fired when the far-right panel close cross button is clicked. */
@@ -66,6 +68,7 @@ export const BottomPanel = React.forwardRef<SlotPanelHandle, BottomPanelProps>(
       defaultActiveTabId,
       keepMounted,
       outlet,
+      controlledTabs = false,
       syncTabs = false,
       launcherItems,
       onClose,
@@ -210,6 +213,7 @@ export const BottomPanel = React.forwardRef<SlotPanelHandle, BottomPanelProps>(
           tabs={tabs}
           keepMounted={keepMounted}
           outlet={outlet}
+          controlledTabs={controlledTabs}
           syncTabs={syncTabs}
           launcherItems={launcherItems}
           onClose={onClose}
