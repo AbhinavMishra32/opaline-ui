@@ -7,6 +7,7 @@ export type FileTreeItem = {
   decoration?: ReactNode;
   gitStatus?: "added" | "modified" | "deleted" | "renamed";
   id?: string;
+  hideChevron?: boolean;
   icon?: ReactNode;
   locked?: boolean;
   name: string;
@@ -172,7 +173,7 @@ function FileTreeRow({
             aria-hidden="true"
           />
         ))}
-        {isDirectory ? (
+        {isDirectory && !item.hideChevron ? (
           <span className="flex size-4 shrink-0 items-center justify-center" style={{ marginLeft: 6 + (level - 1) * 18 }}>
             <svg className="size-3" data-icon-name="file-tree-icon-chevron" aria-hidden="true">
               <use href="#file-tree-icon-chevron" />
@@ -251,7 +252,7 @@ function FileTreeRow({
           aria-hidden="true"
         />
       ))}
-      {isDirectory ? (
+      {isDirectory && !item.hideChevron ? (
         <span className="flex size-4 shrink-0 items-center justify-center" style={{ marginLeft: 6 + (level - 1) * 18 }}>
           <span className={cn("block", isExpanded ? "rotate-0" : "-rotate-90")}>
             <svg className="size-3" data-icon-name="file-tree-icon-chevron" aria-hidden="true">
@@ -312,21 +313,37 @@ function FileTreeRow({
       ) : (
         buttonElement
       )}
-      {isDirectory && isExpanded ? (
-        <div>
-          {item.children?.map((child) => (
-            <FileTreeRow
-              gitLane={gitLane}
-              key={child.path}
-              item={child}
-              level={level + 1}
-              onNodeClick={onNodeClick}
-              onSelectionChange={onSelectionChange}
-              onSelectPath={onSelectPath}
-              showActions={showActions}
-              renderRowContextMenu={renderRowContextMenu}
-            />
-          ))}
+      {isDirectory && item.children?.length ? (
+        <div
+          className="grid"
+          aria-hidden={!isExpanded}
+          style={{
+            gridTemplateRows: isExpanded ? "1fr" : "0fr",
+            opacity: isExpanded ? 1 : 0,
+            pointerEvents: isExpanded ? undefined : "none",
+            transform: isExpanded ? "translateY(0)" : "translateY(-2px)",
+            transition: [
+              "grid-template-rows 240ms cubic-bezier(0.16, 0.84, 0.22, 1)",
+              "opacity 160ms ease",
+              "transform 240ms cubic-bezier(0.16, 0.84, 0.22, 1)",
+            ].join(", "),
+          }}
+        >
+          <div className="min-h-0 overflow-hidden">
+            {item.children?.map((child) => (
+              <FileTreeRow
+                gitLane={gitLane}
+                key={child.path}
+                item={child}
+                level={level + 1}
+                onNodeClick={onNodeClick}
+                onSelectionChange={onSelectionChange}
+                onSelectPath={onSelectPath}
+                showActions={showActions}
+                renderRowContextMenu={renderRowContextMenu}
+              />
+            ))}
+          </div>
         </div>
       ) : null}
     </>
