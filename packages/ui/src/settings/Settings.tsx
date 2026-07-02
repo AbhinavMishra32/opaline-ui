@@ -7,6 +7,7 @@ import { ScrollArea } from "../components/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/select";
 import { Separator } from "../components/separator";
 import { Switch } from "../components/switch";
+import { SidebarNavItemRow } from "../opaline-v2/Sidebar";
 
 export interface SettingsNavItem {
   id: string;
@@ -112,22 +113,26 @@ function SettingsSidebar({
 }: SettingsSidebarProps) {
   return (
     <aside className="flex h-full min-h-0 flex-col bg-transparent text-sidebar-foreground">
-      <div className="flex flex-col gap-0.5 px-1.5 py-1">
+      <div className="flex flex-col gap-0.5 px-2.5 py-1">
         {onBack && (
-          <Button variant="ghost" data-construct-control="sidebar" className="construct-sidebar-row" onClick={onBack}>
-            <span data-icon="inline-start" aria-hidden="true">
-              <svg className="size-[15px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-                <path d="m12 19-7-7 7-7" />
-                <path d="M19 12H5" />
-              </svg>
-            </span>
-            <span data-sidebar-row-label>{backLabel ?? "Back"}</span>
-          </Button>
+          <SidebarNavItemRow
+            item={{
+              id: "back",
+              label: backLabel ?? "Back",
+              onClick: onBack,
+              icon: (
+                <svg className="size-[15px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m12 19-7-7 7-7" />
+                  <path d="M19 12H5" />
+                </svg>
+              )
+            }}
+          />
         )}
         {header ?? null}
       </div>
 
-      <div className="px-1.5 pb-2">
+      <div className="px-2.5 pb-2">
         <Input
           type="search"
           placeholder={searchPlaceholder}
@@ -138,7 +143,7 @@ function SettingsSidebar({
       </div>
 
       <ScrollArea className="min-h-0 flex-1">
-        <div className="flex flex-col gap-3 p-1.5 pt-1">
+        <div className="flex flex-col gap-3 p-2.5 pt-1">
           {sections.map((section) => (
             <div key={section.label} className="flex flex-col gap-0.5">
               <div className="px-2 py-1" data-sidebar="sidebar-section-heading">
@@ -147,22 +152,21 @@ function SettingsSidebar({
                 </span>
               </div>
               {section.items.map((item) => (
-                <Button
+                <SidebarNavItemRow
                   key={item.id}
-                  variant="ghost"
-                  data-active={activeItemId === item.id ? "true" : undefined}
-                  data-construct-control="sidebar"
-                  className="construct-sidebar-row"
-                  onClick={() => onItemSelect?.(item)}
-                >
-                  <span data-icon="inline-start">{item.icon}</span>
-                  <span className="flex-1 text-left" data-sidebar-row-label>{item.label}</span>
-                  {item.badge && (
-                    <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[0.6rem] font-semibold text-primary">
-                      {item.badge}
-                    </span>
-                  )}
-                </Button>
+                  item={{
+                    id: item.id,
+                    label: item.label,
+                    active: activeItemId === item.id,
+                    icon: item.icon,
+                    onClick: () => onItemSelect?.(item),
+                    badge: item.badge ? (
+                      <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[0.6rem] font-semibold text-primary">
+                        {item.badge}
+                      </span>
+                    ) : undefined
+                  }}
+                />
               ))}
             </div>
           ))}
@@ -172,7 +176,7 @@ function SettingsSidebar({
       {footer && (
         <>
           <Separator />
-          <div className="p-2">{footer}</div>
+          <div className="px-2.5 py-1">{footer}</div>
         </>
       )}
     </aside>

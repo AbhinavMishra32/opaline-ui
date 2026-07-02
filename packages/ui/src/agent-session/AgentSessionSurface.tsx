@@ -227,6 +227,7 @@ export function AgentSessionComposer({
                 <Button
                   aria-label={pending ? "Construct Interact is thinking" : accessibleSubmitLabel}
                   className="rounded-full agent-composer-submit-btn"
+                  style={{ borderRadius: "9999px" }}
                   type="button"
                   size="icon-lg"
                   disabled={isDisabled}

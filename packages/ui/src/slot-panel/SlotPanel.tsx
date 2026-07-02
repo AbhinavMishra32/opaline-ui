@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../components/dropdown-menu";
-import { ChevronLeft, ChevronRight, Plus, X, Layers } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, X } from "lucide-react";
 import { cn } from "../lib/utils";
 
 // ---------------------------------------------------------------------------
@@ -448,15 +448,7 @@ export const SlotPanel = React.forwardRef<SlotPanelHandle, SlotPanelProps>(
         ) : openTabs.length === 0 ? (
           <div className="min-h-0 flex-1 overflow-auto">
             <div className="flex min-h-full items-center justify-center p-8 animate-in fade-in duration-300">
-              <div className="flex max-w-sm flex-col items-center text-center">
-                <div className="flex size-14 items-center justify-center rounded-2xl bg-muted/30 text-muted-foreground/50 mb-4 border border-border/20">
-                  <Layers size={24} className="stroke-[1.5]" />
-                </div>
-                <h3 className="text-sm font-medium text-foreground">No tabs open</h3>
-                <p className="mt-1 text-xs text-muted-foreground/50 max-w-[360px] leading-relaxed">
-                  Open a file from the sidebar to get started.
-                </p>
-              </div>
+              <div className="opaline-slot-panel-empty-watermark" aria-hidden="true" />
             </div>
           </div>
         ) : outlet !== undefined ? (

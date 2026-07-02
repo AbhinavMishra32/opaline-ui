@@ -41,6 +41,7 @@ export type SidebarNavItem = {
   id: string;
   label: ReactNode;
   onClick?: () => void;
+  badge?: ReactNode;
 };
 
 export type SidebarProps = {
@@ -71,12 +72,9 @@ export function Sidebar({
   return (
     <aside className="flex h-full min-h-0 flex-col bg-transparent text-sidebar-foreground">
       {primaryItems.length > 0 ? (
-        <>
-          <SidebarPrimary>
-            {primaryItems.map((item) => renderNavItem?.(item) ?? <SidebarNavItemRow item={item} key={item.id} />)}
-          </SidebarPrimary>
-          <Separator />
-        </>
+        <SidebarPrimary>
+          {primaryItems.map((item) => renderNavItem?.(item) ?? <SidebarNavItemRow item={item} key={item.id} />)}
+        </SidebarPrimary>
       ) : null}
       <SidebarScroll>
         {projects.length > 0 ? (
@@ -90,7 +88,7 @@ export function Sidebar({
         ) : null}
         {items.length > 0 ? (
           <SidebarSection heading={sectionLabels.items ?? "Items"}>
-            <nav className="flex flex-col gap-1" aria-label={sectionLabels.items ?? "Items"}>
+            <nav className="flex flex-col gap-0.5" aria-label={sectionLabels.items ?? "Items"}>
               {items.map((item) => renderItem?.(item, { inset: false }) ?? <SidebarThreadRow key={item.id} item={item} />)}
             </nav>
           </SidebarSection>
@@ -108,19 +106,19 @@ export function Sidebar({
 }
 
 export function SidebarPrimary({ children, className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <nav className={cn("flex flex-col gap-1 px-1.5 py-1", className)} aria-label="Primary" {...props}>{children}</nav>;
+  return <nav className={cn("flex flex-col gap-0.5 px-2.5 py-1", className)} aria-label="Primary" {...props}>{children}</nav>;
 }
 
 export function SidebarScroll({ children, className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <ScrollArea className={cn("min-h-0 flex-1", className)} {...appActionAttributes.sidebarScroll} {...props}>
-      <div className="flex flex-col gap-1 p-1.5">{children}</div>
+      <div className="flex flex-col gap-0.5 p-2.5">{children}</div>
     </ScrollArea>
   );
 }
 
 export function SidebarFooter({ children, className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("flex flex-col gap-1 p-1.5", className)} {...props}>{children}</div>;
+  return <div className={cn("flex flex-col gap-0.5 px-2.5 py-1", className)} {...props}>{children}</div>;
 }
 
 export type SidebarBottomSlotProps = HTMLAttributes<HTMLDivElement> & {
@@ -209,7 +207,8 @@ export function SidebarNavItemRow({ className, item, type = "button", ...props }
       {...props}
     >
       {item.icon != null ? <span className="grid size-[18px] shrink-0 place-items-center" data-icon="inline-start" aria-hidden="true">{item.icon}</span> : null}
-      <span data-sidebar-row-label>{item.label}</span>
+      <span className="flex-1 text-left" data-sidebar-row-label>{item.label}</span>
+      {item.badge}
     </Button>
   );
 }
@@ -227,12 +226,12 @@ export function SidebarProjectRow({ onSelect, project, renderItem }: { onSelect?
   const label = typeof project.label === "string" ? project.label : project.labelForAttributes ?? project.id;
   const expanded = project.collapsed !== true && project.threads != null;
   return (
-    <div className="flex flex-col gap-1" data-active={project.active === true ? "true" : "false"} data-muted={project.muted === true ? "true" : "false"} {...appActionAttributes.sidebarProjectRow({ collapsed: project.collapsed === true, label, projectId: project.id })}>
+    <div className="flex flex-col gap-0.5" data-active={project.active === true ? "true" : "false"} data-muted={project.muted === true ? "true" : "false"} {...appActionAttributes.sidebarProjectRow({ collapsed: project.collapsed === true, label, projectId: project.id })}>
       <Button className="construct-sidebar-row" onClick={() => onSelect?.(project.id)} variant="ghost" {...appActionAttributes.sidebarProjectSelect}>
         {project.icon != null ? <span data-sidebar-row-icon aria-hidden="true">{project.icon}</span> : null}
         <span data-sidebar-row-label>{project.label}</span>
       </Button>
-      {expanded ? <div className="flex flex-col gap-1" {...appActionAttributes.sidebarProjectList({ projectId: project.id, showAll: false })}>{project.threads?.map((item) => renderItem?.(item, { inset: true }) ?? <SidebarThreadRow key={item.id} item={item} inset />)}</div> : null}
+      {expanded ? <div className="flex flex-col gap-0.5" {...appActionAttributes.sidebarProjectList({ projectId: project.id, showAll: false })}>{project.threads?.map((item) => renderItem?.(item, { inset: true }) ?? <SidebarThreadRow key={item.id} item={item} inset />)}</div> : null}
     </div>
   );
 }
