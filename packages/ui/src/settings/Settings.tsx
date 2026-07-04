@@ -185,12 +185,12 @@ function SettingsSidebar({
 
 function SettingsPanel({ title, subtitle, children }: SettingsPanelProps) {
   return (
-    <main className="h-full min-h-0 flex-1 overflow-y-auto bg-background px-8 py-7">
-      <div className="mx-auto flex w-full max-w-[920px] flex-col gap-7 pb-12">
+    <main className="h-full min-h-0 flex-1 overflow-y-auto bg-background px-6 py-8 md:px-8 md:py-10">
+      <div className="mx-auto flex w-full max-w-[660px] flex-col gap-8 pb-12">
         {(title || subtitle) && (
-          <div>
-            {title && <h2 className="text-base font-semibold">{title}</h2>}
-            {subtitle && <p className="mt-1 text-[13px] text-muted-foreground">{subtitle}</p>}
+          <div className="mb-1">
+            {title && <h2 className="text-lg font-bold tracking-tight text-foreground">{title}</h2>}
+            {subtitle && <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>}
           </div>
         )}
         {children}
@@ -203,20 +203,20 @@ function SettingsSection({ title, description, children }: SettingsSectionProps)
   return (
     <section className="flex flex-col gap-3">
       {title && (
-        <div>
-          <h3 className="text-sm font-semibold">{title}</h3>
-          {description && <p className="mt-1 text-xs text-muted-foreground">{description}</p>}
+        <div className="px-0.5 mb-0.5">
+          <h3 className="text-[14px] font-semibold text-foreground tracking-tight">{title}</h3>
+          {description && <p className="mt-1 text-xs text-muted-foreground leading-normal">{description}</p>}
         </div>
       )}
-      <div className="flex flex-col gap-3">{children}</div>
+      <div className="flex flex-col gap-4">{children}</div>
     </section>
   );
 }
 
 function SettingsCard({ children, className }: SettingsCardProps) {
   return (
-    <Card className={className}>
-      <CardContent className="flex flex-col divide-y divide-border/70 p-0">{children}</CardContent>
+    <Card className={`rounded-lg bg-card border-border/80 divide-y divide-border/40 overflow-hidden ${className || ""}`}>
+      <CardContent className="flex flex-col p-0">{children}</CardContent>
     </Card>
   );
 }
@@ -227,13 +227,13 @@ function SettingsRow({ title, label, description, action, control, children }: S
 
   if (hasInlineControl) {
     return (
-      <div className="grid gap-3 px-4 py-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+      <div className="grid gap-3 px-5 py-4.5 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
         <div className="min-w-0 flex-1">
-          {displayLabel && <Label className="text-sm">{displayLabel}</Label>}
+          {displayLabel && <Label className="text-[13px] font-semibold text-foreground tracking-tight">{displayLabel}</Label>}
           {description && (
             typeof description === "string"
-              ? <p className="mt-1 text-xs text-muted-foreground">{description}</p>
-              : <div className="mt-1 text-xs text-muted-foreground">{description}</div>
+              ? <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{description}</p>
+              : <div className="mt-1 text-xs text-muted-foreground leading-relaxed">{description}</div>
           )}
         </div>
         <div className="flex min-w-0 justify-start md:justify-end">{control || action}</div>
@@ -242,14 +242,14 @@ function SettingsRow({ title, label, description, action, control, children }: S
   }
 
   return (
-    <div className="flex flex-col gap-2 px-4 py-3">
+    <div className="flex flex-col gap-3 px-5 py-4.5">
       {(displayLabel || description) && (
         <div>
-          {displayLabel && <Label className="text-sm">{displayLabel}</Label>}
+          {displayLabel && <Label className="text-[13px] font-semibold text-foreground tracking-tight">{displayLabel}</Label>}
           {description && (
             typeof description === "string"
-              ? <p className="mt-1 text-xs text-muted-foreground">{description}</p>
-              : <div className="mt-1 text-xs text-muted-foreground">{description}</div>
+              ? <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{description}</p>
+              : <div className="mt-1 text-xs text-muted-foreground leading-relaxed">{description}</div>
           )}
         </div>
       )}
@@ -264,6 +264,7 @@ function SettingsToggle({ checked, onCheckedChange, disabled }: SettingsTogglePr
       checked={checked}
       onCheckedChange={onCheckedChange}
       disabled={disabled}
+      className="data-checked:bg-sky-500 dark:data-checked:bg-sky-500 border border-transparent data-checked:border-sky-500 cursor-pointer"
     />
   );
 }
@@ -273,37 +274,41 @@ function SettingsOptionCard({ title, description, selected, onClick, icon, badge
     <button
       type="button"
       onClick={onClick}
-      className={`flex w-full items-start gap-3 rounded-lg border p-3 text-left transition-all ${
+      className={`flex w-full items-start text-left gap-3.5 rounded-lg p-4 transition-all duration-200 border cursor-pointer ${
         selected
-          ? "border-primary bg-primary/5 ring-2 ring-primary/15"
-          : "border-border bg-background hover:bg-muted/45"
+          ? "border-primary bg-primary/5 ring-1 ring-primary/10 text-foreground"
+          : "border-border bg-background hover:bg-muted/45 text-muted-foreground"
       }`}
     >
       {icon && (
-        <div className="mt-0.5 text-muted-foreground">
+        <span className={`grid size-8 shrink-0 place-items-center rounded-lg border transition-colors ${
+          selected
+            ? "bg-primary/10 text-primary border-primary/20"
+            : "bg-muted text-muted-foreground border-border"
+        }`}>
           {icon}
-        </div>
+        </span>
       )}
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium">{title}</span>
-          {badge && (
-            <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[0.6rem] font-semibold text-primary">
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between">
+          <span className={`text-[12px] font-semibold tracking-tight ${selected ? "text-foreground" : "text-foreground/90"}`}>
+            {title}
+          </span>
+          {selected && (
+            <span className="text-[10px] uppercase font-bold tracking-wider text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+              Active
+            </span>
+          )}
+          {!selected && badge && (
+            <span className="rounded-full bg-muted px-1.5 py-0.5 text-[0.65rem] font-semibold text-muted-foreground">
               {badge}
             </span>
           )}
         </div>
         {description && (
-          <p className="mt-1 text-xs text-muted-foreground">{description}</p>
-        )}
-      </div>
-      <div className="mt-0.5">
-        {selected ? (
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
-            <path d="M20 6 9 17l-5-5" />
-          </svg>
-        ) : (
-          <div className="size-[18px] rounded-full border-2 border-muted-foreground/30" />
+          <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground font-normal">
+            {description}
+          </p>
         )}
       </div>
     </button>
