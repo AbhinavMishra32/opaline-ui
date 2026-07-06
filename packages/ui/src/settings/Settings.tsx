@@ -227,7 +227,7 @@ function SettingsRow({ title, label, description, action, control, children }: S
 
   if (hasInlineControl) {
     return (
-      <div className="grid gap-3 px-5 py-4.5 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+      <div className="grid gap-3 px-5 py-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
         <div className="min-w-0 flex-1">
           {displayLabel && <Label className="text-[13px] font-semibold text-foreground tracking-tight">{displayLabel}</Label>}
           {description && (
@@ -242,7 +242,7 @@ function SettingsRow({ title, label, description, action, control, children }: S
   }
 
   return (
-    <div className="flex flex-col gap-3 px-5 py-4.5">
+    <div className="flex flex-col gap-3 px-5 py-3">
       {(displayLabel || description) && (
         <div>
           {displayLabel && <Label className="text-[13px] font-semibold text-foreground tracking-tight">{displayLabel}</Label>}
