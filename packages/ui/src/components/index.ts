@@ -15,6 +15,8 @@ export type {
   DesktopHeaderControlTone,
   DesktopHeaderIconButtonProps,
 } from "./desktop-header-controls";
+export { DesktopWindowControls } from "./desktop-window-controls";
+export type { DesktopWindowControlsProps } from "./desktop-window-controls";
 export { Input } from "./input";
 export { SearchInput } from "./search-input";
 export { Spinner } from "./spinner";

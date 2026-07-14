@@ -46,6 +46,8 @@ export type {
   DesktopHeaderControlTone,
   DesktopHeaderIconButtonProps,
 } from "./components/desktop-header-controls";
+export { DesktopWindowControls } from "./components/desktop-window-controls";
+export type { DesktopWindowControlsProps } from "./components/desktop-window-controls";
 export { Alert, AlertDescription, AlertTitle, Badge, Input, SearchInput, Spinner, Textarea } from "./components";
 export { Switch } from "./components/switch";
 export { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/tabs";

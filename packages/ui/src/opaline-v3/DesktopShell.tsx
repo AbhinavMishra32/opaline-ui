@@ -238,6 +238,7 @@ export function DesktopShell({
   const sidebarWidth = controlledSidebarWidth ?? defaultSidebarWidth;
   const platform = typeof navigator === "undefined" ? "" : navigator.platform;
   const isMacDesktop = /Mac|iPhone|iPad|iPod/i.test(platform);
+  const isWindowsDesktop = /Win/i.test(platform);
 
   const setSidebarOpen = React.useCallback((open: boolean) => {
     if (controlledSidebarOpen === undefined) setInternalSidebarOpen(open);
@@ -383,6 +384,7 @@ export function DesktopShell({
             className={cn(
               "chat-surface-divider relative z-30 flex h-[46px] min-h-[46px] items-center justify-between gap-3 px-3 select-none sm:px-5 [-webkit-app-region:drag]",
               isMacDesktop && sidebar != null && !sidebarOpen && "desktop-top-bar-traffic-light-gutter",
+              isWindowsDesktop && "pr-[138px]! sm:pr-[138px]!",
             )}
           >
             <div className="flex min-w-0 flex-1 items-center gap-3 overflow-hidden">
