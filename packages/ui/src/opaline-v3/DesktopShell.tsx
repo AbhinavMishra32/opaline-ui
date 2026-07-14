@@ -3,6 +3,14 @@ import { ArrowLeft, ArrowRight, House } from "lucide-react";
 
 import { Button } from "../components/button";
 import { DesktopHeaderIconButton } from "../components/desktop-header-controls";
+import {
+  SidebarPrimaryAction,
+  SidebarProjectButton,
+  SIDEBAR_HEADER_ROW_CLASS_NAME,
+  SIDEBAR_ROW_ACTIVE_CLASS_NAME,
+  SIDEBAR_ROW_HOVER_CLASS_NAME,
+  SIDEBAR_ROW_IDLE_TEXT_CLASS_NAME,
+} from "../components/sidebar-presentation";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../components/tooltip";
 import type { ShellHistoryController } from "../history/ShellHistory";
 import { cn } from "../lib/utils";
@@ -19,7 +27,6 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarRail,
-  SidebarSeparator,
   SidebarInset,
   SidebarTrigger,
   SIDEBAR_OFFCANVAS_MOTION_CLASS,
@@ -539,15 +546,11 @@ export function DesktopSidebar({
           {viewSwitcher}
         </SidebarHeader>
       ) : null}
-      <SidebarContent>
+      <SidebarContent className="gap-0 font-system-ui">
         {primaryItems.length > 0 ? (
-          <SidebarGroup>
-            <SidebarMenu>
-              {primaryItems.map((item) => (
-                <SidebarMenuItem key={item.id}>
-                  {renderNavItem?.(item) ?? <DesktopSidebarNavRow item={item} />}
-                </SidebarMenuItem>
-              ))}
+          <SidebarGroup className="px-1.5 pt-1 pb-1.5">
+            <SidebarMenu className="gap-0.5">
+              {primaryItems.map((item) => renderNavItem?.(item) ?? <DesktopSidebarNavRow item={item} key={item.id} />)}
             </SidebarMenu>
           </SidebarGroup>
         ) : null}
@@ -577,24 +580,34 @@ export function DesktopSidebar({
         ) : null}
         {children}
       </SidebarContent>
-      {footer != null ? <><SidebarSeparator /><SidebarFooter>{footer}</SidebarFooter></> : null}
+      {footer != null ? <SidebarFooter className="gap-2 p-2 font-system-ui">{footer}</SidebarFooter> : null}
     </div>
   );
 }
 
 function DesktopSidebarNavRow({ item }: { item: DesktopSidebarNavItem }) {
   return (
-    <SidebarMenuButton isActive={item.active === true} onClick={item.onClick}>
-      {item.icon != null ? <span className="grid size-4 shrink-0 place-items-center">{item.icon}</span> : null}
-      <span className="min-w-0 flex-1 truncate">{item.label}</span>
-      {item.badge}
-    </SidebarMenuButton>
+    <SidebarPrimaryAction
+      active={item.active === true}
+      badge={item.badge}
+      icon={item.icon}
+      label={item.label}
+      onClick={item.onClick}
+    />
   );
 }
 
 function DesktopSidebarItemRow({ inset = false, item }: { inset?: boolean; item: DesktopSidebarItem }) {
   return (
-    <SidebarMenuButton isActive={item.active === true} className={inset ? "pl-8" : undefined}>
+    <SidebarMenuButton
+      size="sm"
+      data-active={item.active === true}
+      className={cn(
+        SIDEBAR_HEADER_ROW_CLASS_NAME,
+        item.active ? SIDEBAR_ROW_ACTIVE_CLASS_NAME : cn(SIDEBAR_ROW_IDLE_TEXT_CLASS_NAME, SIDEBAR_ROW_HOVER_CLASS_NAME),
+        inset ? "pl-8" : undefined,
+      )}
+    >
       <span className="min-w-0 flex-1 truncate">{item.title}</span>
       {item.time ?? item.meta}
     </SidebarMenuButton>
@@ -612,10 +625,12 @@ function DesktopSidebarProjectRow({
 }) {
   return (
     <div>
-      <SidebarMenuButton isActive={project.active === true} onClick={() => onSelect?.(project.id)}>
-        {project.icon}
-        <span className="min-w-0 flex-1 truncate">{project.label}</span>
-      </SidebarMenuButton>
+      <SidebarProjectButton
+        active={project.active === true}
+        icon={project.icon}
+        label={project.label}
+        onClick={() => onSelect?.(project.id)}
+      />
       {project.collapsed !== true && project.threads?.map((item) => (
         <div key={item.id}>{renderItem?.(item, { inset: true }) ?? <DesktopSidebarItemRow inset item={item} />}</div>
       ))}

@@ -46,7 +46,7 @@ export type {
   DesktopHeaderControlTone,
   DesktopHeaderIconButtonProps,
 } from "./components/desktop-header-controls";
-export { Alert, AlertDescription, AlertTitle, Badge, Input, Spinner, Textarea } from "./components";
+export { Alert, AlertDescription, AlertTitle, Badge, Input, SearchInput, Spinner, Textarea } from "./components";
 export { Switch } from "./components/switch";
 export { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/tabs";
 export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./components/select";
@@ -238,6 +238,32 @@ export {
   useSidebar,
 } from "./components/sidebar";
 export type { SidebarResizableOptions } from "./components/sidebar";
+export {
+  SidebarLeadingIcon,
+  SidebarPrimaryAction,
+  SidebarProjectButton,
+  SIDEBAR_HEADER_ROW_CLASS_NAME,
+  SIDEBAR_NESTED_LIST_GAP_CLASS_NAME,
+  SIDEBAR_NESTED_LIST_OFFSET_CLASS_NAME,
+  SIDEBAR_ROW_ACTIVE_CLASS_NAME,
+  SIDEBAR_ROW_FOCUS_CLASS_NAME,
+  SIDEBAR_ROW_GAP_CLASS_NAME,
+  SIDEBAR_ROW_HEIGHT_CLASS_NAME,
+  SIDEBAR_ROW_HOVER_CLASS_NAME,
+  SIDEBAR_ROW_IDLE_TEXT_CLASS_NAME,
+  SIDEBAR_ROW_LABEL_TEXT_CLASS_NAME,
+  SIDEBAR_ROW_MUTED_TEXT_CLASS_NAME,
+  SIDEBAR_ROW_PADDING_CLASS_NAME,
+  SIDEBAR_ROW_RADIUS_CLASS_NAME,
+  SIDEBAR_ROW_TEXT_CLASS_NAME,
+  SIDEBAR_SECTION_LABEL_CLASS_NAME,
+} from "./components/sidebar-presentation";
+export type {
+  SidebarLeadingIconProps,
+  SidebarLeadingIconSize,
+  SidebarPrimaryActionProps,
+  SidebarProjectButtonProps,
+} from "./components/sidebar-presentation";
 export {
   Card,
   CardAction,

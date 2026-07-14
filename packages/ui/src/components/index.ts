@@ -16,6 +16,7 @@ export type {
   DesktopHeaderIconButtonProps,
 } from "./desktop-header-controls";
 export { Input } from "./input";
+export { SearchInput } from "./search-input";
 export { Spinner } from "./spinner";
 export { Textarea } from "./textarea";
 export {
@@ -93,6 +94,32 @@ export {
   useSidebar,
 } from "./sidebar";
 export type { SidebarResizableOptions } from "./sidebar";
+export {
+  SidebarLeadingIcon,
+  SidebarPrimaryAction,
+  SidebarProjectButton,
+  SIDEBAR_HEADER_ROW_CLASS_NAME,
+  SIDEBAR_NESTED_LIST_GAP_CLASS_NAME,
+  SIDEBAR_NESTED_LIST_OFFSET_CLASS_NAME,
+  SIDEBAR_ROW_ACTIVE_CLASS_NAME,
+  SIDEBAR_ROW_FOCUS_CLASS_NAME,
+  SIDEBAR_ROW_GAP_CLASS_NAME,
+  SIDEBAR_ROW_HEIGHT_CLASS_NAME,
+  SIDEBAR_ROW_HOVER_CLASS_NAME,
+  SIDEBAR_ROW_IDLE_TEXT_CLASS_NAME,
+  SIDEBAR_ROW_LABEL_TEXT_CLASS_NAME,
+  SIDEBAR_ROW_MUTED_TEXT_CLASS_NAME,
+  SIDEBAR_ROW_PADDING_CLASS_NAME,
+  SIDEBAR_ROW_RADIUS_CLASS_NAME,
+  SIDEBAR_ROW_TEXT_CLASS_NAME,
+  SIDEBAR_SECTION_LABEL_CLASS_NAME,
+} from "./sidebar-presentation";
+export type {
+  SidebarLeadingIconProps,
+  SidebarLeadingIconSize,
+  SidebarPrimaryActionProps,
+  SidebarProjectButtonProps,
+} from "./sidebar-presentation";
 export { RadioGroup, RadioGroupItem } from "./radio-group";
 export { Select, SelectContent, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from "./select";
 export { Switch } from "./switch";

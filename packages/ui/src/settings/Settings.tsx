@@ -1,20 +1,23 @@
 import { type ReactNode } from "react";
+import { cn } from "../lib/utils";
 import { Button } from "../components/button";
 import { Card, CardContent } from "../components/card";
 import { Label } from "../components/label";
 import { ScrollArea } from "../components/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/select";
 import { Switch } from "../components/switch";
+import { SearchInput } from "../components/search-input";
+import {
+  SidebarPrimaryAction,
+  SidebarProjectButton,
+  SIDEBAR_NESTED_LIST_GAP_CLASS_NAME,
+  SIDEBAR_SECTION_LABEL_CLASS_NAME,
+} from "../components/sidebar-presentation";
 import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupLabel,
-  SidebarInput,
   SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarSeparator,
 } from "../components/sidebar";
 
 export interface SettingsNavItem {
@@ -120,67 +123,70 @@ function SettingsSidebar({
   query,
 }: SettingsSidebarProps) {
   return (
-    <aside className="flex h-full min-h-0 flex-col bg-transparent font-sans text-sidebar-foreground">
-      <SidebarGroup className="pb-1 pt-1">
-        <SidebarMenu>
-        {onBack && (
-          <SidebarMenuItem>
-            <SidebarMenuButton onClick={onBack}>
-                <svg className="size-[15px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="m12 19-7-7 7-7" />
-                  <path d="M19 12H5" />
-                </svg>
-              <span className="min-w-0 flex-1 truncate">{backLabel ?? "Back"}</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        )}
-        </SidebarMenu>
-        {header ?? null}
-      </SidebarGroup>
-
-      <div className="px-2 pb-1.5">
-        <SidebarInput
-          type="search"
-          placeholder={searchPlaceholder}
-          value={query}
-          onChange={(e) => onSearchChange?.(e.target.value)}
-        />
-      </div>
-
-      <SidebarContent>
-        <div className="flex flex-col gap-1">
-          {sections.map((section) => (
-            <SidebarGroup key={section.id ?? section.label}>
-              <SidebarGroupLabel>{section.label}</SidebarGroupLabel>
-              <SidebarMenu>
-                {section.items.map((item) => (
-                  <SidebarMenuItem key={item.id}>
-                    <SidebarMenuButton
-                      isActive={activeItemId === item.id}
-                      onClick={() => onItemSelect?.(item)}
-                    >
-                      <span className="grid size-4 shrink-0 place-items-center">{item.icon}</span>
-                      <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                      {item.badge ? (
-                      <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[0.6rem] font-semibold text-primary">
-                        {item.badge}
-                      </span>
-                      ) : null}
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroup>
-          ))}
-        </div>
+    <aside className="flex h-full min-h-0 flex-col bg-transparent font-system-ui text-sidebar-foreground">
+      <SidebarContent className="gap-0 font-system-ui">
+        <SidebarGroup className="p-0">
+          <div className="px-1.5 py-1.5">
+            {onBack ? (
+              <div className="mb-3">
+                <SidebarMenu>
+                  <SidebarPrimaryAction
+                    icon={(
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="m12 19-7-7 7-7" />
+                        <path d="M19 12H5" />
+                      </svg>
+                    )}
+                    label={backLabel ?? "Back"}
+                    onClick={onBack}
+                  />
+                </SidebarMenu>
+              </div>
+            ) : null}
+            {header ?? null}
+            <div className="mb-3 px-1">
+              <SearchInput
+                aria-label={searchPlaceholder}
+                type="search"
+                placeholder={searchPlaceholder}
+                value={query}
+                onChange={(event) => onSearchChange?.(event.target.value)}
+              />
+            </div>
+            <nav aria-label="Settings sections" className="flex flex-col">
+              {sections.map((section) => (
+                <section
+                  className="flex flex-col not-first:mt-3"
+                  key={section.id ?? section.label}
+                >
+                  <h2 className={cn("px-2 py-1", SIDEBAR_SECTION_LABEL_CLASS_NAME)}>
+                    {section.label}
+                  </h2>
+                  <SidebarMenu className={SIDEBAR_NESTED_LIST_GAP_CLASS_NAME}>
+                    {section.items.map((item) => (
+                      <li key={item.id}>
+                        <SidebarProjectButton
+                          active={activeItemId === item.id}
+                          icon={item.icon}
+                          label={item.label}
+                          onClick={() => onItemSelect?.(item)}
+                          trailing={item.badge ? (
+                            <span className="ml-auto rounded-full bg-primary/10 px-1.5 py-0.5 text-[0.6rem] font-semibold text-primary">
+                              {item.badge}
+                            </span>
+                          ) : null}
+                        />
+                      </li>
+                    ))}
+                  </SidebarMenu>
+                </section>
+              ))}
+            </nav>
+          </div>
+        </SidebarGroup>
       </SidebarContent>
 
-      {footer && (
-        <>
-          <SidebarSeparator />
-          <SidebarFooter>{footer}</SidebarFooter>
-        </>
-      )}
+      {footer ? <SidebarFooter className="gap-2 p-2 font-system-ui">{footer}</SidebarFooter> : null}
     </aside>
   );
 }
