@@ -5,9 +5,17 @@ import { Input } from "../components/input";
 import { Label } from "../components/label";
 import { ScrollArea } from "../components/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/select";
-import { Separator } from "../components/separator";
 import { Switch } from "../components/switch";
-import { SidebarNavItemRow } from "../opaline-v2/Sidebar";
+import {
+  SynaraSidebarContent,
+  SynaraSidebarFooter,
+  SynaraSidebarGroup,
+  SynaraSidebarGroupLabel,
+  SynaraSidebarMenu,
+  SynaraSidebarMenuButton,
+  SynaraSidebarMenuItem,
+  SynaraSidebarSeparator,
+} from "../opaline-v3/SynaraSidebar";
 
 export interface SettingsNavItem {
   id: string;
@@ -112,27 +120,25 @@ function SettingsSidebar({
   query,
 }: SettingsSidebarProps) {
   return (
-    <aside className="flex h-full min-h-0 flex-col bg-transparent text-sidebar-foreground">
-      <div className="flex flex-col gap-0.5 px-2.5 py-1">
+    <aside className="flex h-full min-h-0 flex-col bg-transparent font-sans text-sidebar-foreground">
+      <SynaraSidebarGroup className="pb-1 pt-1">
+        <SynaraSidebarMenu>
         {onBack && (
-          <SidebarNavItemRow
-            item={{
-              id: "back",
-              label: backLabel ?? "Back",
-              onClick: onBack,
-              icon: (
+          <SynaraSidebarMenuItem>
+            <SynaraSidebarMenuButton onClick={onBack}>
                 <svg className="size-[15px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
                   <path d="m12 19-7-7 7-7" />
                   <path d="M19 12H5" />
                 </svg>
-              )
-            }}
-          />
+              <span className="min-w-0 flex-1 truncate">{backLabel ?? "Back"}</span>
+            </SynaraSidebarMenuButton>
+          </SynaraSidebarMenuItem>
         )}
+        </SynaraSidebarMenu>
         {header ?? null}
-      </div>
+      </SynaraSidebarGroup>
 
-      <div className="px-2.5 pb-2">
+      <div className="px-2 pb-1.5">
         <Input
           type="search"
           placeholder={searchPlaceholder}
@@ -142,41 +148,38 @@ function SettingsSidebar({
         />
       </div>
 
-      <ScrollArea className="min-h-0 flex-1">
-        <div className="flex flex-col gap-3 p-2.5 pt-1">
+      <SynaraSidebarContent>
+        <div className="flex flex-col gap-1">
           {sections.map((section) => (
-            <div key={section.label} className="flex flex-col gap-0.5">
-              <div className="px-2 py-1" data-sidebar="sidebar-section-heading">
-                <span>
-                  {section.label}
-                </span>
-              </div>
-              {section.items.map((item) => (
-                <SidebarNavItemRow
-                  key={item.id}
-                  item={{
-                    id: item.id,
-                    label: item.label,
-                    active: activeItemId === item.id,
-                    icon: item.icon,
-                    onClick: () => onItemSelect?.(item),
-                    badge: item.badge ? (
+            <SynaraSidebarGroup key={section.id ?? section.label}>
+              <SynaraSidebarGroupLabel>{section.label}</SynaraSidebarGroupLabel>
+              <SynaraSidebarMenu>
+                {section.items.map((item) => (
+                  <SynaraSidebarMenuItem key={item.id}>
+                    <SynaraSidebarMenuButton
+                      active={activeItemId === item.id}
+                      onClick={() => onItemSelect?.(item)}
+                    >
+                      <span className="grid size-4 shrink-0 place-items-center">{item.icon}</span>
+                      <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                      {item.badge ? (
                       <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[0.6rem] font-semibold text-primary">
                         {item.badge}
                       </span>
-                    ) : undefined
-                  }}
-                />
-              ))}
-            </div>
+                      ) : null}
+                    </SynaraSidebarMenuButton>
+                  </SynaraSidebarMenuItem>
+                ))}
+              </SynaraSidebarMenu>
+            </SynaraSidebarGroup>
           ))}
         </div>
-      </ScrollArea>
+      </SynaraSidebarContent>
 
       {footer && (
         <>
-          <Separator />
-          <div className="px-2.5 py-1">{footer}</div>
+          <SynaraSidebarSeparator />
+          <SynaraSidebarFooter>{footer}</SynaraSidebarFooter>
         </>
       )}
     </aside>

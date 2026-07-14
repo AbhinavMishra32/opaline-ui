@@ -181,6 +181,27 @@ export type {
   DesktopSidebarProps,
 } from "./opaline-v3/DesktopShell";
 export {
+  SynaraSidebar,
+  SynaraSidebarContent,
+  SynaraSidebarFooter,
+  SynaraSidebarGroup,
+  SynaraSidebarGroupLabel,
+  SynaraSidebarHeader,
+  SynaraSidebarHeaderTrigger,
+  SynaraSidebarInset,
+  SynaraSidebarInstanceProvider,
+  SynaraSidebarMenu,
+  SynaraSidebarMenuButton,
+  SynaraSidebarMenuItem,
+  SynaraSidebarProvider,
+  SynaraSidebarRail,
+  SynaraSidebarSeparator,
+  SynaraSidebarTrigger,
+  SYNARA_SIDEBAR_OFFCANVAS_MOTION_CLASS,
+  useSynaraSidebar,
+} from "./opaline-v3/SynaraSidebar";
+export type { SynaraSidebarResizableOptions } from "./opaline-v3/SynaraSidebar";
+export {
   Card,
   CardAction,
   CardContent,
