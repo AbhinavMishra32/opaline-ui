@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ArrowLeft, ArrowRight, House } from "lucide-react";
+import { House } from "lucide-react";
 
 import { Button } from "../components/button";
 import { DesktopHeaderIconButton } from "../components/desktop-header-controls";
@@ -236,6 +236,8 @@ export function DesktopShell({
   const bottomPanelExpanded = controlledBottomPanelExpanded ?? internalBottomPanelExpanded;
   const inspectorWidth = controlledInspectorWidth ?? internalInspectorWidth;
   const sidebarWidth = controlledSidebarWidth ?? defaultSidebarWidth;
+  const platform = typeof navigator === "undefined" ? "" : navigator.platform;
+  const isMacDesktop = /Mac|iPhone|iPad|iPod/i.test(platform);
 
   const setSidebarOpen = React.useCallback((open: boolean) => {
     if (controlledSidebarOpen === undefined) setInternalSidebarOpen(open);
@@ -353,9 +355,15 @@ export function DesktopShell({
           transparentSurface
         >
           {showSidebarChrome ? (
-            <div data-tauri-drag-region className="flex h-[46px] shrink-0 items-center gap-0.5 px-3 pl-[83px] [-webkit-app-region:drag] [&>*]:[-webkit-app-region:no-drag]">
+            <SidebarHeader
+              data-tauri-drag-region
+              className={cn(
+                "flex-row items-center gap-2 px-4 py-0 font-system-ui h-[46px] [-webkit-app-region:drag] [&>*]:[-webkit-app-region:no-drag]",
+                isMacDesktop && "desktop-top-bar-traffic-light-gutter",
+              )}
+            >
               {sidebarChromeContent}
-            </div>
+            </SidebarHeader>
           ) : null}
           <div className="min-h-0 flex-1 overflow-hidden">{sidebar}</div>
         </Sidebar>
@@ -370,13 +378,19 @@ export function DesktopShell({
           </SidebarInstanceProvider>
         ) : null}
         <SidebarInset surfaceClassName="chat-content-card relative z-[15] overflow-hidden bg-background">
-          <header data-tauri-drag-region className="chat-surface-divider relative z-30 flex h-[46px] min-h-[46px] items-center justify-between gap-3 px-3 select-none sm:px-5 [-webkit-app-region:drag]">
-            {sidebar != null && !sidebarOpen ? (
-              <div className="absolute left-[83px] top-[9px] z-40 flex items-center gap-0.5 [-webkit-app-region:no-drag]">
-                {collapsedTriggerContent}
-              </div>
-            ) : null}
-            <div className={cn("flex min-w-0 flex-1 items-center gap-3 overflow-hidden", sidebar != null && !sidebarOpen && "pl-52")}>
+          <header
+            data-tauri-drag-region
+            className={cn(
+              "chat-surface-divider relative z-30 flex h-[46px] min-h-[46px] items-center justify-between gap-3 px-3 select-none sm:px-5 [-webkit-app-region:drag]",
+              isMacDesktop && sidebar != null && !sidebarOpen && "desktop-top-bar-traffic-light-gutter",
+            )}
+          >
+            <div className="flex min-w-0 flex-1 items-center gap-3 overflow-hidden">
+              {sidebar != null && !sidebarOpen ? (
+                <div className="flex shrink-0 items-center gap-0.5 [-webkit-app-region:no-drag]">
+                  {collapsedTriggerContent}
+                </div>
+              ) : null}
               {headerTabs.length > 0 ? (
                 <div className="flex min-w-0 items-center gap-1 [-webkit-app-region:no-drag]">
                   {headerTabs.map((tab) => (
@@ -445,12 +459,28 @@ function DesktopNavigationControls({ state }: { state: DesktopShellState }) {
         <House className="size-4" strokeWidth={1.8} />
       </DesktopNavigationButton>
       <DesktopNavigationButton label="Back" shortcut={isMac ? "⌘[" : "Alt+Left"} disabled={!state.canNavigateBack} onClick={state.navigateBack}>
-        <ArrowLeft className="size-6" strokeWidth={1.7} />
+        <RoundBackIcon className="size-6" />
       </DesktopNavigationButton>
       <DesktopNavigationButton label="Forward" shortcut={isMac ? "⌘]" : "Alt+Right"} disabled={!state.canNavigateForward} onClick={state.navigateForward}>
-        <ArrowRight className="size-6" strokeWidth={1.7} />
+        <RoundForwardIcon className="size-6" />
       </DesktopNavigationButton>
     </div>
+  );
+}
+
+function RoundBackIcon({ className }: { className?: string }) {
+  return (
+    <svg aria-hidden="true" className={className} fill="currentColor" viewBox="0 0 512 512">
+      <path d="M216.4 163.7c5.1 5 5.1 13.3.1 18.4L155.8 243h231.3c7.1 0 12.9 5.8 12.9 13s-5.8 13-12.9 13H155.8l60.8 60.9c5 5.1 4.9 13.3-.1 18.4-5.1 5-13.2 5-18.3-.1l-82.4-83c-1.1-1.2-2-2.5-2.7-4.1-.7-1.6-1-3.3-1-5 0-3.4 1.3-6.6 3.7-9.1l82.4-83c4.9-5.2 13.1-5.3 18.2-.3z" />
+    </svg>
+  );
+}
+
+function RoundForwardIcon({ className }: { className?: string }) {
+  return (
+    <svg aria-hidden="true" className={className} fill="currentColor" viewBox="0 0 512 512">
+      <path d="M295.6 163.7c-5.1 5-5.1 13.3-.1 18.4l60.8 60.9H124.9c-7.1 0-12.9 5.8-12.9 13s5.8 13 12.9 13h231.3l-60.8 60.9c-5 5.1-4.9 13.3.1 18.4 5.1 5 13.2 5 18.3-.1l82.4-83c1.1-1.2 2-2.5 2.7-4.1.7-1.6 1-3.3 1-5 0-3.4-1.3-6.6-3.7-9.1l-82.4-83c-4.9-5.2-13.1-5.3-18.2-.3z" />
+    </svg>
   );
 }
 

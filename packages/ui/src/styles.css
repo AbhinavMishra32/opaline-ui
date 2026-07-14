@@ -35,6 +35,10 @@
   -webkit-backdrop-filter: var(--app-composer-backdrop-filter, none);
 }
 
+.desktop-top-bar-traffic-light-gutter {
+  padding-left: var(--desktop-top-bar-traffic-light-gutter, 90px) !important;
+}
+
 @supports (corner-shape: round) {
   .chat-composer-shell,
   .chat-composer-surface {
