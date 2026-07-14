@@ -497,7 +497,7 @@ export function OpalineV2Shell({
             data-open={sidebarOpen ? "true" : "false"}
             data-resizing={sidebarResizing ? "true" : "false"}
           >
-            {showSidebarChrome ? <div className="flex h-11 items-start gap-[2px] bg-transparent px-3 pl-[83px] pt-2.5 [-webkit-app-region:drag] [&>*]:[-webkit-app-region:no-drag]">{sidebarChromeContent}</div> : null}
+            {showSidebarChrome ? <div data-tauri-drag-region className="flex h-11 items-start gap-[2px] bg-transparent px-3 pl-[83px] pt-2.5 [-webkit-app-region:drag] [&>*]:[-webkit-app-region:no-drag]">{sidebarChromeContent}</div> : null}
             <div className="absolute inset-x-0 bottom-0 top-11 flex min-h-0 flex-col overflow-hidden">{sidebar}</div>
             <div
               aria-disabled={!sidebarOpen}
@@ -511,7 +511,7 @@ export function OpalineV2Shell({
           </aside>
         ) : null}
         <section className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-background/95">
-          <header className="relative z-30 flex h-11 min-h-11 min-w-0 items-end justify-between gap-3 bg-background/95 px-3 pb-1.5 select-none backdrop-blur supports-[backdrop-filter]:bg-background/85 [-webkit-app-region:drag]">
+          <header data-tauri-drag-region className="relative z-30 flex h-11 min-h-11 min-w-0 items-end justify-between gap-3 bg-background/95 px-3 pb-1.5 select-none backdrop-blur supports-[backdrop-filter]:bg-background/85 [-webkit-app-region:drag]">
             {sidebar != null ? (
               <div
                 className={cn(
