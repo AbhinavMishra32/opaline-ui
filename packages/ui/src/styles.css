@@ -1,6 +1,6 @@
 @import "./tokens/opaline-theme.css";
 
-/* Literal Synara shell material and seam geometry, scoped to Opaline v3. */
+/* Literal source shell material and seam geometry, scoped to Opaline v3. */
 .opaline-v3-desktop-shell {
   --app-content-card-radius: 0.9rem;
   --app-shell-background: transparent;

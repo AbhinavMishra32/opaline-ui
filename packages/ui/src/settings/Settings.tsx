@@ -6,16 +6,16 @@ import { ScrollArea } from "../components/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/select";
 import { Switch } from "../components/switch";
 import {
-  SynaraSidebarContent,
-  SynaraSidebarFooter,
-  SynaraSidebarGroup,
-  SynaraSidebarGroupLabel,
-  SynaraSidebarInput,
-  SynaraSidebarMenu,
-  SynaraSidebarMenuButton,
-  SynaraSidebarMenuItem,
-  SynaraSidebarSeparator,
-} from "../opaline-v3/SynaraSidebar";
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarInput,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarSeparator,
+} from "../components/sidebar";
 
 export interface SettingsNavItem {
   id: string;
@@ -121,25 +121,25 @@ function SettingsSidebar({
 }: SettingsSidebarProps) {
   return (
     <aside className="flex h-full min-h-0 flex-col bg-transparent font-sans text-sidebar-foreground">
-      <SynaraSidebarGroup className="pb-1 pt-1">
-        <SynaraSidebarMenu>
+      <SidebarGroup className="pb-1 pt-1">
+        <SidebarMenu>
         {onBack && (
-          <SynaraSidebarMenuItem>
-            <SynaraSidebarMenuButton onClick={onBack}>
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={onBack}>
                 <svg className="size-[15px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
                   <path d="m12 19-7-7 7-7" />
                   <path d="M19 12H5" />
                 </svg>
               <span className="min-w-0 flex-1 truncate">{backLabel ?? "Back"}</span>
-            </SynaraSidebarMenuButton>
-          </SynaraSidebarMenuItem>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
         )}
-        </SynaraSidebarMenu>
+        </SidebarMenu>
         {header ?? null}
-      </SynaraSidebarGroup>
+      </SidebarGroup>
 
       <div className="px-2 pb-1.5">
-        <SynaraSidebarInput
+        <SidebarInput
           type="search"
           placeholder={searchPlaceholder}
           value={query}
@@ -147,16 +147,16 @@ function SettingsSidebar({
         />
       </div>
 
-      <SynaraSidebarContent>
+      <SidebarContent>
         <div className="flex flex-col gap-1">
           {sections.map((section) => (
-            <SynaraSidebarGroup key={section.id ?? section.label}>
-              <SynaraSidebarGroupLabel>{section.label}</SynaraSidebarGroupLabel>
-              <SynaraSidebarMenu>
+            <SidebarGroup key={section.id ?? section.label}>
+              <SidebarGroupLabel>{section.label}</SidebarGroupLabel>
+              <SidebarMenu>
                 {section.items.map((item) => (
-                  <SynaraSidebarMenuItem key={item.id}>
-                    <SynaraSidebarMenuButton
-                      active={activeItemId === item.id}
+                  <SidebarMenuItem key={item.id}>
+                    <SidebarMenuButton
+                      isActive={activeItemId === item.id}
                       onClick={() => onItemSelect?.(item)}
                     >
                       <span className="grid size-4 shrink-0 place-items-center">{item.icon}</span>
@@ -166,19 +166,19 @@ function SettingsSidebar({
                         {item.badge}
                       </span>
                       ) : null}
-                    </SynaraSidebarMenuButton>
-                  </SynaraSidebarMenuItem>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
                 ))}
-              </SynaraSidebarMenu>
-            </SynaraSidebarGroup>
+              </SidebarMenu>
+            </SidebarGroup>
           ))}
         </div>
-      </SynaraSidebarContent>
+      </SidebarContent>
 
       {footer && (
         <>
-          <SynaraSidebarSeparator />
-          <SynaraSidebarFooter>{footer}</SynaraSidebarFooter>
+          <SidebarSeparator />
+          <SidebarFooter>{footer}</SidebarFooter>
         </>
       )}
     </aside>

@@ -1,20 +1,76 @@
-import * as React from "react"
+"use client"
+
 import { Input as InputPrimitive } from "@base-ui/react/input"
+import { forwardRef, type ComponentPropsWithoutRef } from "react"
 
 import { cn } from "#lib/utils"
 
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
-  return (
-    <InputPrimitive
-      type={type}
-      data-slot="input"
-      className={cn(
-        "h-7 w-full min-w-0 rounded-[8px] border border-input bg-background/70 px-2 py-0.5 text-sm transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-xs/relaxed file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 md:text-xs/relaxed dark:bg-input/30 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40",
-        className
-      )}
-      {...props}
-    />
-  )
+type InputProps = Omit<ComponentPropsWithoutRef<typeof InputPrimitive>, "size"> & {
+  size?: "sm" | "default" | "lg" | number
+  variant?: "default" | "soft"
+  unstyled?: boolean
+  nativeInput?: boolean
 }
 
-export { Input }
+const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
+  {
+    className,
+    size = "default",
+    variant = "default",
+    unstyled = false,
+    nativeInput = false,
+    style,
+    ...props
+  },
+  ref
+) {
+  const inputClassName = cn(
+    "font-system-ui h-full w-full min-w-0 rounded-[inherit] border-0 bg-transparent px-3 py-1.5 text-[length:var(--app-font-size-ui,12px)] leading-normal outline-none placeholder:text-muted-foreground/72 [transition:background-color_5000000s_ease-in-out_0s] sm:text-[length:var(--app-font-size-ui,12px)]",
+    size === "sm" &&
+      "px-2.5 py-1 text-[length:var(--app-font-size-ui-sm,11px)] sm:text-[length:var(--app-font-size-ui-sm,11px)]",
+    size === "lg" && "px-3.5 py-2",
+    props.type === "search" &&
+      "[&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-decoration]:appearance-none [&::-webkit-search-results-button]:appearance-none [&::-webkit-search-results-decoration]:appearance-none",
+    props.type === "file" &&
+      "text-muted-foreground file:me-3 file:bg-transparent file:font-medium file:text-[length:var(--app-font-size-ui-sm,11px)] file:text-foreground"
+  )
+
+  return (
+    <span
+      className={
+        cn(
+          !unstyled &&
+            "relative inline-flex w-full min-h-9 items-center rounded-lg border border-border bg-background text-[length:var(--app-font-size-ui,12px)] text-foreground has-aria-invalid:border-destructive/30 has-focus-visible:has-aria-invalid:border-destructive/50 has-focus-visible:border-foreground/30 has-autofill:bg-foreground/4 has-disabled:opacity-64 sm:min-h-8 sm:text-[length:var(--app-font-size-ui,12px)] dark:bg-input/32 dark:has-autofill:bg-foreground/8",
+          size === "sm" && "min-h-8 sm:min-h-7",
+          size === "lg" && "min-h-10 sm:min-h-9",
+          variant === "soft" && "bg-foreground/2 dark:bg-foreground/2",
+          className
+        ) || undefined
+      }
+      data-size={size}
+      data-slot="input-control"
+    >
+      {nativeInput ? (
+        <input
+          className={inputClassName}
+          data-slot="input"
+          size={typeof size === "number" ? size : undefined}
+          ref={ref}
+          style={typeof style === "function" ? undefined : style}
+          {...props}
+        />
+      ) : (
+        <InputPrimitive
+          className={inputClassName}
+          data-slot="input"
+          size={typeof size === "number" ? size : undefined}
+          ref={ref}
+          style={style}
+          {...props}
+        />
+      )}
+    </span>
+  )
+})
+
+export { Input, type InputProps }

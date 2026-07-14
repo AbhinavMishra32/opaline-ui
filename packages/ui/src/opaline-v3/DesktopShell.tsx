@@ -5,22 +5,23 @@ import { Button } from "../components/button";
 import type { ShellHistoryController } from "../history/ShellHistory";
 import { cn } from "../lib/utils";
 import {
-  SynaraSidebar,
-  SynaraSidebarContent,
-  SynaraSidebarFooter,
-  SynaraSidebarGroup,
-  SynaraSidebarGroupLabel,
-  SynaraSidebarHeader,
-  SynaraSidebarInstanceProvider,
-  SynaraSidebarMenu,
-  SynaraSidebarMenuButton,
-  SynaraSidebarMenuItem,
-  SynaraSidebarProvider,
-  SynaraSidebarRail,
-  SynaraSidebarSeparator,
-  SynaraSidebarInset,
-  SynaraSidebarTrigger,
-} from "./SynaraSidebar";
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarInstanceProvider,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarRail,
+  SidebarSeparator,
+  SidebarInset,
+  SidebarTrigger,
+  SIDEBAR_OFFCANVAS_MOTION_CLASS,
+} from "../components/sidebar";
 
 export type DesktopShellTabItem = {
   active?: boolean;
@@ -144,11 +145,11 @@ export type DesktopSidebarProject = {
 
 export type DesktopChromeButtonProps = React.ComponentProps<typeof Button>;
 
-const SYNARA_SIDEBAR_GAP_CLASS =
+const SIDEBAR_GAP_CLASS =
   "overflow-hidden before:absolute before:inset-0 before:bg-[radial-gradient(90%_75%_at_0%_0%,rgba(255,255,255,0.06),transparent_58%),linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.008))] dark:before:bg-[radial-gradient(90%_75%_at_0%_0%,rgba(255,255,255,0.04),transparent_58%),linear-gradient(180deg,rgba(255,255,255,0.018),rgba(255,255,255,0.006))]";
 
 /**
- * The desktop shell is composed from the extracted Synara sidebar provider,
+ * The desktop shell is composed from the extracted source sidebar provider,
  * off-canvas sidebar, seam rail, and inset surface. Construct supplies content
  * through slots; it does not own the shell DOM.
  */
@@ -288,10 +289,10 @@ export function DesktopShell({
 
   const sidebarChromeContent = sidebarChrome != null
     ? resolveSlot(sidebarChrome, state)
-    : <SynaraNavigationControls state={state} />;
+    : <DesktopNavigationControls state={state} />;
   const collapsedTriggerContent = collapsedSidebarTrigger != null
     ? resolveSlot(collapsedSidebarTrigger, state)
-    : <SynaraNavigationControls state={state} />;
+    : <DesktopNavigationControls state={state} />;
   const headerContent = resolveSlot(header, state);
   const actionContent = resolveSlot(actions ?? headerActions, state);
   const bottomPanelContent = resolveSlot(bottomPanel, state);
@@ -317,23 +318,25 @@ export function DesktopShell({
   }
 
   return (
-    <SynaraSidebarProvider
-      className={cn("opaline-v3-desktop-shell h-full min-h-0 overflow-hidden text-foreground antialiased", className)}
+    <SidebarProvider
+      className={cn("opaline-v3-desktop-shell h-full min-h-0 overflow-hidden bg-[var(--app-shell-background)] text-foreground antialiased", className)}
+      data-sidebar-side="left"
       defaultOpen={defaultSidebarOpen}
       open={sidebar != null ? sidebarOpen : false}
       onOpenChange={setSidebarOpen}
       style={{ "--sidebar-width": `${sidebarWidth}px` } as React.CSSProperties}
     >
       {sidebar != null ? (
-        <SynaraSidebar
-          className="text-foreground"
-          gapClassName={SYNARA_SIDEBAR_GAP_CLASS}
+        <Sidebar
+          className={cn("text-foreground", SIDEBAR_OFFCANVAS_MOTION_CLASS)}
+          gapClassName={cn(SIDEBAR_GAP_CLASS, SIDEBAR_OFFCANVAS_MOTION_CLASS)}
           innerClassName="app-sidebar-surface"
           resizable={{
             maxWidth: sidebarMaxWidth,
             minWidth: sidebarMinWidth,
             onResize: onSidebarWidthChange,
           }}
+          transparentSurface
         >
           {showSidebarChrome ? (
             <div data-tauri-drag-region className="flex h-[46px] shrink-0 items-center gap-0.5 px-3 pl-[83px] [-webkit-app-region:drag] [&>*]:[-webkit-app-region:no-drag]">
@@ -341,18 +344,18 @@ export function DesktopShell({
             </div>
           ) : null}
           <div className="min-h-0 flex-1 overflow-hidden">{sidebar}</div>
-        </SynaraSidebar>
+        </Sidebar>
       ) : null}
 
       <div className="chat-content-card-backing relative flex h-svh min-h-0 min-w-0 flex-1">
         {sidebar != null ? (
-          <SynaraSidebarInstanceProvider
+          <SidebarInstanceProvider
             resizable={{ maxWidth: sidebarMaxWidth, minWidth: sidebarMinWidth, onResize: onSidebarWidthChange }}
           >
-            <SynaraSidebarRail placement="content-seam" />
-          </SynaraSidebarInstanceProvider>
+            <SidebarRail placement="content-seam" />
+          </SidebarInstanceProvider>
         ) : null}
-        <SynaraSidebarInset surfaceClassName="chat-content-card relative z-[15] overflow-hidden bg-background">
+        <SidebarInset surfaceClassName="chat-content-card relative z-[15] overflow-hidden bg-background">
           <header data-tauri-drag-region className="chat-surface-divider relative z-30 flex h-[46px] min-h-[46px] items-center justify-between gap-3 px-3 select-none sm:px-5 [-webkit-app-region:drag]">
             {sidebar != null && !sidebarOpen ? (
               <div className="absolute left-[83px] top-[9px] z-40 flex items-center gap-0.5 [-webkit-app-region:no-drag]">
@@ -364,7 +367,7 @@ export function DesktopShell({
                 <div className="flex min-w-0 items-center gap-1 [-webkit-app-region:no-drag]">
                   {headerTabs.map((tab) => (
                     <div className="relative inline-flex min-w-0 max-w-56 shrink-0 items-center gap-1" data-tab-id={tab.id} key={tab.id}>
-                      {renderHeaderTab?.(tab, state) ?? <SynaraHeaderTab tab={tab} />}
+                      {renderHeaderTab?.(tab, state) ?? <DesktopHeaderTab tab={tab} />}
                       {renderHeaderTabActions?.(tab, state)}
                     </div>
                   ))}
@@ -409,33 +412,33 @@ export function DesktopShell({
               </aside>
             ) : null}
           </div>
-        </SynaraSidebarInset>
+        </SidebarInset>
       </div>
-    </SynaraSidebarProvider>
+    </SidebarProvider>
   );
 }
 
-function SynaraNavigationControls({ state }: { state: DesktopShellState }) {
+function DesktopNavigationControls({ state }: { state: DesktopShellState }) {
   return (
     <div className="-ms-1 flex shrink-0 items-center gap-0.5 [-webkit-app-region:no-drag]">
-      <SynaraSidebarTrigger
+      <SidebarTrigger
         aria-label={state.sidebarOpen ? "Close sidebar" : "Open sidebar"}
         className="size-7 shrink-0 rounded-lg text-muted-foreground/75 hover:text-foreground"
       />
-      <SynaraNavigationButton aria-label="Home" disabled={!state.canNavigateHome} onClick={state.navigateHome}>
+      <DesktopNavigationButton aria-label="Home" disabled={!state.canNavigateHome} onClick={state.navigateHome}>
         <House className="size-4" strokeWidth={1.8} />
-      </SynaraNavigationButton>
-      <SynaraNavigationButton aria-label="Back" disabled={!state.canNavigateBack} onClick={state.navigateBack}>
+      </DesktopNavigationButton>
+      <DesktopNavigationButton aria-label="Back" disabled={!state.canNavigateBack} onClick={state.navigateBack}>
         <ArrowLeft className="size-5" strokeWidth={1.7} />
-      </SynaraNavigationButton>
-      <SynaraNavigationButton aria-label="Forward" disabled={!state.canNavigateForward} onClick={state.navigateForward}>
+      </DesktopNavigationButton>
+      <DesktopNavigationButton aria-label="Forward" disabled={!state.canNavigateForward} onClick={state.navigateForward}>
         <ArrowRight className="size-5" strokeWidth={1.7} />
-      </SynaraNavigationButton>
+      </DesktopNavigationButton>
     </div>
   );
 }
 
-function SynaraNavigationButton(props: React.ComponentProps<typeof Button>) {
+function DesktopNavigationButton(props: React.ComponentProps<typeof Button>) {
   return (
     <Button
       {...props}
@@ -470,7 +473,7 @@ export function DesktopHeaderToolButton(props: DesktopChromeButtonProps) {
   return <DesktopChromeButton {...props} />;
 }
 
-function SynaraHeaderTab({ tab }: { tab: DesktopShellTabItem }) {
+function DesktopHeaderTab({ tab }: { tab: DesktopShellTabItem }) {
   return (
     <Button
       className="max-w-48 rounded-lg data-[active=true]:shadow-sm"
@@ -500,7 +503,7 @@ export type DesktopSidebarProps = {
   viewSwitcher?: React.ReactNode;
 };
 
-/** Construct data rendered through the extracted Synara sidebar primitives. */
+/** Construct data rendered through the extracted source sidebar primitives. */
 export function DesktopSidebar({
   children,
   footer,
@@ -518,70 +521,70 @@ export function DesktopSidebar({
   return (
     <div className="opaline-v3-sidebar flex h-full min-h-0 flex-col font-sans">
       {header != null || viewSwitcher != null ? (
-        <SynaraSidebarHeader>
+        <SidebarHeader>
           {header}
           {viewSwitcher}
-        </SynaraSidebarHeader>
+        </SidebarHeader>
       ) : null}
-      <SynaraSidebarContent>
+      <SidebarContent>
         {primaryItems.length > 0 ? (
-          <SynaraSidebarGroup>
-            <SynaraSidebarMenu>
+          <SidebarGroup>
+            <SidebarMenu>
               {primaryItems.map((item) => (
-                <SynaraSidebarMenuItem key={item.id}>
+                <SidebarMenuItem key={item.id}>
                   {renderNavItem?.(item) ?? <DesktopSidebarNavRow item={item} />}
-                </SynaraSidebarMenuItem>
+                </SidebarMenuItem>
               ))}
-            </SynaraSidebarMenu>
-          </SynaraSidebarGroup>
+            </SidebarMenu>
+          </SidebarGroup>
         ) : null}
         {projects.length > 0 ? (
-          <SynaraSidebarGroup>
-            <SynaraSidebarGroupLabel>{sectionLabels.projects ?? "Projects"}</SynaraSidebarGroupLabel>
-            <SynaraSidebarMenu>
+          <SidebarGroup>
+            <SidebarGroupLabel>{sectionLabels.projects ?? "Projects"}</SidebarGroupLabel>
+            <SidebarMenu>
               {projects.map((project) => (
-                <SynaraSidebarMenuItem key={project.id}>
+                <SidebarMenuItem key={project.id}>
                   {renderProject?.(project) ?? <DesktopSidebarProjectRow project={project} onSelect={onProjectSelect} renderItem={renderItem} />}
-                </SynaraSidebarMenuItem>
+                </SidebarMenuItem>
               ))}
-            </SynaraSidebarMenu>
-          </SynaraSidebarGroup>
+            </SidebarMenu>
+          </SidebarGroup>
         ) : null}
         {items.length > 0 ? (
-          <SynaraSidebarGroup>
-            <SynaraSidebarGroupLabel>{sectionLabels.items ?? "Items"}</SynaraSidebarGroupLabel>
-            <SynaraSidebarMenu>
+          <SidebarGroup>
+            <SidebarGroupLabel>{sectionLabels.items ?? "Items"}</SidebarGroupLabel>
+            <SidebarMenu>
               {items.map((item) => (
-                <SynaraSidebarMenuItem key={item.id}>
+                <SidebarMenuItem key={item.id}>
                   {renderItem?.(item, { inset: false }) ?? <DesktopSidebarItemRow item={item} />}
-                </SynaraSidebarMenuItem>
+                </SidebarMenuItem>
               ))}
-            </SynaraSidebarMenu>
-          </SynaraSidebarGroup>
+            </SidebarMenu>
+          </SidebarGroup>
         ) : null}
         {children}
-      </SynaraSidebarContent>
-      {footer != null ? <><SynaraSidebarSeparator /><SynaraSidebarFooter>{footer}</SynaraSidebarFooter></> : null}
+      </SidebarContent>
+      {footer != null ? <><SidebarSeparator /><SidebarFooter>{footer}</SidebarFooter></> : null}
     </div>
   );
 }
 
 function DesktopSidebarNavRow({ item }: { item: DesktopSidebarNavItem }) {
   return (
-    <SynaraSidebarMenuButton active={item.active === true} onClick={item.onClick}>
+    <SidebarMenuButton isActive={item.active === true} onClick={item.onClick}>
       {item.icon != null ? <span className="grid size-4 shrink-0 place-items-center">{item.icon}</span> : null}
       <span className="min-w-0 flex-1 truncate">{item.label}</span>
       {item.badge}
-    </SynaraSidebarMenuButton>
+    </SidebarMenuButton>
   );
 }
 
 function DesktopSidebarItemRow({ inset = false, item }: { inset?: boolean; item: DesktopSidebarItem }) {
   return (
-    <SynaraSidebarMenuButton active={item.active === true} className={inset ? "pl-8" : undefined}>
+    <SidebarMenuButton isActive={item.active === true} className={inset ? "pl-8" : undefined}>
       <span className="min-w-0 flex-1 truncate">{item.title}</span>
       {item.time ?? item.meta}
-    </SynaraSidebarMenuButton>
+    </SidebarMenuButton>
   );
 }
 
@@ -596,10 +599,10 @@ function DesktopSidebarProjectRow({
 }) {
   return (
     <div>
-      <SynaraSidebarMenuButton active={project.active === true} onClick={() => onSelect?.(project.id)}>
+      <SidebarMenuButton isActive={project.active === true} onClick={() => onSelect?.(project.id)}>
         {project.icon}
         <span className="min-w-0 flex-1 truncate">{project.label}</span>
-      </SynaraSidebarMenuButton>
+      </SidebarMenuButton>
       {project.collapsed !== true && project.threads?.map((item) => (
         <div key={item.id}>{renderItem?.(item, { inset: true }) ?? <DesktopSidebarItemRow inset item={item} />}</div>
       ))}

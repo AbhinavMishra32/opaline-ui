@@ -1,6 +1,9 @@
+# Third-Party Notices
+
+Portions of the desktop shell and UI primitive implementations are available under the following license:
+
 MIT License
 
-Copyright (c) 2026 Opaline contributors
 Copyright (c) 2026 Emanuele Di Pietro
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
