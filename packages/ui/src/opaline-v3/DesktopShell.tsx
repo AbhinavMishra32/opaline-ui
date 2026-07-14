@@ -40,8 +40,8 @@ export type DesktopHomeSurfaceProps = {
   children: ReactNode;
   className?: string;
   description?: ReactNode;
-  eyebrow?: ReactNode;
   footer?: ReactNode;
+  mark?: ReactNode;
   title: ReactNode;
 };
 
@@ -53,17 +53,16 @@ export function DesktopHomeSurface({
   children,
   className,
   description,
-  eyebrow,
   footer,
+  mark,
   title,
 }: DesktopHomeSurfaceProps) {
   return (
     <section className={cn("opaline-v3-home", className)}>
-      <div className="opaline-v3-home-ambient" aria-hidden="true" />
       <div className="opaline-v3-home-content">
         <header className="opaline-v3-home-heading">
-          {eyebrow != null ? <div className="opaline-v3-home-eyebrow">{eyebrow}</div> : null}
-          <h1 className="opaline-v3-home-title">{title}</h1>
+          {mark}
+          <h2 className="opaline-v3-home-title">{title}</h2>
           {description != null ? <p className="opaline-v3-home-description">{description}</p> : null}
         </header>
         <div className="opaline-v3-home-primary">{children}</div>

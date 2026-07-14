@@ -476,7 +476,9 @@ export function OpalineV2Shell({
         data-bottom-panel-open={bottomPanel != null && bottomPanelOpen ? "true" : "false"}
         data-inspector-open={resolvedInspector != null && inspectorOpen ? "true" : "false"}
         data-resizing={shellResizing ? "true" : "false"}
+        data-sidebar-side="left"
         data-sidebar-open={sidebar != null && sidebarOpen ? "true" : "false"}
+        data-slot="sidebar-wrapper"
         style={
           {
             "--opaline-v2-inspector-width": (inspectorExpanded && inspectorOpen) ? "calc(100vw - var(--opaline-v2-sidebar-width))" : `${inspectorWidth}px`,
@@ -490,19 +492,22 @@ export function OpalineV2Shell({
           <aside
             className={cn(
               "relative h-full min-h-0 shrink-0 overflow-visible border-r border-sidebar-border/60 bg-sidebar/45 backdrop-blur-[30px] backdrop-saturate-[1.75]",
-              "transition-[width,opacity] duration-300 ease-[cubic-bezier(0.2,0.9,0.2,1)]",
+              "transition-[width,opacity] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
               "opaline-v2-sidebar-pane",
               sidebarOpen ? "w-[var(--opaline-v2-sidebar-width)] opacity-100" : "pointer-events-none w-0 opacity-0"
             )}
             data-open={sidebarOpen ? "true" : "false"}
             data-resizing={sidebarResizing ? "true" : "false"}
+            data-slot="sidebar"
+            data-state={sidebarOpen ? "expanded" : "collapsed"}
           >
-            {showSidebarChrome ? <div data-tauri-drag-region className="flex h-11 items-start gap-[2px] bg-transparent px-3 pl-[83px] pt-2.5 [-webkit-app-region:drag] [&>*]:[-webkit-app-region:no-drag]">{sidebarChromeContent}</div> : null}
-            <div className="absolute inset-x-0 bottom-0 top-11 flex min-h-0 flex-col overflow-hidden">{sidebar}</div>
+            {showSidebarChrome ? <div data-tauri-drag-region className="flex h-[46px] items-center gap-[2px] bg-transparent px-3 pl-[83px] [-webkit-app-region:drag] [&>*]:[-webkit-app-region:no-drag]">{sidebarChromeContent}</div> : null}
+            <div className="absolute inset-x-0 bottom-0 top-[46px] flex min-h-0 flex-col overflow-hidden">{sidebar}</div>
             <div
               aria-disabled={!sidebarOpen}
               aria-orientation="vertical"
               className="absolute inset-y-0 -right-2 z-50 flex w-4 cursor-col-resize touch-none select-none"
+              data-placement="content-seam"
               onPointerDown={sidebarOpen ? startSidebarResize : undefined}
               role="separator"
             >
@@ -510,12 +515,12 @@ export function OpalineV2Shell({
             </div>
           </aside>
         ) : null}
-        <section className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-background/95">
-          <header data-tauri-drag-region className="relative z-30 flex h-11 min-h-11 min-w-0 items-end justify-between gap-3 bg-background/95 px-3 pb-1.5 select-none backdrop-blur supports-[backdrop-filter]:bg-background/85 [-webkit-app-region:drag]">
+        <section className="chat-content-card relative flex min-w-0 flex-1 flex-col overflow-hidden bg-background/95">
+          <header data-tauri-drag-region className="chat-surface-divider relative z-30 flex h-[46px] min-h-[46px] min-w-0 items-center justify-between gap-3 bg-background/95 px-3 select-none backdrop-blur supports-[backdrop-filter]:bg-background/85 sm:px-5 [-webkit-app-region:drag]">
             {sidebar != null ? (
               <div
                 className={cn(
-                  "absolute left-[83px] top-2.5 z-40 flex items-center gap-[2px] [-webkit-app-region:no-drag]",
+                  "absolute left-[83px] top-[9px] z-40 flex items-center gap-[2px] [-webkit-app-region:no-drag]",
                   "transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.2,0.9,0.2,1)]",
                   sidebarOpen && "pointer-events-none -translate-x-1 opacity-0",
                   !sidebarOpen && "translate-x-0 opacity-100"
@@ -526,7 +531,7 @@ export function OpalineV2Shell({
             ) : null}
             <div className={cn(
               "flex min-w-0 flex-1 items-center gap-3 overflow-hidden transition-none",
-              sidebarCollapsed && "translate-y-0.5 pl-52"
+              sidebarCollapsed && "pl-52"
             )}>
               {headerTabs.length > 0 ? (
                 <div className="flex h-full min-w-0 items-center gap-1 [-webkit-app-region:no-drag]">
@@ -545,7 +550,7 @@ export function OpalineV2Shell({
               )}
               {headerContent}
             </div>
-            <div className="inline-flex items-center gap-1 pb-px [-webkit-app-region:no-drag]">
+            <div className="inline-flex items-center gap-1 [-webkit-app-region:no-drag]">
               {actionContent}
             </div>
           </header>

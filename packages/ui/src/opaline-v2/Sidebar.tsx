@@ -108,19 +108,19 @@ export function Sidebar({
 }
 
 export function SidebarPrimary({ children, className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <nav className={cn("flex flex-col gap-0.5 px-2.5 py-1", className)} aria-label="Primary" {...props}>{children}</nav>;
+  return <nav className={cn("flex flex-col gap-0.5 px-1.5 pb-1.5 pt-1", className)} aria-label="Primary" {...props}>{children}</nav>;
 }
 
 export function SidebarScroll({ children, className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <ScrollArea className={cn("min-h-0 flex-1", className)} {...appActionAttributes.sidebarScroll} {...props}>
-      <div className="flex flex-col gap-0.5 p-2.5">{children}</div>
+      <div className="flex flex-col gap-0.5 px-1.5 py-1.5">{children}</div>
     </ScrollArea>
   );
 }
 
 export function SidebarFooter({ children, className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("flex flex-col gap-0.5 px-2.5 py-1", className)} {...props}>{children}</div>;
+  return <div className={cn("flex flex-col gap-2 p-2", className)} {...props}>{children}</div>;
 }
 
 export type SidebarBottomSlotProps = HTMLAttributes<HTMLDivElement> & {
@@ -218,7 +218,7 @@ export function SidebarNavItemRow({ className, item, type = "button", ...props }
 export function SidebarSection({ children, heading }: { children: ReactNode; heading: string }) {
   return (
     <section className="flex flex-col gap-1" {...appActionAttributes.sidebarSection({ collapsed: false, heading })}>
-      <div className="px-2 py-1 text-xs font-medium text-muted-foreground">{heading}</div>
+      <div className="px-2 py-1 text-[length:var(--app-font-size-ui,12px)] font-normal text-muted-foreground/58">{heading}</div>
       {children}
     </section>
   );
