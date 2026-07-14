@@ -2,20 +2,15 @@ import * as React from "react";
 import { ArrowLeft, ArrowRight, House } from "lucide-react";
 
 import { Button } from "../components/button";
+import type { ShellHistoryController } from "../history/ShellHistory";
 import { cn } from "../lib/utils";
-import type { AppShellProps, AppShellState, AppShellTabItem } from "../opaline-v2/AppShell";
-import type {
-  SidebarItem,
-  SidebarNavItem,
-  SidebarProject,
-  SidebarProps,
-} from "../opaline-v2/Sidebar";
 import {
   SynaraSidebar,
   SynaraSidebarContent,
   SynaraSidebarFooter,
   SynaraSidebarGroup,
   SynaraSidebarGroupLabel,
+  SynaraSidebarHeader,
   SynaraSidebarInstanceProvider,
   SynaraSidebarMenu,
   SynaraSidebarMenuButton,
@@ -27,7 +22,127 @@ import {
   SynaraSidebarTrigger,
 } from "./SynaraSidebar";
 
-export type DesktopShellProps = AppShellProps;
+export type DesktopShellTabItem = {
+  active?: boolean;
+  dirty?: boolean;
+  id: string;
+  title: React.ReactNode;
+};
+
+export type DesktopShellState = {
+  bottomPanelExpanded: boolean;
+  bottomPanelOpen: boolean;
+  canNavigateBack: boolean;
+  canNavigateForward: boolean;
+  canNavigateHome: boolean;
+  history?: ShellHistoryController<any>;
+  inspectorExpanded: boolean;
+  inspectorOpen: boolean;
+  isBottomPanelOpen: boolean;
+  isRightPanelOpen: boolean;
+  isSidebarOpen: boolean;
+  navigateBack: () => void;
+  navigateForward: () => void;
+  navigateHome: () => void;
+  setBottomPanelExpanded: (expanded: boolean) => void;
+  setBottomPanelOpen: (open: boolean) => void;
+  setInspectorExpanded: (expanded: boolean) => void;
+  setInspectorOpen: (open: boolean) => void;
+  setRightPanelOpen: (open: boolean) => void;
+  setSidebarOpen: (open: boolean) => void;
+  sidebarOpen: boolean;
+  toggleBottomPanel: () => void;
+  toggleBottomPanelExpanded: () => void;
+  toggleInspector: () => void;
+  toggleRightPanel: () => void;
+  toggleSidebar: () => void;
+};
+
+type DesktopShellSlot = React.ReactNode | ((state: DesktopShellState) => React.ReactNode);
+
+export type DesktopShellProps = {
+  actions?: DesktopShellSlot;
+  bottomPanel?: DesktopShellSlot;
+  bottomPanelExpanded?: boolean;
+  bottomPanelOpen?: boolean;
+  canNavigateBack?: boolean;
+  canNavigateForward?: boolean;
+  className?: string;
+  collapsedSidebarTrigger?: DesktopShellSlot;
+  composer?: React.ReactNode;
+  defaultBottomPanelExpanded?: boolean;
+  defaultBottomPanelOpen?: boolean;
+  defaultInspectorExpanded?: boolean;
+  defaultInspectorOpen?: boolean;
+  defaultInspectorWidth?: number;
+  defaultRightPanelOpen?: boolean;
+  defaultRightPanelWidth?: number;
+  defaultSidebarOpen?: boolean;
+  defaultSidebarWidth?: number;
+  header?: DesktopShellSlot;
+  headerActions?: DesktopShellSlot;
+  headerTabs?: DesktopShellTabItem[];
+  history?: ShellHistoryController<any>;
+  inspector?: React.ReactNode;
+  inspectorExpanded?: boolean;
+  inspectorMaxWidth?: number;
+  inspectorMinWidth?: number;
+  inspectorOpen?: boolean;
+  inspectorWidth?: number;
+  main: React.ReactNode;
+  onBottomPanelExpandedChange?: (expanded: boolean) => void;
+  onBottomPanelOpenChange?: (open: boolean) => void;
+  onInspectorExpandedChange?: (expanded: boolean) => void;
+  onInspectorOpenChange?: (open: boolean) => void;
+  onInspectorWidthChange?: (width: number) => void;
+  onNavigateBack?: () => void;
+  onNavigateForward?: () => void;
+  onNavigateHome?: () => void;
+  onSidebarOpenChange?: (open: boolean) => void;
+  onSidebarWidthChange?: (width: number) => void;
+  renderHeaderTab?: (tab: DesktopShellTabItem, state: DesktopShellState) => React.ReactNode;
+  renderHeaderTabActions?: (tab: DesktopShellTabItem, state: DesktopShellState) => React.ReactNode;
+  rightPanel?: React.ReactNode;
+  rightPanelMaxWidth?: number;
+  rightPanelMinWidth?: number;
+  showSidebarChrome?: boolean;
+  sidebar?: React.ReactNode;
+  sidebarChrome?: DesktopShellSlot;
+  sidebarMaxWidth?: number;
+  sidebarMinWidth?: number;
+  sidebarOpen?: boolean;
+  sidebarWidth?: number;
+  subtitle?: React.ReactNode;
+  title?: React.ReactNode;
+};
+
+export type DesktopSidebarItem = {
+  active?: boolean;
+  id: string;
+  meta?: React.ReactNode;
+  time?: React.ReactNode;
+  title: React.ReactNode;
+};
+
+export type DesktopSidebarNavItem = {
+  active?: boolean;
+  badge?: React.ReactNode;
+  icon?: React.ReactNode;
+  id: string;
+  label: React.ReactNode;
+  onClick?: () => void;
+};
+
+export type DesktopSidebarProject = {
+  active?: boolean;
+  collapsed?: boolean;
+  icon?: React.ReactNode;
+  id: string;
+  label: React.ReactNode;
+  threads?: DesktopSidebarItem[];
+};
+
+export type DesktopChromeButtonProps = React.ComponentProps<typeof Button>;
 
 const SYNARA_SIDEBAR_GAP_CLASS =
   "overflow-hidden before:absolute before:inset-0 before:bg-[radial-gradient(90%_75%_at_0%_0%,rgba(255,255,255,0.06),transparent_58%),linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.008))] dark:before:bg-[radial-gradient(90%_75%_at_0%_0%,rgba(255,255,255,0.04),transparent_58%),linear-gradient(180deg,rgba(255,255,255,0.018),rgba(255,255,255,0.006))]";
@@ -137,7 +252,7 @@ export function DesktopShell({
   }, [history, onNavigateForward]);
   const navigateHome = React.useCallback(() => onNavigateHome?.(), [onNavigateHome]);
 
-  const state = React.useMemo<AppShellState>(() => ({
+  const state = React.useMemo<DesktopShellState>(() => ({
     bottomPanelExpanded,
     bottomPanelOpen,
     canNavigateBack: canNavigateBack ?? history?.canGoBack ?? false,
@@ -218,7 +333,6 @@ export function DesktopShell({
             maxWidth: sidebarMaxWidth,
             minWidth: sidebarMinWidth,
             onResize: onSidebarWidthChange,
-            storageKey: "opaline-v3-sidebar-width",
           }}
         >
           {showSidebarChrome ? (
@@ -238,7 +352,7 @@ export function DesktopShell({
             <SynaraSidebarRail placement="content-seam" />
           </SynaraSidebarInstanceProvider>
         ) : null}
-        <SynaraSidebarInset surfaceClassName="chat-content-card bg-background">
+        <SynaraSidebarInset surfaceClassName="chat-content-card relative z-[15] overflow-hidden bg-background">
           <header data-tauri-drag-region className="chat-surface-divider relative z-30 flex h-[46px] min-h-[46px] items-center justify-between gap-3 px-3 select-none sm:px-5 [-webkit-app-region:drag]">
             {sidebar != null && !sidebarOpen ? (
               <div className="absolute left-[83px] top-[9px] z-40 flex items-center gap-0.5 [-webkit-app-region:no-drag]">
@@ -278,10 +392,11 @@ export function DesktopShell({
                   className={cn(
                     "relative z-40 min-h-0 overflow-hidden border-t transition-[height,opacity] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
                     bottomPanelOpen
-                      ? bottomPanelExpanded ? "h-full" : "h-[var(--opaline-v2-bottom-panel-height,260px)]"
+                      ? bottomPanelExpanded ? "h-full" : "h-[var(--app-shell-bottom-panel-height,260px)]"
                       : "pointer-events-none h-0 opacity-0",
                   )}
                   data-open={bottomPanelOpen ? "true" : "false"}
+                  data-slot="desktop-bottom-panel"
                 >
                   {bottomPanelContent}
                 </section>
@@ -290,7 +405,7 @@ export function DesktopShell({
             {resolvedInspector != null ? (
               <aside className={cn("relative min-h-0 overflow-hidden max-[980px]:hidden", inspectorOpen ? "opacity-100" : "pointer-events-none opacity-0")}>
                 {!inspectorExpanded ? <div className="absolute inset-y-0 -left-2 z-50 w-4 cursor-col-resize" onPointerDown={beginInspectorResize} role="separator" /> : null}
-                <div className="absolute inset-0 flex min-h-0 flex-col overflow-hidden border-l bg-card/78">{resolvedInspector}</div>
+                <div className="absolute inset-0 flex min-h-0 flex-col overflow-hidden border-l bg-card/78" data-slot="desktop-inspector-surface">{resolvedInspector}</div>
               </aside>
             ) : null}
           </div>
@@ -300,7 +415,7 @@ export function DesktopShell({
   );
 }
 
-function SynaraNavigationControls({ state }: { state: AppShellState }) {
+function SynaraNavigationControls({ state }: { state: DesktopShellState }) {
   return (
     <div className="-ms-1 flex shrink-0 items-center gap-0.5 [-webkit-app-region:no-drag]">
       <SynaraSidebarTrigger
@@ -335,7 +450,27 @@ function SynaraNavigationButton(props: React.ComponentProps<typeof Button>) {
   );
 }
 
-function SynaraHeaderTab({ tab }: { tab: AppShellTabItem }) {
+/** Source-style desktop chrome button used by Construct-owned shell actions. */
+export function DesktopChromeButton({ className, size = "icon", variant = "ghost", ...props }: DesktopChromeButtonProps) {
+  return (
+    <Button
+      className={cn(
+        "size-7 shrink-0 rounded-lg p-0 text-muted-foreground/75 hover:text-foreground disabled:opacity-35 [&_svg:not([class*='size-'])]:size-4",
+        className,
+      )}
+      size={size}
+      type="button"
+      variant={variant}
+      {...props}
+    />
+  );
+}
+
+export function DesktopHeaderToolButton(props: DesktopChromeButtonProps) {
+  return <DesktopChromeButton {...props} />;
+}
+
+function SynaraHeaderTab({ tab }: { tab: DesktopShellTabItem }) {
   return (
     <Button
       className="max-w-48 rounded-lg data-[active=true]:shadow-sm"
@@ -350,8 +485,18 @@ function SynaraHeaderTab({ tab }: { tab: AppShellTabItem }) {
   );
 }
 
-export type DesktopSidebarProps = SidebarProps & {
+export type DesktopSidebarProps = {
+  children?: React.ReactNode;
+  footer?: React.ReactNode;
   header?: React.ReactNode;
+  items?: DesktopSidebarItem[];
+  onProjectSelect?: (projectId: string) => void;
+  primaryItems?: DesktopSidebarNavItem[];
+  projects?: DesktopSidebarProject[];
+  renderItem?: (item: DesktopSidebarItem, options: { inset: boolean }) => React.ReactNode;
+  renderNavItem?: (item: DesktopSidebarNavItem) => React.ReactNode;
+  renderProject?: (project: DesktopSidebarProject) => React.ReactNode;
+  sectionLabels?: { items?: string; projects?: string };
   viewSwitcher?: React.ReactNode;
 };
 
@@ -372,11 +517,15 @@ export function DesktopSidebar({
 }: DesktopSidebarProps) {
   return (
     <div className="opaline-v3-sidebar flex h-full min-h-0 flex-col font-sans">
-      {header != null ? <div className="px-3 py-2">{header}</div> : null}
-      {viewSwitcher}
+      {header != null || viewSwitcher != null ? (
+        <SynaraSidebarHeader>
+          {header}
+          {viewSwitcher}
+        </SynaraSidebarHeader>
+      ) : null}
       <SynaraSidebarContent>
         {primaryItems.length > 0 ? (
-          <SynaraSidebarGroup className="pb-1.5 pt-1">
+          <SynaraSidebarGroup>
             <SynaraSidebarMenu>
               {primaryItems.map((item) => (
                 <SynaraSidebarMenuItem key={item.id}>
@@ -417,7 +566,7 @@ export function DesktopSidebar({
   );
 }
 
-function DesktopSidebarNavRow({ item }: { item: SidebarNavItem }) {
+function DesktopSidebarNavRow({ item }: { item: DesktopSidebarNavItem }) {
   return (
     <SynaraSidebarMenuButton active={item.active === true} onClick={item.onClick}>
       {item.icon != null ? <span className="grid size-4 shrink-0 place-items-center">{item.icon}</span> : null}
@@ -427,7 +576,7 @@ function DesktopSidebarNavRow({ item }: { item: SidebarNavItem }) {
   );
 }
 
-function DesktopSidebarItemRow({ inset = false, item }: { inset?: boolean; item: SidebarItem }) {
+function DesktopSidebarItemRow({ inset = false, item }: { inset?: boolean; item: DesktopSidebarItem }) {
   return (
     <SynaraSidebarMenuButton active={item.active === true} className={inset ? "pl-8" : undefined}>
       <span className="min-w-0 flex-1 truncate">{item.title}</span>
@@ -442,8 +591,8 @@ function DesktopSidebarProjectRow({
   renderItem,
 }: {
   onSelect?: (projectId: string) => void;
-  project: SidebarProject;
-  renderItem?: (item: SidebarItem, options: { inset: boolean }) => React.ReactNode;
+  project: DesktopSidebarProject;
+  renderItem?: (item: DesktopSidebarItem, options: { inset: boolean }) => React.ReactNode;
 }) {
   return (
     <div>
@@ -469,23 +618,26 @@ export type DesktopHomeSurfaceProps = {
 
 export function DesktopHomeSurface({ children, className, description, footer, mark, title }: DesktopHomeSurfaceProps) {
   return (
-    <section className={cn("opaline-v3-home", className)}>
-      <div className="opaline-v3-home-content">
-        <header className="opaline-v3-home-heading">
+    <section className={cn(
+      "opaline-v3-home flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-hidden bg-[var(--color-background-surface)] px-[var(--app-density-chat-gutter-x,0.75rem)] sm:px-[var(--app-density-chat-gutter-x-lg,1.25rem)]",
+      className,
+    )}>
+      <div className="opaline-v3-home-content mx-auto flex w-full max-w-[46rem] min-w-0 flex-col justify-center">
+        <header className="opaline-v3-home-heading flex flex-col items-center gap-4 px-6 pb-5 text-center select-none">
           {mark}
-          <h2 className="opaline-v3-home-title">{title}</h2>
-          {description != null ? <p className="opaline-v3-home-description">{description}</p> : null}
+          <h2 className="opaline-v3-home-title text-[26px] font-normal leading-[1.15] tracking-[-0.015em] text-foreground/95 sm:text-[30px]">{title}</h2>
+          {description != null ? <p className="opaline-v3-home-description max-w-[34rem] text-sm leading-relaxed text-muted-foreground">{description}</p> : null}
         </header>
-        <div className="opaline-v3-home-primary">{children}</div>
-        {footer != null ? <footer className="opaline-v3-home-footer">{footer}</footer> : null}
+        <div className="opaline-v3-home-primary w-full">{children}</div>
+        {footer != null ? <footer className="opaline-v3-home-footer flex justify-center text-xs text-muted-foreground">{footer}</footer> : null}
       </div>
     </section>
   );
 }
 
 function resolveSlot(
-  slot: React.ReactNode | ((state: AppShellState) => React.ReactNode) | undefined,
-  state: AppShellState,
+  slot: React.ReactNode | ((state: DesktopShellState) => React.ReactNode) | undefined,
+  state: DesktopShellState,
 ) {
   return typeof slot === "function" ? slot(state) : slot;
 }

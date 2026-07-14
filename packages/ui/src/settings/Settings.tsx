@@ -1,7 +1,6 @@
 import { type ReactNode } from "react";
 import { Button } from "../components/button";
 import { Card, CardContent } from "../components/card";
-import { Input } from "../components/input";
 import { Label } from "../components/label";
 import { ScrollArea } from "../components/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/select";
@@ -11,6 +10,7 @@ import {
   SynaraSidebarFooter,
   SynaraSidebarGroup,
   SynaraSidebarGroupLabel,
+  SynaraSidebarInput,
   SynaraSidebarMenu,
   SynaraSidebarMenuButton,
   SynaraSidebarMenuItem,
@@ -139,12 +139,11 @@ function SettingsSidebar({
       </SynaraSidebarGroup>
 
       <div className="px-2 pb-1.5">
-        <Input
+        <SynaraSidebarInput
           type="search"
           placeholder={searchPlaceholder}
           value={query}
           onChange={(e) => onSearchChange?.(e.target.value)}
-          className="h-7 rounded-[6px] border-transparent bg-sidebar-accent/45 px-2 text-[13px] shadow-none placeholder:text-muted-foreground/70 focus-visible:border-sidebar-border/40 focus-visible:ring-1 focus-visible:ring-ring/20"
         />
       </div>
 

@@ -30,10 +30,12 @@ export {
   OpalineV2SidebarItemButton,
   ShellIconButton,
 } from "./opaline-v2/AppShell";
-export { Button, IconButton, Pill, StatusDot } from "./opaline-v2/Button";
+export { Button as LegacyButton, IconButton, Pill, StatusDot } from "./opaline-v2/Button";
 export type { OpalineV2ButtonProps } from "./opaline-v2/Button";
+export { Button } from "./components/button";
 export { Alert, AlertDescription, AlertTitle, Badge, Input, Spinner, Textarea } from "./components";
 export { Switch } from "./components/switch";
+export { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/tabs";
 export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./components/select";
 export { RadioGroup, RadioGroupItem } from "./components/radio-group";
 export { Label } from "./components/label";
@@ -174,10 +176,22 @@ export {
   SidebarThreadRow,
 } from "./opaline-v2/Sidebar";
 export type { SidebarBottomSlotProps, SidebarItem, SidebarNavItem, SidebarProject, SidebarProps } from "./opaline-v2/Sidebar";
-export { DesktopHomeSurface, DesktopShell, DesktopSidebar } from "./opaline-v3/DesktopShell";
+export {
+  DesktopChromeButton,
+  DesktopHeaderToolButton,
+  DesktopHomeSurface,
+  DesktopShell,
+  DesktopSidebar,
+} from "./opaline-v3/DesktopShell";
 export type {
+  DesktopChromeButtonProps,
   DesktopHomeSurfaceProps,
+  DesktopShellState,
+  DesktopShellTabItem,
   DesktopShellProps,
+  DesktopSidebarItem,
+  DesktopSidebarNavItem,
+  DesktopSidebarProject,
   DesktopSidebarProps,
 } from "./opaline-v3/DesktopShell";
 export {
@@ -189,8 +203,11 @@ export {
   SynaraSidebarHeader,
   SynaraSidebarHeaderTrigger,
   SynaraSidebarInset,
+  SynaraSidebarInput,
   SynaraSidebarInstanceProvider,
   SynaraSidebarMenu,
+  SynaraSidebarMenuAction,
+  SynaraSidebarMenuBadge,
   SynaraSidebarMenuButton,
   SynaraSidebarMenuItem,
   SynaraSidebarProvider,

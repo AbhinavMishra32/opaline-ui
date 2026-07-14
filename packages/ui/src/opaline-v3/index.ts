@@ -1,7 +1,19 @@
-export { DesktopHomeSurface, DesktopShell, DesktopSidebar } from "./DesktopShell";
+export {
+  DesktopChromeButton,
+  DesktopHeaderToolButton,
+  DesktopHomeSurface,
+  DesktopShell,
+  DesktopSidebar,
+} from "./DesktopShell";
 export type {
+  DesktopChromeButtonProps,
   DesktopHomeSurfaceProps,
+  DesktopShellState,
+  DesktopShellTabItem,
   DesktopShellProps,
+  DesktopSidebarItem,
+  DesktopSidebarNavItem,
+  DesktopSidebarProject,
   DesktopSidebarProps,
 } from "./DesktopShell";
 export {
@@ -13,8 +25,11 @@ export {
   SynaraSidebarHeader,
   SynaraSidebarHeaderTrigger,
   SynaraSidebarInset,
+  SynaraSidebarInput,
   SynaraSidebarInstanceProvider,
   SynaraSidebarMenu,
+  SynaraSidebarMenuAction,
+  SynaraSidebarMenuBadge,
   SynaraSidebarMenuButton,
   SynaraSidebarMenuItem,
   SynaraSidebarProvider,

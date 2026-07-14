@@ -196,7 +196,10 @@ export function AgentSessionComposer({
   const accessibleSubmitLabel = typeof submitLabel === "string" ? submitLabel : "Send";
 
   return (
-    <div className={cn("mx-auto w-full max-w-[840px] overflow-hidden rounded-3xl bg-card shadow-[0_8px_24px_color-mix(in_srgb,var(--foreground)_6%,transparent)] dark:shadow-none ring-1 ring-border/65 transition-[box-shadow,background-color] focus-within:ring-ring/70", className)}>
+    <div className={cn(
+      "chat-composer-shell chat-composer-surface mx-auto w-full max-w-[46rem] overflow-hidden border border-[color:color-mix(in_srgb,var(--color-border-heavy,var(--border))_95%,var(--foreground)_5%)] bg-[var(--composer-surface,var(--card))] shadow-[0_4px_18px_-6px_color-mix(in_srgb,var(--foreground)_7%,transparent)] transition-colors duration-200 focus-within:border-[color:color-mix(in_srgb,var(--foreground)_14%,transparent)] dark:border-border dark:shadow-[0_6px_24px_-10px_rgba(0,0,0,0.30)]",
+      className,
+    )}>
       {header && <div>{header}</div>}
       <Textarea
         {...props}
