@@ -2,6 +2,19 @@ export { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 export { Badge, badgeVariants } from "./badge";
 export { Alert, AlertDescription, AlertTitle } from "./alert";
 export { Button, buttonVariants } from "./button";
+export {
+  DesktopHeaderButton,
+  DesktopHeaderIconButton,
+  DESKTOP_HEADER_CONTROL_CLASS_NAME,
+  DESKTOP_HEADER_ICON_CONTROL_CLASS_NAME,
+  DESKTOP_HEADER_ICON_STRENGTH_CLASS_NAME,
+  desktopHeaderControlVariant,
+} from "./desktop-header-controls";
+export type {
+  DesktopHeaderButtonProps,
+  DesktopHeaderControlTone,
+  DesktopHeaderIconButtonProps,
+} from "./desktop-header-controls";
 export { Input } from "./input";
 export { Spinner } from "./spinner";
 export { Textarea } from "./textarea";

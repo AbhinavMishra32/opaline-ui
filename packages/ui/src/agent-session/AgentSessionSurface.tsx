@@ -2,7 +2,6 @@ import { ArrowUpIcon, SpinnerIcon } from "@phosphor-icons/react";
 import { useEffect, useMemo, useRef } from "react";
 
 import { Button } from "../components/button";
-import { Textarea } from "../components/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../components/tooltip";
 import { cn } from "../lib/utils";
 import { AgentRunTrace } from "./AgentRunTrace";
@@ -201,26 +200,28 @@ export function AgentSessionComposer({
       className,
     )}>
       {header && <div>{header}</div>}
-      <Textarea
-        {...props}
-        className={cn(
-          "min-h-16 max-h-36 resize-none border-0 bg-transparent dark:bg-transparent px-4 pb-1 text-[13px] leading-5 shadow-none focus-visible:border-transparent focus-visible:ring-0",
-          header ? "pt-1.5" : "pt-3"
-        )}
-        value={value}
-        onChange={(event) => onValueChange(event.target.value)}
-        onKeyDown={(event) => {
-          props.onKeyDown?.(event);
-          if (event.defaultPrevented || event.nativeEvent.isComposing) return;
-          if (event.key === "Enter" && !event.shiftKey && !isDisabled) {
-            event.preventDefault();
-            onSubmit();
-          }
-        }}
-        placeholder={placeholder}
-        spellCheck
-      />
-      <div className="flex items-center justify-between gap-2 px-2 pb-2 pt-0.5">
+      <div className={cn(
+        "relative pl-[var(--app-density-composer-editor-padding-x,0.75rem)] pr-[var(--app-density-composer-editor-padding-x-end,0.875rem)] pb-[var(--app-density-composer-editor-padding-bottom,0.5rem)]",
+        header ? "pt-1.5" : "pt-[var(--app-density-composer-editor-padding-top,0.75rem)]",
+      )}>
+        <textarea
+          {...props}
+          className="font-system-ui block min-h-[var(--app-density-composer-editor-min-height,2lh)] max-h-[200px] w-full resize-none overflow-y-auto whitespace-pre-wrap break-words border-0 bg-transparent text-[length:var(--app-font-size-chat,12px)] leading-relaxed text-foreground outline-none placeholder:text-muted-foreground/40 focus:outline-none"
+          value={value}
+          onChange={(event) => onValueChange(event.target.value)}
+          onKeyDown={(event) => {
+            props.onKeyDown?.(event);
+            if (event.defaultPrevented || event.nativeEvent.isComposing) return;
+            if (event.key === "Enter" && !event.shiftKey && !isDisabled) {
+              event.preventDefault();
+              onSubmit();
+            }
+          }}
+          placeholder={placeholder}
+          spellCheck
+        />
+      </div>
+      <div className="flex items-center justify-between gap-2 pl-[var(--app-density-composer-footer-padding,0.375rem)] pr-[var(--app-density-composer-footer-padding-end,0.5rem)] pb-[var(--app-density-composer-footer-padding,0.375rem)]">
         <div className="flex min-w-0 flex-1 items-center gap-1.5">{footerStart}</div>
         <div className="flex items-center gap-1.5 shrink-0">
           {footerEnd}
@@ -229,10 +230,10 @@ export function AgentSessionComposer({
               render={(
                 <Button
                   aria-label={pending ? "Construct Interact is thinking" : accessibleSubmitLabel}
-                  className="rounded-full agent-composer-submit-btn"
-                  style={{ borderRadius: "9999px" }}
+                  className="size-7 rounded-full sm:size-7 agent-composer-submit-btn"
                   type="button"
-                  size="icon-lg"
+                  size="icon-xs"
+                  variant="prominent"
                   disabled={isDisabled}
                   onClick={onSubmit}
                 >

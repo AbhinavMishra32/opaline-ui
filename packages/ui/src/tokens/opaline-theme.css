@@ -60,6 +60,7 @@
   --app-font-size-ui-sm: 11px;
   --app-font-size-ui-xs: 10px;
   --app-font-size-ui-2xs: 9px;
+  --app-font-size-chat: 12px;
   --color-text-foreground: var(--foreground, var(--opaline-text-primary));
   --color-text-foreground-secondary: var(--muted-foreground, var(--opaline-text-secondary));
   --color-text-foreground-tertiary: var(--opaline-text-tertiary);

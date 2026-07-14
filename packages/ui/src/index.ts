@@ -33,6 +33,19 @@ export {
 export { Button as LegacyButton, IconButton, Pill, StatusDot } from "./opaline-v2/Button";
 export type { OpalineV2ButtonProps } from "./opaline-v2/Button";
 export { Button } from "./components/button";
+export {
+  DesktopHeaderButton,
+  DesktopHeaderIconButton,
+  DESKTOP_HEADER_CONTROL_CLASS_NAME,
+  DESKTOP_HEADER_ICON_CONTROL_CLASS_NAME,
+  DESKTOP_HEADER_ICON_STRENGTH_CLASS_NAME,
+  desktopHeaderControlVariant,
+} from "./components/desktop-header-controls";
+export type {
+  DesktopHeaderButtonProps,
+  DesktopHeaderControlTone,
+  DesktopHeaderIconButtonProps,
+} from "./components/desktop-header-controls";
 export { Alert, AlertDescription, AlertTitle, Badge, Input, Spinner, Textarea } from "./components";
 export { Switch } from "./components/switch";
 export { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/tabs";

@@ -2,6 +2,8 @@ import * as React from "react";
 import { ArrowLeft, ArrowRight, House } from "lucide-react";
 
 import { Button } from "../components/button";
+import { DesktopHeaderIconButton } from "../components/desktop-header-controls";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../components/tooltip";
 import type { ShellHistoryController } from "../history/ShellHistory";
 import { cn } from "../lib/utils";
 import {
@@ -143,7 +145,12 @@ export type DesktopSidebarProject = {
   threads?: DesktopSidebarItem[];
 };
 
-export type DesktopChromeButtonProps = React.ComponentProps<typeof Button>;
+export type DesktopChromeButtonProps = Omit<
+  React.ComponentProps<typeof DesktopHeaderIconButton>,
+  "label"
+> & {
+  "aria-label": string;
+};
 
 const SIDEBAR_GAP_CLASS =
   "overflow-hidden before:absolute before:inset-0 before:bg-[radial-gradient(90%_75%_at_0%_0%,rgba(255,255,255,0.06),transparent_58%),linear-gradient(180deg,rgba(255,255,255,0.025),rgba(255,255,255,0.008))] dark:before:bg-[radial-gradient(90%_75%_at_0%_0%,rgba(255,255,255,0.04),transparent_58%),linear-gradient(180deg,rgba(255,255,255,0.018),rgba(255,255,255,0.006))]";
@@ -419,52 +426,58 @@ export function DesktopShell({
 }
 
 function DesktopNavigationControls({ state }: { state: DesktopShellState }) {
+  const platform = typeof navigator === "undefined" ? "" : navigator.platform;
+  const isMac = /Mac|iPhone|iPad|iPod/i.test(platform);
   return (
     <div className="-ms-1 flex shrink-0 items-center gap-0.5 [-webkit-app-region:no-drag]">
       <SidebarTrigger
         aria-label={state.sidebarOpen ? "Close sidebar" : "Open sidebar"}
         className="size-7 shrink-0 rounded-lg text-muted-foreground/75 hover:text-foreground"
       />
-      <DesktopNavigationButton aria-label="Home" disabled={!state.canNavigateHome} onClick={state.navigateHome}>
+      <DesktopNavigationButton label="Home" disabled={!state.canNavigateHome} onClick={state.navigateHome}>
         <House className="size-4" strokeWidth={1.8} />
       </DesktopNavigationButton>
-      <DesktopNavigationButton aria-label="Back" disabled={!state.canNavigateBack} onClick={state.navigateBack}>
-        <ArrowLeft className="size-5" strokeWidth={1.7} />
+      <DesktopNavigationButton label="Back" shortcut={isMac ? "⌘[" : "Alt+Left"} disabled={!state.canNavigateBack} onClick={state.navigateBack}>
+        <ArrowLeft className="size-6" strokeWidth={1.7} />
       </DesktopNavigationButton>
-      <DesktopNavigationButton aria-label="Forward" disabled={!state.canNavigateForward} onClick={state.navigateForward}>
-        <ArrowRight className="size-5" strokeWidth={1.7} />
+      <DesktopNavigationButton label="Forward" shortcut={isMac ? "⌘]" : "Alt+Right"} disabled={!state.canNavigateForward} onClick={state.navigateForward}>
+        <ArrowRight className="size-6" strokeWidth={1.7} />
       </DesktopNavigationButton>
     </div>
   );
 }
 
-function DesktopNavigationButton(props: React.ComponentProps<typeof Button>) {
+function DesktopNavigationButton({ children, label, shortcut, ...props }: React.ComponentProps<typeof Button> & { label: string; shortcut?: string }) {
   return (
-    <Button
-      {...props}
-      className={cn(
-        "size-8 rounded-lg text-muted-foreground/75 hover:text-foreground disabled:opacity-35",
-        props.className,
-      )}
-      size="icon"
-      type="button"
-      variant="ghost"
-    />
+    <Tooltip>
+      <TooltipTrigger
+        render={(
+          <Button
+            {...props}
+            aria-label={label}
+            className={cn(
+              "size-8 rounded-lg",
+              props.className,
+            )}
+            size="icon-sm"
+            type="button"
+            variant="ghost"
+          />
+        )}
+      >
+        {children}
+      </TooltipTrigger>
+      <TooltipContent side="bottom">{label}{shortcut ? ` (${shortcut})` : ""}</TooltipContent>
+    </Tooltip>
   );
 }
 
-/** Source-style desktop chrome button used by Construct-owned shell actions. */
-export function DesktopChromeButton({ className, size = "icon", variant = "ghost", ...props }: DesktopChromeButtonProps) {
+/** Source desktop chrome primitive used by Construct-owned shell actions. */
+export function DesktopChromeButton({ "aria-label": label, ...props }: DesktopChromeButtonProps) {
   return (
-    <Button
-      className={cn(
-        "size-7 shrink-0 rounded-lg p-0 text-muted-foreground/75 hover:text-foreground disabled:opacity-35 [&_svg:not([class*='size-'])]:size-4",
-        className,
-      )}
-      size={size}
-      type="button"
-      variant={variant}
+    <DesktopHeaderIconButton
       {...props}
+      label={label}
     />
   );
 }
