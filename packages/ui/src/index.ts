@@ -174,6 +174,12 @@ export {
   SidebarThreadRow,
 } from "./opaline-v2/Sidebar";
 export type { SidebarBottomSlotProps, SidebarItem, SidebarNavItem, SidebarProject, SidebarProps } from "./opaline-v2/Sidebar";
+export { DesktopHomeSurface, DesktopShell, DesktopSidebar } from "./opaline-v3/DesktopShell";
+export type {
+  DesktopHomeSurfaceProps,
+  DesktopShellProps,
+  DesktopSidebarProps,
+} from "./opaline-v3/DesktopShell";
 export {
   Card,
   CardAction,

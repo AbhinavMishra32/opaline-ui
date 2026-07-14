@@ -46,6 +46,7 @@ export type SidebarNavItem = {
 
 export type SidebarProps = {
   children?: ReactNode;
+  className?: string;
   footer?: ReactNode;
   items?: SidebarItem[];
   onProjectSelect?: (projectId: string) => void;
@@ -59,6 +60,7 @@ export type SidebarProps = {
 
 export function Sidebar({
   children,
+  className,
   footer,
   items = [],
   onProjectSelect,
@@ -70,7 +72,7 @@ export function Sidebar({
   sectionLabels = { items: "Items", projects: "Projects" },
 }: SidebarProps) {
   return (
-    <aside className="flex h-full min-h-0 flex-col bg-transparent text-sidebar-foreground">
+    <aside className={cn("flex h-full min-h-0 flex-col bg-transparent text-sidebar-foreground", className)}>
       {primaryItems.length > 0 ? (
         <SidebarPrimary>
           {primaryItems.map((item) => renderNavItem?.(item) ?? <SidebarNavItemRow item={item} key={item.id} />)}

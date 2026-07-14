@@ -1,5 +1,153 @@
 @import "./tokens/opaline-theme.css";
 
+/* Opaline v3 desktop material. The sidebar and content card are deliberately
+   separate surfaces: the sidebar continues beneath the rounded seam while the
+   content reads as a raised working plane. */
+.opaline-v3-desktop-shell {
+  --opaline-v3-content-radius: 0.9rem;
+  --opaline-v3-shell-surface: color-mix(in srgb, var(--sidebar) 68%, transparent);
+  --opaline-v3-shell-divider: color-mix(in srgb, var(--border) 74%, transparent);
+  --opaline-v3-content-shadow:
+    -1px 0 0 var(--opaline-v3-shell-divider),
+    -10px 0 28px color-mix(in srgb, #000 8%, transparent);
+  background: var(--opaline-v3-shell-surface);
+  isolation: isolate;
+}
+
+.dark .opaline-v3-desktop-shell {
+  --opaline-v3-shell-surface: color-mix(in srgb, var(--sidebar) 76%, transparent);
+  --opaline-v3-content-shadow:
+    -1px 0 0 color-mix(in srgb, var(--border) 82%, transparent),
+    -12px 0 32px color-mix(in srgb, #000 32%, transparent);
+}
+
+.opaline-v3-desktop-shell > .opaline-v2-sidebar-pane {
+  border-right: 0;
+  background: var(--opaline-v3-shell-surface);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--foreground) 3%, transparent);
+  backdrop-filter: blur(8px) saturate(135%);
+  -webkit-backdrop-filter: blur(8px) saturate(135%);
+}
+
+.opaline-v3-desktop-shell > .opaline-v2-sidebar-pane::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  content: "";
+  pointer-events: none;
+  background:
+    radial-gradient(90% 75% at 0% 0%, color-mix(in srgb, #fff 6%, transparent), transparent 58%),
+    linear-gradient(180deg, color-mix(in srgb, #fff 2.5%, transparent), transparent 24%);
+}
+
+.opaline-v3-desktop-shell > section {
+  border-radius: var(--opaline-v3-content-radius) 0 0 var(--opaline-v3-content-radius);
+  box-shadow: var(--opaline-v3-content-shadow);
+  transition:
+    border-radius 300ms cubic-bezier(0.32, 0.72, 0, 1),
+    box-shadow 300ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.opaline-v3-desktop-shell[data-sidebar-open="false"] > section {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.opaline-v3-desktop-shell > section > header {
+  background-color: color-mix(in srgb, var(--background) 96%, transparent);
+}
+
+.opaline-v3-sidebar-header {
+  padding: 0.25rem 0.75rem 0.4rem;
+}
+
+.opaline-v3-sidebar-switcher {
+  padding: 0.125rem 0.75rem 0.625rem;
+}
+
+.opaline-v3-sidebar .construct-sidebar-row {
+  min-height: 2rem;
+  border-radius: 0.5rem;
+}
+
+.opaline-v3-home {
+  position: relative;
+  display: grid;
+  min-height: 100%;
+  overflow: hidden;
+  place-items: center;
+  padding: clamp(2rem, 7vh, 5.5rem) clamp(1.25rem, 5vw, 5rem);
+  background: var(--background);
+}
+
+.opaline-v3-home-ambient {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.7;
+  background:
+    radial-gradient(55% 38% at 50% 34%, color-mix(in srgb, var(--foreground) 3.5%, transparent), transparent 72%),
+    linear-gradient(180deg, color-mix(in srgb, var(--background) 96%, var(--card)), var(--background));
+}
+
+.opaline-v3-home-content {
+  position: relative;
+  display: flex;
+  width: min(46rem, 100%);
+  flex-direction: column;
+  gap: 1.5rem;
+  transform: translateY(-4vh);
+}
+
+.opaline-v3-home-heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: center;
+}
+
+.opaline-v3-home-eyebrow {
+  color: var(--muted-foreground);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.opaline-v3-home-title {
+  max-width: 42rem;
+  color: var(--foreground);
+  font-size: clamp(1.65rem, 3vw, 2.35rem);
+  font-weight: 520;
+  letter-spacing: -0.035em;
+  line-height: 1.12;
+}
+
+.opaline-v3-home-description {
+  max-width: 34rem;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+.opaline-v3-home-primary {
+  width: 100%;
+}
+
+.opaline-v3-home-footer {
+  display: flex;
+  justify-content: center;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .opaline-v3-desktop-shell > section {
+    transition: none;
+  }
+}
+
 @keyframes opaline-agent-thinking-shimmer {
   from { background-position: 100% center; }
   to { background-position: 0% center; }
