@@ -1,5 +1,5 @@
 import { ArrowDownIcon, ArrowUpIcon, SpinnerIcon } from "@phosphor-icons/react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "../components/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../components/tooltip";
@@ -233,56 +233,67 @@ export function AgentSessionComposer({
 }: AgentSessionComposerProps) {
   const isDisabled = disabled || pending || !value.trim();
   const accessibleSubmitLabel = typeof submitLabel === "string" ? submitLabel : "Send";
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useLayoutEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    textarea.style.height = "auto";
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
+  }, [value]);
 
   return (
-    <div className={cn(
-      "chat-composer-shell chat-composer-surface mx-auto w-full max-w-[46rem] overflow-hidden border border-[color:color-mix(in_srgb,var(--color-border-heavy,var(--border))_95%,var(--foreground)_5%)] bg-[var(--composer-surface,var(--card))] shadow-[0_4px_18px_-6px_color-mix(in_srgb,var(--foreground)_7%,transparent)] transition-colors duration-200 focus-within:border-[color:color-mix(in_srgb,var(--foreground)_14%,transparent)] dark:border-border dark:shadow-[0_6px_24px_-10px_rgba(0,0,0,0.30)]",
-      className,
-    )}>
-      {header && <div>{header}</div>}
-      <div className={cn(
-        "relative pl-[var(--app-density-composer-editor-padding-x,0.75rem)] pr-[var(--app-density-composer-editor-padding-x-end,0.875rem)] pb-[var(--app-density-composer-editor-padding-bottom,0.5rem)]",
-        header ? "pt-1.5" : "pt-[var(--app-density-composer-editor-padding-top,0.75rem)]",
-      )}>
-        <textarea
-          {...props}
-          className="font-system-ui block min-h-[var(--app-density-composer-editor-min-height,2lh)] max-h-[200px] w-full resize-none overflow-y-auto whitespace-pre-wrap break-words border-0 bg-transparent text-[length:var(--app-font-size-chat,12px)] leading-relaxed text-foreground outline-none placeholder:text-muted-foreground/40 focus:outline-none"
-          value={value}
-          onChange={(event) => onValueChange(event.target.value)}
-          onKeyDown={(event) => {
-            props.onKeyDown?.(event);
-            if (event.defaultPrevented || event.nativeEvent.isComposing) return;
-            if (event.key === "Enter" && !event.shiftKey && !isDisabled) {
-              event.preventDefault();
-              onSubmit();
-            }
-          }}
-          placeholder={placeholder}
-          spellCheck
-        />
-      </div>
-      <div className="flex items-center justify-between gap-2 pl-[var(--app-density-composer-footer-padding,0.375rem)] pr-[var(--app-density-composer-footer-padding-end,0.5rem)] pb-[var(--app-density-composer-footer-padding,0.375rem)]">
-        <div className="flex min-w-0 flex-1 items-center gap-1.5">{footerStart}</div>
-        <div className="flex items-center gap-1.5 shrink-0">
-          {footerEnd}
-          <Tooltip>
-            <TooltipTrigger
-              render={(
-                <Button
-                  aria-label={pending ? "Construct Interact is thinking" : accessibleSubmitLabel}
-                  className="size-7 rounded-full sm:size-7 agent-composer-submit-btn"
-                  type="button"
-                  size="icon-xs"
-                  variant="prominent"
-                  disabled={isDisabled}
-                  onClick={onSubmit}
-                >
-                  {pending ? <SpinnerIcon className="animate-spin" /> : <ArrowUpIcon weight="bold" />}
-                </Button>
-              )}
+    <div className={cn("mx-auto w-full max-w-[46rem]", className)} data-chat-composer-form="true">
+      {header ? (
+        <div className="chat-composer-stacked-top mx-auto -mb-px w-11/12 min-w-0 overflow-hidden border border-[color:color-mix(in_srgb,var(--color-border-heavy,var(--border))_95%,var(--foreground)_5%)] bg-[var(--color-background-elevated-secondary)]">
+          {header}
+        </div>
+      ) : null}
+      <div className="group chat-composer-shell bg-[var(--color-background-surface)] transition-colors duration-200">
+        <div className="chat-composer-surface overflow-hidden border border-[color:color-mix(in_srgb,var(--color-border-heavy,var(--border))_95%,var(--foreground)_5%)] bg-[var(--composer-surface,var(--card))] shadow-[0_4px_18px_-6px_color-mix(in_srgb,var(--foreground)_7%,transparent)] transition-colors duration-200 focus-within:border-[color:color-mix(in_srgb,var(--foreground)_14%,transparent)] dark:border-border dark:shadow-[0_6px_24px_-10px_rgba(0,0,0,0.30)]">
+          <div className="relative pl-[var(--app-density-composer-editor-padding-x,0.75rem)] pr-[var(--app-density-composer-editor-padding-x-end,0.875rem)] pb-[var(--app-density-composer-editor-padding-bottom,0.5rem)] pt-[var(--app-density-composer-editor-padding-top,0.75rem)]">
+            <textarea
+              {...props}
+              ref={textareaRef}
+              className="font-system-ui block min-h-[var(--app-density-composer-editor-min-height,2lh)] max-h-[200px] w-full resize-none overflow-y-auto whitespace-pre-wrap break-words border-0 bg-transparent text-[length:var(--app-font-size-chat,12px)] leading-relaxed text-foreground outline-none placeholder:text-muted-foreground/40 focus:outline-none"
+              value={value}
+              onChange={(event) => onValueChange(event.target.value)}
+              onKeyDown={(event) => {
+                props.onKeyDown?.(event);
+                if (event.defaultPrevented || event.nativeEvent.isComposing) return;
+                if (event.key === "Enter" && !event.shiftKey && !isDisabled) {
+                  event.preventDefault();
+                  onSubmit();
+                }
+              }}
+              placeholder={placeholder}
+              spellCheck
             />
-            <TooltipContent>{pending ? "Thinking" : `${accessibleSubmitLabel} (Enter)`}</TooltipContent>
-          </Tooltip>
+          </div>
+          <div className="flex items-center justify-between gap-2 pl-[var(--app-density-composer-footer-padding,0.375rem)] pr-[var(--app-density-composer-footer-padding-end,0.5rem)] pb-[var(--app-density-composer-footer-padding,0.375rem)]">
+            <div className="flex min-w-0 flex-1 items-center gap-1.5">{footerStart}</div>
+            <div className="flex shrink-0 items-center gap-1.5">
+              {footerEnd}
+              <Tooltip>
+                <TooltipTrigger
+                  render={(
+                    <Button
+                      aria-label={pending ? "Construct agent is thinking" : accessibleSubmitLabel}
+                      className="agent-composer-submit-btn size-7 rounded-full sm:size-7"
+                      type="button"
+                      size="icon-xs"
+                      variant="prominent"
+                      disabled={isDisabled}
+                      onClick={onSubmit}
+                    >
+                      {pending ? <SpinnerIcon className="animate-spin" /> : <ArrowUpIcon weight="bold" />}
+                    </Button>
+                  )}
+                />
+                <TooltipContent>{pending ? "Thinking" : `${accessibleSubmitLabel} (Enter)`}</TooltipContent>
+              </Tooltip>
+            </div>
+          </div>
         </div>
       </div>
     </div>
