@@ -30,6 +30,35 @@
   border-radius: var(--composer-radius, 1.2rem);
 }
 
+/* Aside's task thread is intentionally scoped so its flatter message and composer
+   materials do not repaint the rest of the Opaline shell. */
+.aside-thread-ui {
+  --aside-surface-primary: var(--color-background-elevated-primary-opaque, var(--card));
+  --aside-surface-secondary: var(--color-background-elevated-secondary, var(--secondary));
+  --agent-session-panel-overlay-height: 0px;
+  font-family: var(--font-sans, var(--font-system-ui));
+}
+
+.aside-thread-ui [data-component="message-list"] {
+  container-type: inline-size;
+}
+
+.aside-thread-ui .aside-thread-composer-surface {
+  background: var(--aside-surface-primary);
+  box-shadow: 0 6px 18px -12px color-mix(in srgb, var(--foreground) 24%, transparent);
+}
+
+.aside-thread-ui .aside-thread-domain-item [data-component="agent-session-actions"] {
+  width: 100%;
+  padding-top: 0;
+}
+
+@supports (corner-shape: squircle) {
+  .aside-thread-ui :where(.aside-thread-composer-surface, [data-testid="message-content"]) {
+    corner-shape: squircle;
+  }
+}
+
 /* Copied from the source app's macOS-style sidebar view switcher. */
 .sidebar-segmented-picker {
   background: var(--color-background-elevated-secondary, var(--secondary));
