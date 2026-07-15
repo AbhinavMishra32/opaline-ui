@@ -1,8 +1,6 @@
 import { type ReactNode } from "react";
 import { cn } from "../lib/utils";
 import { Button } from "../components/button";
-import { Card, CardContent } from "../components/card";
-import { Label } from "../components/label";
 import { ScrollArea } from "../components/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/select";
 import { Switch } from "../components/switch";
@@ -193,15 +191,15 @@ function SettingsSidebar({
 
 function SettingsPanel({ title, subtitle, children }: SettingsPanelProps) {
   return (
-    <main className="h-full min-h-0 flex-1 overflow-y-auto bg-background px-6 py-8 md:px-8 md:py-10">
-      <div className="mx-auto flex w-full max-w-[660px] flex-col gap-8 pb-12">
+    <main className="app-settings-surface h-full min-h-0 flex-1 overflow-y-auto bg-background">
+      <div className="mx-auto flex w-full max-w-2xl flex-col px-6 py-8 pb-12">
         {(title || subtitle) && (
-          <div className="mb-1">
-            {title && <h2 className="text-lg font-bold tracking-tight text-foreground">{title}</h2>}
-            {subtitle && <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>}
+          <div className="mb-8 min-w-0">
+            {title && <h1 className="text-xl font-medium tracking-tight text-foreground">{title}</h1>}
+            {subtitle && <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{subtitle}</p>}
           </div>
         )}
-        {children}
+        <div className="flex flex-col gap-6">{children}</div>
       </div>
     </main>
   );
@@ -209,59 +207,66 @@ function SettingsPanel({ title, subtitle, children }: SettingsPanelProps) {
 
 function SettingsSection({ title, description, children }: SettingsSectionProps) {
   return (
-    <section className="flex flex-col gap-3">
+    <section className="flex flex-col gap-1.5 not-first:mt-4">
       {title && (
-        <div className="px-0.5 mb-0.5">
-          <h3 className="text-[14px] font-semibold text-foreground tracking-tight">{title}</h3>
-          {description && <p className="mt-1 text-xs text-muted-foreground leading-normal">{description}</p>}
+        <div className="px-2 py-1">
+          <h2 className="text-[length:var(--app-font-size-ui,12px)] font-normal text-muted-foreground/58">{title}</h2>
+          {description && <p className="mt-1 text-xs leading-normal text-muted-foreground">{description}</p>}
         </div>
       )}
-      <div className="flex flex-col gap-4">{children}</div>
+      {children}
     </section>
   );
 }
 
 function SettingsCard({ children, className }: SettingsCardProps) {
   return (
-    <Card className={`rounded-lg bg-card border-border/80 divide-y divide-border/40 overflow-hidden ${className || ""}`}>
-      <CardContent className="flex flex-col p-0">{children}</CardContent>
-    </Card>
+    <div
+      className={cn(
+        "divide-y divide-border overflow-hidden rounded-lg border border-border bg-transparent",
+        className,
+      )}
+    >
+      {children}
+    </div>
   );
 }
 
 function SettingsRow({ title, label, description, action, control, children }: SettingsRowProps) {
   const displayLabel = title ?? label;
-  const hasInlineControl = !!(control || action);
-
-  if (hasInlineControl) {
-    return (
-      <div className="grid gap-3 px-5 py-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
-        <div className="min-w-0 flex-1">
-          {displayLabel && <Label className="text-[13px] font-semibold text-foreground tracking-tight">{displayLabel}</Label>}
-          {description && (
-            typeof description === "string"
-              ? <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{description}</p>
-              : <div className="mt-1 text-xs text-muted-foreground leading-relaxed">{description}</div>
-          )}
-        </div>
-        <div className="flex min-w-0 justify-start md:justify-end">{control || action}</div>
-      </div>
-    );
-  }
+  const resolvedControl = control ?? action;
 
   return (
-    <div className="flex flex-col gap-3 px-5 py-3">
-      {(displayLabel || description) && (
-        <div>
-          {displayLabel && <Label className="text-[13px] font-semibold text-foreground tracking-tight">{displayLabel}</Label>}
-          {description && (
-            typeof description === "string"
-              ? <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{description}</p>
-              : <div className="mt-1 text-xs text-muted-foreground leading-relaxed">{description}</div>
-          )}
+    <div
+      className="px-3 py-[var(--app-density-settings-row-padding-y,0.625rem)]"
+      data-slot="settings-row"
+    >
+      <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0 flex-1 space-y-0.5">
+          {displayLabel ? (
+            <h3 className="text-[length:var(--app-font-size-ui,12px)] font-medium text-foreground">
+              {displayLabel}
+            </h3>
+          ) : null}
+          {description ? (
+            typeof description === "string" ? (
+              <p className="text-[length:var(--app-font-size-ui,12px)] text-muted-foreground">
+                {description}
+              </p>
+            ) : (
+              <div className="text-[length:var(--app-font-size-ui,12px)] text-muted-foreground">
+                {description}
+              </div>
+            )
+          ) : null}
         </div>
-      )}
-      {children}
+        {resolvedControl ? (
+          <div className="flex w-full shrink-0 items-center gap-2 sm:w-auto sm:justify-end">
+            {resolvedControl}
+          </div>
+        ) : null}
+      </div>
+      {children ? <div className="mt-3">{children}</div> : null}
     </div>
   );
 }
@@ -272,7 +277,6 @@ function SettingsToggle({ checked, onCheckedChange, disabled }: SettingsTogglePr
       checked={checked}
       onCheckedChange={onCheckedChange}
       disabled={disabled}
-      className="data-checked:bg-sky-500 dark:data-checked:bg-sky-500 border border-transparent data-checked:border-sky-500 cursor-pointer"
     />
   );
 }
