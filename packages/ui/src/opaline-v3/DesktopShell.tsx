@@ -31,6 +31,7 @@ import {
   SidebarTrigger,
   SIDEBAR_OFFCANVAS_MOTION_CLASS,
 } from "../components/sidebar";
+import type { SidebarResizableOptions } from "../components/sidebar";
 
 export type DesktopShellTabItem = {
   active?: boolean;
@@ -100,6 +101,7 @@ export type DesktopShellProps = {
   inspectorOpen?: boolean;
   inspectorWidth?: number;
   main: React.ReactNode;
+  navigationHomeIcon?: React.ReactNode;
   onBottomPanelExpandedChange?: (expanded: boolean) => void;
   onBottomPanelOpenChange?: (open: boolean) => void;
   onInspectorExpandedChange?: (expanded: boolean) => void;
@@ -120,8 +122,11 @@ export type DesktopShellProps = {
   sidebarChrome?: DesktopShellSlot;
   sidebarMaxWidth?: number;
   sidebarMinWidth?: number;
+  sidebarMainMinWidth?: number;
   sidebarOpen?: boolean;
+  sidebarResizeStorageKey?: string;
   sidebarWidth?: number;
+  showHeader?: boolean;
   subtitle?: React.ReactNode;
   title?: React.ReactNode;
 };
@@ -197,6 +202,7 @@ export function DesktopShell({
   inspectorOpen: controlledInspectorOpen,
   inspectorWidth: controlledInspectorWidth,
   main,
+  navigationHomeIcon,
   onBottomPanelExpandedChange,
   onBottomPanelOpenChange,
   onInspectorExpandedChange,
@@ -216,9 +222,12 @@ export function DesktopShell({
   sidebarChrome,
   sidebarMaxWidth = 520,
   sidebarMinWidth = 240,
+  sidebarMainMinWidth,
   sidebarOpen: controlledSidebarOpen,
+  sidebarResizeStorageKey,
   sidebarWidth: controlledSidebarWidth,
   showSidebarChrome = true,
+  showHeader = true,
   subtitle,
   title,
 }: DesktopShellProps) {
@@ -229,6 +238,7 @@ export function DesktopShell({
   const [internalBottomPanelOpen, setInternalBottomPanelOpen] = React.useState(defaultBottomPanelOpen ?? bottomPanel != null);
   const [internalBottomPanelExpanded, setInternalBottomPanelExpanded] = React.useState(defaultBottomPanelExpanded);
   const [internalInspectorWidth, setInternalInspectorWidth] = React.useState(defaultRightPanelWidth ?? defaultInspectorWidth);
+  const [inspectorResizing, setInspectorResizing] = React.useState(false);
   const sidebarOpen = controlledSidebarOpen ?? internalSidebarOpen;
   const inspectorOpen = controlledInspectorOpen ?? internalInspectorOpen;
   const inspectorExpanded = controlledInspectorExpanded ?? internalInspectorExpanded;
@@ -306,16 +316,36 @@ export function DesktopShell({
 
   const sidebarChromeContent = sidebarChrome != null
     ? resolveSlot(sidebarChrome, state)
-    : <DesktopNavigationControls state={state} />;
+    : <DesktopNavigationControls homeIcon={navigationHomeIcon} state={state} />;
   const collapsedTriggerContent = collapsedSidebarTrigger != null
     ? resolveSlot(collapsedSidebarTrigger, state)
-    : <DesktopNavigationControls state={state} />;
+    : <DesktopNavigationControls homeIcon={navigationHomeIcon} state={state} />;
   const headerContent = resolveSlot(header, state);
   const actionContent = resolveSlot(actions ?? headerActions, state);
   const bottomPanelContent = resolveSlot(bottomPanel, state);
+  const sidebarResizable = React.useMemo<SidebarResizableOptions>(
+    () => ({
+      maxWidth: sidebarMaxWidth,
+      minWidth: sidebarMinWidth,
+      onResize: onSidebarWidthChange,
+      shouldAcceptWidth: sidebarMainMinWidth == null
+        ? undefined
+        : ({ nextWidth, wrapper }) =>
+            wrapper.clientWidth - nextWidth >= sidebarMainMinWidth,
+      storageKey: sidebarResizeStorageKey,
+    }),
+    [
+      onSidebarWidthChange,
+      sidebarMainMinWidth,
+      sidebarMaxWidth,
+      sidebarMinWidth,
+      sidebarResizeStorageKey,
+    ],
+  );
 
   function beginInspectorResize(event: React.PointerEvent<HTMLDivElement>) {
     event.preventDefault();
+    setInspectorResizing(true);
     const startX = event.clientX;
     const startWidth = inspectorWidth;
     const move = (pointerEvent: PointerEvent) => {
@@ -327,6 +357,7 @@ export function DesktopShell({
       onInspectorWidthChange?.(next);
     };
     const stop = () => {
+      setInspectorResizing(false);
       window.removeEventListener("pointermove", move);
       window.removeEventListener("pointerup", stop);
     };
@@ -348,11 +379,7 @@ export function DesktopShell({
           className={cn("text-foreground", SIDEBAR_OFFCANVAS_MOTION_CLASS)}
           gapClassName={cn(SIDEBAR_GAP_CLASS, SIDEBAR_OFFCANVAS_MOTION_CLASS)}
           innerClassName="app-sidebar-surface"
-          resizable={{
-            maxWidth: sidebarMaxWidth,
-            minWidth: sidebarMinWidth,
-            onResize: onSidebarWidthChange,
-          }}
+          resizable={sidebarResizable}
           transparentSurface
         >
           {showSidebarChrome ? (
@@ -373,13 +400,13 @@ export function DesktopShell({
       <div className="chat-content-card-backing relative flex h-svh min-h-0 min-w-0 flex-1">
         {sidebar != null ? (
           <SidebarInstanceProvider
-            resizable={{ maxWidth: sidebarMaxWidth, minWidth: sidebarMinWidth, onResize: onSidebarWidthChange }}
+            resizable={sidebarResizable}
           >
             <SidebarRail placement="content-seam" />
           </SidebarInstanceProvider>
         ) : null}
         <SidebarInset surfaceClassName="chat-content-card relative z-[15] overflow-hidden bg-background">
-          <header
+          {showHeader ? <header
             data-tauri-drag-region
             className={cn(
               "chat-surface-divider relative z-30 flex h-[46px] min-h-[46px] items-center justify-between gap-3 px-3 select-none sm:px-5 [-webkit-app-region:drag]",
@@ -411,10 +438,26 @@ export function DesktopShell({
               {headerContent}
             </div>
             <div className="inline-flex items-center gap-1 [-webkit-app-region:no-drag]">{actionContent}</div>
-          </header>
+          </header> : sidebar != null && !sidebarOpen ? (
+            <div
+              data-tauri-drag-region
+              className={cn(
+                "pointer-events-none absolute inset-x-0 top-0 z-30 flex h-[46px] items-center px-3 sm:px-5 [-webkit-app-region:drag]",
+                isMacDesktop && "desktop-top-bar-traffic-light-gutter",
+                isWindowsDesktop && "pr-[138px]! sm:pr-[138px]!",
+              )}
+            >
+              <div className="pointer-events-auto flex shrink-0 items-center gap-0.5 [-webkit-app-region:no-drag]">
+                {collapsedTriggerContent}
+              </div>
+            </div>
+          ) : null}
 
           <div
-            className="grid min-h-0 flex-1 overflow-hidden max-[980px]:grid-cols-1"
+            className={cn(
+              "grid min-h-0 flex-1 overflow-hidden transition-[grid-template-columns] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none max-[980px]:grid-cols-1",
+              inspectorResizing && "transition-none",
+            )}
             style={{ gridTemplateColumns: resolvedInspector && inspectorOpen ? `minmax(0,1fr) ${inspectorExpanded ? "calc(100vw - var(--sidebar-width))" : `${inspectorWidth}px`}` : "minmax(0,1fr) 0px" }}
           >
             <section className="relative flex min-h-0 min-w-0 flex-col overflow-hidden">
@@ -448,7 +491,7 @@ export function DesktopShell({
   );
 }
 
-function DesktopNavigationControls({ state }: { state: DesktopShellState }) {
+function DesktopNavigationControls({ homeIcon, state }: { homeIcon?: React.ReactNode; state: DesktopShellState }) {
   const platform = typeof navigator === "undefined" ? "" : navigator.platform;
   const isMac = /Mac|iPhone|iPad|iPod/i.test(platform);
   return (
@@ -458,7 +501,7 @@ function DesktopNavigationControls({ state }: { state: DesktopShellState }) {
         className="size-7 shrink-0 rounded-lg text-muted-foreground/75 hover:text-foreground"
       />
       <DesktopNavigationButton label="Home" disabled={!state.canNavigateHome} onClick={state.navigateHome}>
-        <House className="size-4" strokeWidth={1.8} />
+        {homeIcon ?? <House className="size-4" strokeWidth={1.8} />}
       </DesktopNavigationButton>
       <DesktopNavigationButton label="Back" shortcut={isMac ? "⌘[" : "Alt+Left"} disabled={!state.canNavigateBack} onClick={state.navigateBack}>
         <RoundBackIcon className="size-6" />
