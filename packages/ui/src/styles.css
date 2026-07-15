@@ -29,6 +29,41 @@
   border-radius: var(--composer-radius, 1.2rem);
 }
 
+/* Copied from the source app's macOS-style sidebar view switcher. */
+.sidebar-segmented-picker {
+  background: var(--color-background-elevated-secondary, var(--secondary));
+  border: 1px solid color-mix(in oklab, var(--color-text-foreground, var(--foreground)) 4%, transparent);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.dark .sidebar-segmented-picker {
+  background: var(--background);
+  border-color: color-mix(in oklab, var(--color-text-foreground, var(--foreground)) 8%, transparent);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.sidebar-segmented-thumb {
+  background:
+    linear-gradient(var(--composer-surface), var(--composer-surface)),
+    linear-gradient(
+      var(--color-background-elevated-secondary, var(--secondary)),
+      var(--color-background-elevated-secondary, var(--secondary))
+    ),
+    var(--background);
+  border: 1px solid color-mix(in oklab, var(--color-text-foreground, var(--foreground)) 5%, transparent);
+  box-shadow:
+    0 1px 1.5px rgba(0, 0, 0, 0.04),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.dark .sidebar-segmented-thumb {
+  border-color: color-mix(in oklab, var(--color-text-foreground, var(--foreground)) 7%, transparent);
+  box-shadow:
+    0 1px 1.5px rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
 .chat-composer-surface {
   background: var(--composer-surface, var(--card));
   backdrop-filter: var(--app-composer-backdrop-filter, none);
