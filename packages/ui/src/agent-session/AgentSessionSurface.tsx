@@ -181,7 +181,7 @@ export function AgentSessionTimeline({
                       <AgentRunTrace
                         state={hasActive ? "thinking" : "thought"}
                         entries={group.entries}
-                        defaultOpen={false}
+                        defaultOpen={hasActive}
                       />
                     </div>
                   );

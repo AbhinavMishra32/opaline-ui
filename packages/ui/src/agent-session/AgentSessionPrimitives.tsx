@@ -21,14 +21,14 @@ import type {
 export function AgentSessionMessageView({ message }: { message: AgentSessionMessage }) {
   if (message.role === "user") {
     return (
-      <div data-component="user-message">
+      <div className="group/user-message flex flex-col items-end gap-px" data-component="user-message">
         {message.content ? (
           <div data-slot="user-message-body">
             <div data-slot="user-message-text">{message.content}</div>
           </div>
         ) : null}
         {message.meta ? (
-          <div data-slot="user-message-copy-wrapper" style={{ opacity: 1, pointerEvents: "auto" }}>
+          <div className="flex items-center justify-end pr-0.5 text-muted-foreground/45 opacity-0 transition-opacity group-hover/user-message:opacity-100 group-focus-within/user-message:opacity-100" data-slot="user-message-copy-wrapper">
             <span data-slot="user-message-meta-wrap">
               <span data-slot="user-message-meta">{message.meta}</span>
             </span>
@@ -39,7 +39,7 @@ export function AgentSessionMessageView({ message }: { message: AgentSessionMess
   }
 
   return (
-    <div data-component="assistant-message">
+    <div className="group/assistant-message" data-component="assistant-message">
       {message.parts?.map((part) => (
         <AgentSessionPartView key={part.id} part={part} />
       ))}
@@ -47,7 +47,7 @@ export function AgentSessionMessageView({ message }: { message: AgentSessionMess
         <div data-component="text-part">
           <div data-slot="text-part-body">{message.content}</div>
           {message.meta ? (
-            <div data-slot="text-part-copy-wrapper" style={{ opacity: 1, pointerEvents: "auto" }}>
+            <div className="opacity-0 transition-opacity group-hover/assistant-message:opacity-100 group-focus-within/assistant-message:opacity-100" data-slot="text-part-copy-wrapper">
               <span data-slot="text-part-meta">{message.meta}</span>
             </div>
           ) : null}
@@ -128,7 +128,7 @@ export function AgentSessionPartView({ part }: { part: AgentSessionMessagePart }
       <div data-component="text-part">
         <div data-slot="text-part-body">{part.content}</div>
         {part.meta ? (
-          <div data-slot="text-part-copy-wrapper" style={{ opacity: 1, pointerEvents: "auto" }}>
+          <div className="opacity-0 transition-opacity group-hover/assistant-message:opacity-100 group-focus-within/assistant-message:opacity-100" data-slot="text-part-copy-wrapper">
             <span data-slot="text-part-meta">{part.meta}</span>
           </div>
         ) : null}
