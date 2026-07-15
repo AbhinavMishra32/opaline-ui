@@ -73,8 +73,6 @@ export {
   AgentSessionToolGroup,
   buildAgentSessionTimeline,
 } from "../agent-session/AgentSessionSurface";
-export { AsideThreadComposer, AsideThreadSurface } from "../agent-session/AsideThreadSurface";
-export type { AsideThreadComposerProps, AsideThreadSurfaceProps } from "../agent-session/AsideThreadSurface";
 export type {
   AgentSessionActionEntry,
   AgentSessionComposerProps,
