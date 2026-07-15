@@ -1,5 +1,5 @@
-import { ArrowUpIcon, SpinnerIcon } from "@phosphor-icons/react";
-import { useEffect, useMemo, useRef } from "react";
+import { ArrowDownIcon, ArrowUpIcon, SpinnerIcon } from "@phosphor-icons/react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "../components/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../components/tooltip";
@@ -72,7 +72,11 @@ export function AgentSessionSurface({
   ) : null;
 
   return (
-    <section className={cn("flex min-h-0 flex-1 flex-col overflow-hidden bg-background text-foreground", className)} {...props}>
+    <section
+      className={cn("flex min-h-0 flex-1 flex-col overflow-hidden bg-[var(--color-background-surface)] text-foreground", className)}
+      data-chat-transcript-pane="true"
+      {...props}
+    >
       <AgentSessionTimeline
         className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
         header={header}
@@ -85,7 +89,11 @@ export function AgentSessionSurface({
         onTimelineScroll={onTimelineScroll}
       />
 
-      {composer ? <div className="shrink-0 bg-background/70 px-3 pb-3 pt-2 backdrop-blur">{composer}</div> : null}
+      {composer ? (
+        <div className="relative z-10 -mt-5 w-full shrink-0 overflow-visible px-[var(--app-density-chat-gutter-x,0.75rem)] pb-3 pt-0 sm:px-[var(--app-density-chat-gutter-x-lg,1.25rem)] sm:pb-4">
+          {composer}
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -106,6 +114,7 @@ export function AgentSessionTimeline({
   const timelineRows = useMemo(() => groupConsecutiveActivityRows(rawTimelineRows), [rawTimelineRows]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const shouldFollowRef = useRef(true);
+  const [scrollButtonVisible, setScrollButtonVisible] = useState(false);
 
   useEffect(() => {
     const element = scrollRef.current;
@@ -120,33 +129,43 @@ export function AgentSessionTimeline({
     shouldFollowRef.current = element.scrollHeight - element.scrollTop - element.clientHeight < 80;
   }, [initialScrollTop]);
 
+  const scrollToBottom = () => {
+    const element = scrollRef.current;
+    if (!element) return;
+    shouldFollowRef.current = true;
+    setScrollButtonVisible(false);
+    element.scrollTo({ top: element.scrollHeight, behavior: "smooth" });
+  };
+
   return (
-    <div
-      ref={scrollRef}
-      className={cn("px-4 pb-6 pt-3 [&_[data-slot=session-turn-content]]:mx-auto [&_[data-slot=session-turn-content]]:w-full [&_[data-slot=session-turn-content]]:max-w-[780px] [&_[data-component=assistant-message]]:flex [&_[data-component=assistant-message]]:flex-col [&_[data-component=assistant-message]]:gap-2.5 [&_[data-component=text-part]]:text-[13px] [&_[data-slot=text-part-body]]:leading-[1.6] [&_[data-component=user-message]]:ml-auto [&_[data-component=user-message]]:max-w-[77%] [&_[data-slot=user-message-body]]:rounded-[18px] [&_[data-slot=user-message-body]]:bg-muted/70 [&_[data-slot=user-message-body]]:px-3 [&_[data-slot=user-message-body]]:py-2 [&_[data-slot=user-message-body]]:ring-1 [&_[data-slot=user-message-body]]:ring-border/35 [&_[data-slot=user-message-text]]:whitespace-pre-wrap [&_[data-slot=user-message-text]]:break-words [&_[data-slot=user-message-text]]:text-[13px] [&_[data-slot=user-message-text]]:leading-5 [&_[data-slot=text-part-meta]]:mt-2 [&_[data-slot=text-part-meta]]:inline-flex [&_[data-slot=text-part-meta]]:w-fit [&_[data-slot=text-part-meta]]:rounded-full [&_[data-slot=text-part-meta]]:bg-muted/40 [&_[data-slot=text-part-meta]]:px-2 [&_[data-slot=text-part-meta]]:py-0.5 [&_[data-slot=text-part-meta]]:text-[10px] [&_[data-slot=text-part-meta]]:leading-4 [&_[data-slot=text-part-meta]]:text-muted-foreground", className)}
-      data-component="agent-session-timeline"
-      {...props}
-      onScroll={(event) => {
-        const element = event.currentTarget;
-        const atBottom = element.scrollHeight - element.scrollTop - element.clientHeight < 80;
-        shouldFollowRef.current = atBottom;
-        onTimelineScroll?.({
-          scrollTop: element.scrollTop,
-          scrollHeight: element.scrollHeight,
-          clientHeight: element.clientHeight,
-          atBottom
-        });
-        props.onScroll?.(event);
-      }}
-    >
-      {header}
-      {timelineRows.length === 0 ? (
-        emptyState ? <div className="flex min-h-24 items-center justify-center text-sm text-muted-foreground">{emptyState}</div> : null
-      ) : (
-        <div data-component="session-turn">
-          <div data-slot="session-turn-content">
-            <div className="flex flex-col gap-4" data-slot="session-turn-message-container">
-              {timelineRows.map((group) => {
+    <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+      <div
+        ref={scrollRef}
+        className={cn("min-h-0 flex-1 overflow-y-auto overscroll-contain px-[var(--app-density-chat-gutter-x,0.75rem)] pb-20 pt-3 sm:px-[var(--app-density-chat-gutter-x-lg,1.25rem)] [&_[data-slot=session-turn-content]]:mx-auto [&_[data-slot=session-turn-content]]:w-full [&_[data-slot=session-turn-content]]:max-w-[46rem] [&_[data-component=assistant-message]]:flex [&_[data-component=assistant-message]]:flex-col [&_[data-component=assistant-message]]:gap-2.5 [&_[data-component=text-part]]:text-[length:var(--app-font-size-chat,12px)] [&_[data-slot=text-part-body]]:leading-relaxed [&_[data-component=user-message]]:ml-auto [&_[data-component=user-message]]:max-w-[80%] [&_[data-slot=user-message-body]]:rounded-[var(--radius-user-message,0.8rem)] [&_[data-slot=user-message-body]]:bg-[var(--app-user-message-background)] [&_[data-slot=user-message-body]]:px-3 [&_[data-slot=user-message-body]]:py-1.5 [&_[data-slot=user-message-text]]:whitespace-pre-wrap [&_[data-slot=user-message-text]]:break-words [&_[data-slot=user-message-text]]:font-system-ui [&_[data-slot=user-message-text]]:text-[length:var(--app-font-size-chat,12px)] [&_[data-slot=user-message-text]]:leading-relaxed [&_[data-slot=text-part-meta]]:mt-2 [&_[data-slot=text-part-meta]]:inline-flex [&_[data-slot=text-part-meta]]:w-fit [&_[data-slot=text-part-meta]]:text-[10px] [&_[data-slot=text-part-meta]]:leading-4 [&_[data-slot=text-part-meta]]:text-muted-foreground/45", className)}
+        data-component="agent-session-timeline"
+        {...props}
+        onScroll={(event) => {
+          const element = event.currentTarget;
+          const atBottom = element.scrollHeight - element.scrollTop - element.clientHeight < 80;
+          shouldFollowRef.current = atBottom;
+          setScrollButtonVisible(!atBottom);
+          onTimelineScroll?.({
+            scrollTop: element.scrollTop,
+            scrollHeight: element.scrollHeight,
+            clientHeight: element.clientHeight,
+            atBottom
+          });
+          props.onScroll?.(event);
+        }}
+      >
+        {header}
+        {timelineRows.length === 0 ? (
+          emptyState ? <div className="flex min-h-full items-center justify-center text-sm text-muted-foreground">{emptyState}</div> : null
+        ) : (
+          <div data-component="session-turn">
+            <div data-slot="session-turn-content">
+              <div className="flex flex-col gap-4" data-slot="session-turn-message-container">
+                {timelineRows.map((group) => {
                 if (group.kind === "activity-group") {
                   if (group.entries.length === 1) {
                     const row = group.rows[0];
@@ -168,11 +187,32 @@ export function AgentSessionTimeline({
                   );
                 }
                 return <AgentSessionTimelineRowView key={group.row.id} row={group.row} showReasoningSummaries={showReasoningSummaries} />;
-              })}
+                })}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
+      <div
+        aria-hidden={!scrollButtonVisible}
+        className={cn(
+          "pointer-events-none absolute inset-x-0 bottom-6 z-30 flex justify-center py-1 transition-[opacity,transform] duration-200",
+          scrollButtonVisible ? "translate-y-0 opacity-100" : "-translate-y-1 opacity-0",
+        )}
+      >
+        <button
+          aria-label="Scroll to bottom"
+          className={cn(
+            "flex size-8 items-center justify-center rounded-full border border-[color:var(--color-border)] bg-[var(--color-background-elevated-primary-opaque)] text-foreground backdrop-blur-md transition-colors hover:bg-[var(--color-background-elevated-secondary)]",
+            scrollButtonVisible ? "pointer-events-auto" : "pointer-events-none",
+          )}
+          onClick={scrollToBottom}
+          tabIndex={scrollButtonVisible ? 0 : -1}
+          type="button"
+        >
+          <ArrowDownIcon className="size-3.5" />
+        </button>
+      </div>
     </div>
   );
 }

@@ -107,13 +107,13 @@ export function AgentSessionThinkingRow({
   showReasoningSummaries: boolean;
 }) {
   return (
-    <div data-slot="session-turn-thinking" className="flex w-fit max-w-full flex-col gap-1 rounded-[14px] bg-muted/18 px-2.5 py-2 text-xs text-muted-foreground ring-1 ring-border/25">
+    <div data-slot="session-turn-thinking" className="flex w-fit max-w-full flex-col gap-1 text-[length:var(--app-font-size-chat,12px)] text-muted-foreground/70">
       <div className="inline-flex items-center gap-2">
-        <SpinnerIcon className="size-3.5 animate-spin" />
-        <span className="animate-pulse font-medium">{label}</span>
+        <SpinnerIcon className="size-3 animate-spin" />
+        <span>{label}</span>
       </div>
       {showReasoningSummaries && summary ? (
-        <div className="max-w-[80ch] pl-5 text-[11px] leading-relaxed" data-slot="session-turn-thinking-heading">
+        <div className="max-w-[80ch] pl-5 text-[11px] leading-relaxed text-muted-foreground/65" data-slot="session-turn-thinking-heading">
           {summary}
         </div>
       ) : null}
@@ -273,7 +273,7 @@ export function AgentSessionDisclosure({
   return (
     <div data-component={component}>
       <button
-        className="flex w-fit max-w-full items-start justify-between gap-3 rounded-[14px] bg-muted/15 px-2.5 py-1.5 text-left text-xs text-muted-foreground ring-1 ring-border/25 transition-colors hover:bg-muted/28 hover:text-foreground"
+        className="flex w-fit max-w-full items-start justify-between gap-3 py-0.5 text-left text-[length:var(--app-font-size-chat,12px)] text-muted-foreground/70 transition-colors hover:text-foreground"
         type="button"
         aria-expanded={expandable ? open : undefined}
         onClick={() => expandable && setOpen((value) => !value)}

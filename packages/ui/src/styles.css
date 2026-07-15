@@ -8,6 +8,7 @@
   --app-sidebar-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.025);
   --app-sidebar-surface: color-mix(in srgb, var(--card) 64%, transparent);
   --app-surface-divider: color-mix(in srgb, var(--border) 60%, transparent);
+  --app-user-message-background: var(--color-background-elevated-secondary-opaque, var(--muted));
   --color-background-control: var(--card);
   --color-background-surface: var(--background);
   --color-border-heavy: var(--border);
