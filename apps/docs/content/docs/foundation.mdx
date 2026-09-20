@@ -1,0 +1,20 @@
+---
+title: Foundation
+description: The type, color, radius, depth, and interaction decisions carried over from Spar.
+---
+
+## Typography
+
+Opaline uses Geist throughout the product surface. UI text is typically 13–14px; supporting text is 12px. The system avoids shrinking important content to manufacture density.
+
+## Color
+
+All component color resolves through semantic tokens: `background`, `foreground`, `card`, `muted`, `accent`, `border`, `input`, and `ring`. The palette is authored in OKLCH so light and dark modes retain comparable contrast and temperature.
+
+## Geometry
+
+Small controls use 5–8px radii. Cards and menus use 10–14px radii. Large sheets can use 18px. This keeps nested corners visually concentric and prevents every control from becoming a pill.
+
+## Interaction
+
+Focus receives a soft three-pixel ring. Pressed buttons move one pixel. Overlays fade and scale over roughly 150ms. Reduced-motion behavior is a requirement for larger animated patterns as they join the library.

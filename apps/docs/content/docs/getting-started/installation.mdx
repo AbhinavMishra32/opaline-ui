@@ -1,32 +1,33 @@
 ---
 title: Installation
-description: Install Opaline from npm and add its shared styles.
+description: Add Opaline components as source code with the shadcn CLI.
 ---
 
-## npm package
+Opaline is a public GitHub registry. Install a component directly from the repository:
 
 ```bash
-npm install @opaline/ui react react-dom
+npx shadcn@latest add AbhinavMishra32/opaline-ui/button
 ```
 
-Import the stylesheet once near the root of your application:
+Install the theme once and import it from your application stylesheet:
 
-```tsx
-import "@opaline/ui/styles.css";
+```bash
+npx shadcn@latest add AbhinavMishra32/opaline-ui/opaline-theme
 ```
 
-Then import components from the package boundary:
-
-```tsx
-import { AppShell, Button, Composer, Sidebar } from "@opaline/ui";
+```css
+@import "./styles/opaline.css";
 ```
 
-Opaline keeps React and React DOM as peer dependencies. Radix, Lucide, motion, and terminal dependencies
-used by the package are installed with `@opaline/ui`.
+The generated source expects a standard shadcn `@/lib/utils` alias. Opaline uses React 19, Tailwind CSS 4, and the unified `radix-ui` package.
 
-## Start small
+## Local development
 
-<ComponentPreview name="buttons" />
+```bash
+git clone https://github.com/AbhinavMishra32/opaline-ui.git
+cd opaline-ui
+npm install
+npm run dev
+```
 
-Every surface accepts normal React props and remains compatible with your state layer, router, data client,
-and application domain.
+The docs run at `http://localhost:3011`.

@@ -1,37 +1,18 @@
 ---
 title: Opaline UI
-description: Desktop-grade React primitives and shell systems for agentic software.
+description: The source-first interface system behind Spar.
 ---
 
-Opaline is a component system for building high-context applications: agent workspaces, editors,
-review surfaces, operational tools, and desktop shells. Components are designed to compose into a
-product rather than dictate one.
+Opaline turns the interface grammar developed in Spar into a library you can install, read, and own. It is built for dense product software: agent workspaces, editors, desktop tools, and interfaces where restraint matters more than spectacle.
 
-<div className="opaline-docs-intro">
-  <div>
-    <strong>Primitives that hold up</strong>
-    <p>Buttons, menus, dialogs, previews, timelines, and dense settings controls with a shared interaction grammar.</p>
-  </div>
-  <div>
-    <strong>Systems, not screenshots</strong>
-    <p>History, slots, panels, terminals, file navigation, and shell regions remain caller-owned and composable.</p>
-  </div>
-</div>
+## What makes it Opaline
 
-## Start here
+- **Compact by default.** The primary button is 32px tall, not a marketing-site control dropped into an app.
+- **Warm neutral color.** OKLCH tokens stay legible and quietly warm in both themes.
+- **Layered surfaces.** Hairline borders, restrained shadow, translucency, and backdrop blur establish depth without noise.
+- **One geometry.** Controls use 8–10px corners; larger sheets earn 14–18px corners.
+- **Source ownership.** Install through the shadcn CLI and adapt the component in your application.
 
-```bash
-npm install @opaline/ui
-```
+## First components
 
-```tsx
-import { Button } from "@opaline/ui";
-import "@opaline/ui/styles.css";
-
-export function SaveAction() {
-  return <Button>Save changes</Button>;
-}
-```
-
-The examples in these docs render the same source files used by the npm package. During local
-development, edits under `packages/ui/src` appear here immediately.
+The foundation release starts with Button, Badge, Card, Input, Textarea, Separator, Switch, Tooltip, and Dialog. Larger Spar patterns—menus, fields, composer controls, agent activity, thread disclosures, sidebars, and workspace surfaces—come next, built on these primitives rather than beside them.

@@ -1,9 +1,0 @@
-function e(e) {
-  return [`git`, e, `opaline-worktrees`];
-}
-function t(e, t) {
-  let n = [`git`, e, `worktree-snapshot-ref`];
-  return t ? [...n, t] : n;
-}
-export { t as n, e as t };
-//# sourceMappingURL=worktree-query-keys-BUOwPAG3.js.map

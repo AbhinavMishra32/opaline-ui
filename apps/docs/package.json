@@ -1,28 +1,32 @@
 {
   "name": "@opaline/docs",
-  "version": "0.3.0",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Documentation and interactive component playground for Opaline UI.",
   "scripts": {
     "dev": "next dev --hostname 127.0.0.1 --port 3011",
     "build": "next build",
-    "generate": "fumadocs-mdx",
     "start": "next start --hostname 127.0.0.1 --port 3011",
+    "generate": "fumadocs-mdx",
     "typecheck": "npm run generate && tsc --noEmit --pretty false"
   },
   "dependencies": {
+    "@fontsource-variable/geist": "^5.2.6",
     "@opaline/ui": "*",
-    "@tailwindcss/postcss": "^4.3.0",
-    "fumadocs-core": "^16.9.3",
-    "fumadocs-mdx": "^15.0.11",
-    "fumadocs-ui": "^16.9.3",
-    "next": "^16.2.7",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7",
-    "tailwindcss": "^4.3.0"
+    "@tailwindcss/postcss": "^4.1.13",
+    "fumadocs-core": "^16.15.12",
+    "fumadocs-mdx": "^15.4.2",
+    "fumadocs-ui": "^16.15.12",
+    "lucide-react": "^0.544.0",
+    "next": "^16.3.5",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "tailwindcss": "^4.1.13",
+    "tw-animate-css": "^1.3.8"
   },
   "devDependencies": {
-    "@types/mdx": "^2.0.13"
+    "@types/mdx": "^2.0.13",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0"
   }
 }

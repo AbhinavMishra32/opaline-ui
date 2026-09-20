@@ -1,7 +1,0 @@
-node_modules/
-dist/
-out/
-.runtime/
-.upstream-cache/
-*.log
-.DS_Store

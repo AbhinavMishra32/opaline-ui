@@ -3,20 +3,18 @@ import { fileURLToPath } from "node:url";
 import { createMDX } from "fumadocs-mdx/next";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
-const uiSource = path.join(repoRoot, "packages/ui/src/index.ts");
 const withMDX = createMDX();
 
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+const config = {
+  agentRules: false,
   reactStrictMode: true,
-  turbopack: {
-    root: repoRoot,
-  },
   transpilePackages: ["@opaline/ui"],
-  webpack(config) {
-    config.resolve.alias["@opaline/ui"] = uiSource;
-    return config;
+  turbopack: { root: repoRoot },
+  webpack(webpackConfig) {
+    webpackConfig.resolve.alias["@opaline/ui"] = path.join(repoRoot, "packages/ui/src/index.ts");
+    return webpackConfig;
   },
 };
 
-export default withMDX(nextConfig);
+export default withMDX(config);

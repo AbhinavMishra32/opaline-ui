@@ -1,4 +1,4 @@
 {
   "title": "Components",
-  "pages": ["index", "primitives", "overlays", "adaptive-sidecar", "navigation", "workspace", "settings", "timeline", "agent-activity"]
+  "pages": ["index", "button", "badge", "card", "input", "switch", "tooltip", "dialog", "separator"]
 }

@@ -1,0 +1,15 @@
+---
+title: Tooltip
+description: Context labels with optional keyboard hints.
+---
+
+<ComponentPreview name="tooltip" />
+
+```tsx
+<TooltipProvider>
+  <Tooltip>
+    <TooltipTrigger asChild><Button>Notifications</Button></TooltipTrigger>
+    <TooltipContent>Notifications <TooltipKeys>⌘N</TooltipKeys></TooltipContent>
+  </Tooltip>
+</TooltipProvider>
+```

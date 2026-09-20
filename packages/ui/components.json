@@ -1,25 +1,20 @@
 {
   "$schema": "https://ui.shadcn.com/schema.json",
-  "style": "base-mira",
-  "rsc": false,
+  "style": "nova",
+  "rsc": true,
   "tsx": true,
   "tailwind": {
     "config": "",
-    "css": "src/globals.css",
+    "css": "src/styles/theme.css",
     "baseColor": "neutral",
-    "cssVariables": true,
-    "prefix": ""
+    "cssVariables": true
   },
+  "iconLibrary": "lucide",
   "aliases": {
-    "components": "#components",
-    "utils": "#lib/utils",
-    "ui": "#components",
-    "lib": "#lib",
-    "hooks": "#hooks"
-  },
-  "iconLibrary": "phosphor",
-  "rtl": false,
-  "menuColor": "default-translucent",
-  "menuAccent": "subtle",
-  "registries": {}
+    "components": "@opaline/ui/components",
+    "utils": "@opaline/ui/lib/utils",
+    "ui": "@opaline/ui/components",
+    "lib": "@opaline/ui/lib",
+    "hooks": "@opaline/ui/hooks"
+  }
 }

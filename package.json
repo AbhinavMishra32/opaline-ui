@@ -1,38 +1,18 @@
 {
-  "name": "opaline",
-  "version": "0.3.0",
+  "name": "opaline-ui",
+  "version": "0.1.0",
   "private": true,
   "packageManager": "npm@11.6.1",
-  "description": "A research-driven Electron component system for modern agentic desktop apps.",
-  "workspaces": [
-    "apps/*",
-    "packages/*",
-    "examples/*"
-  ],
+  "workspaces": ["apps/*", "packages/*"],
   "scripts": {
-    "build": "turbo run build",
-    "dev": "npm run build -w @opaline/ui && turbo run dev --filter=@opaline/electron-example",
-    "docs:build": "npm run build -w @opaline/docs",
-    "docs:dev": "npm run dev -w @opaline/docs",
-    "docs:start": "npm run start -w @opaline/docs",
-    "install:ui": "node scripts/install-opaline-ui.mjs",
-    "start": "npm run build -w @opaline/ui && npm run start -w @opaline/electron-example",
-    "start:example": "npm run build -w @opaline/ui && npm run start -w @opaline/electron-example",
-    "start:example-v2": "npm run build -w @opaline/ui && npm run start -w @opaline/electron-example-v2",
-    "dev:example-v2": "npm run build -w @opaline/ui && turbo run dev --filter=@opaline/electron-example-v2",
-    "typecheck": "turbo run typecheck",
-    "research:refresh": "npm run refresh:components --prefix research/opaline-internals",
-    "research:start": "npm run start --prefix research/opaline-internals"
+    "dev": "npm run dev -w @opaline/docs",
+    "build": "npm run registry:build && npm run build -w @opaline/ui && npm run build -w @opaline/docs",
+    "typecheck": "npm run typecheck -w @opaline/ui && npm run typecheck -w @opaline/docs",
+    "registry:build": "shadcn build registry.json -o apps/docs/public/r"
   },
   "devDependencies": {
-    "@types/react": "^19.2.16",
-    "@types/react-dom": "^19.2.3",
-    "turbo": "^2.9.16",
+    "@types/node": "^24.0.0",
+    "shadcn": "^3.8.5",
     "typescript": "^5.9.3"
-  },
-  "dependencies": {
-    "@radix-ui/react-context-menu": "^2.2.16",
-    "@xterm/xterm": "^5.5.0",
-    "@xterm/addon-fit": "^0.10.0"
   }
 }

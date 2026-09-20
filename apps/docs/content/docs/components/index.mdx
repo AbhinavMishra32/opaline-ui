@@ -1,17 +1,17 @@
 ---
-title: Component registry
-description: The public component surface of @opaline/ui, organized by product responsibility.
+title: Components
+description: Compact primitives with Spar's visual and interaction grammar.
 ---
 
-<div className="docs-component-index">
-  <a href="/docs/components/primitives"><strong>Primitives</strong><span>Button, IconButton, Pill, StatusDot, HoverPreview.</span></a>
-  <a href="/docs/components/overlays"><strong>Overlays</strong><span>Dialog, DropdownMenu, and ContextMenu systems.</span></a>
-  <a href="/docs/components/navigation"><strong>Navigation</strong><span>Sidebar, FileTree, and history-aware shell movement.</span></a>
-  <a href="/docs/components/workspace"><strong>Workspace</strong><span>Composer, ThreadSurface, FileBrowserPanel, BottomPanel, and TerminalSurface.</span></a>
-  <a href="/docs/components/settings"><strong>Settings</strong><span>Sidebar, panel, cards, rows, toggles, selects, and option cards.</span></a>
-  <a href="/docs/components/timeline"><strong>Timeline</strong><span>A reusable status timeline for learning, agents, Git, jobs, and activity.</span></a>
-  <a href="/docs/components/agent-activity"><strong>Agent activity</strong><span>Compact thinking, tool activity, progress, and actionable suggestion surfaces.</span></a>
-</div>
+Each component is copied into the consuming application. The API stays close to shadcn/ui, while the proportions, tokens, and interaction details follow Spar.
 
-The package exports components from a single entrypoint. Content, data, routing, persistence, and domain
-logic remain application responsibilities.
+| Component | Purpose |
+| --- | --- |
+| Button | Primary, secondary, outline, ghost, destructive, and icon actions |
+| Badge | Compact status and metadata labels |
+| Card | Structured raised surfaces with complete composition |
+| Input / Textarea | Dense text entry with consistent focus and invalid states |
+| Switch | Binary settings with Spar's compact geometry and easing |
+| Tooltip | Short contextual labels and keyboard hints |
+| Dialog | Focused modal work with restrained glass depth |
+| Separator | Hairline structure for dense layouts |
