@@ -5,3 +5,4 @@ dist
 apps/docs/public/r
 *.tsbuildinfo
 .DS_Store
+.vercel
