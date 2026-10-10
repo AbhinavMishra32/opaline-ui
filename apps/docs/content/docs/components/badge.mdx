@@ -1,14 +1,20 @@
 ---
 title: Badge
-description: Status and metadata labels that stay quiet in dense product surfaces.
+description: A small label for state.
+icon: Tag
 ---
 
-<ComponentPreview name="badge" />
+<ComponentPreview name="badge-demo" />
 
 ```tsx
-import { Badge } from "@/components/ui/badge";
-
-<Badge>Active</Badge>
-<Badge variant="outline">v0.1</Badge>
-<Badge variant="muted">Queued</Badge>
+import { Badge } from "@opaline/ui"
 ```
+
+Colour is for verdicts. `success`, `warning` and `destructive` say how something went; use `muted` or `outline` for everything else.
+
+<TypeTable
+  type={{
+    variant: { type: '"default" | "secondary" | "outline" | "muted" | "success" | "warning" | "destructive"', default: '"default"' },
+    asChild: { type: "boolean", default: "false" },
+  }}
+/>

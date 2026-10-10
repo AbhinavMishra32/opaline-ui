@@ -1,8 +1,19 @@
 ---
 title: Dialog
-description: Focused modal work on a restrained translucent surface.
+description: A modal sheet for a focused task.
+icon: AppWindow
 ---
 
-<ComponentPreview name="dialog" />
+<ComponentPreview name="dialog-demo" />
 
-Every dialog requires a `DialogTitle`. Add a `DialogDescription` whenever the action benefits from context.
+```tsx
+import { Dialog } from "@opaline/ui"
+```
+
+Dialogs scale in from slightly smaller and fade, over a scrim. With reduced motion they just fade.
+
+## Parts
+
+`Dialog`, `DialogTrigger`, `DialogContent`, `DialogHeader`, `DialogTitle`, `DialogDescription`, `DialogFooter`, `DialogClose`.
+
+<TypeTable type={{ showCloseButton: { type: "boolean", default: "true", description: "On DialogContent: the × in the corner." } }} />

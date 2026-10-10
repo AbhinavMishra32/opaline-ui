@@ -1,14 +1,13 @@
 ---
-title: Input and Textarea
-description: Compact entry controls with shared focus, disabled, and invalid states.
+title: Input
+description: A single-line text field.
+icon: TextCursorInput
 ---
 
-<ComponentPreview name="input" />
+<ComponentPreview name="input-demo" />
 
 ```tsx
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-
-<Input aria-invalid placeholder="Workspace name" />
-<Textarea placeholder="Add a note…" />
+import { Input } from "@opaline/ui"
 ```
+
+Set `aria-invalid` to draw the error state. Pair with [Field](/docs/components/field) for labels and messages.

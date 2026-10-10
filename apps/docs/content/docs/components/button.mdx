@@ -1,16 +1,51 @@
 ---
 title: Button
-description: Compact actions with clear hierarchy and precise pressed states.
+description: The one control everything else is measured against.
+icon: MousePointerClick
 ---
 
-<ComponentPreview name="button" />
+<ComponentPreview name="button-variants" />
 
 ```tsx
-import { Button } from "@/components/ui/button";
-
-<Button>Continue</Button>
-<Button variant="outline">Open</Button>
-<Button variant="ghost" size="icon-sm" aria-label="Settings">…</Button>
+import { Button } from "@opaline/ui"
 ```
 
-Use `data-icon="inline-start"` or `data-icon="inline-end"` on an icon when it sits beside a label. Icon-only buttons always need an accessible label.
+## Variants
+
+Use `default` for the single most likely action on a screen, `outline` or `secondary` beside it, and `ghost` in toolbars. `destructive` is tinted rather than filled: deleting should be deliberate, not loud.
+
+## Sizes
+
+<ComponentPreview name="button-sizes" />
+
+## Icons
+
+Mark an icon with `data-icon="inline-start"` or `"inline-end"` and the button tightens its padding on that side, so the icon sits optically centred.
+
+```tsx
+<Button>
+  New thread <ArrowRight data-icon="inline-end" />
+</Button>
+```
+
+## As a link
+
+`asChild` renders the child element with the button's styles:
+
+```tsx
+<Button asChild variant="outline">
+  <a href="/docs">Docs</a>
+</Button>
+```
+
+## Props
+
+<TypeTable
+  type={{
+    variant: { type: '"default" | "secondary" | "outline" | "ghost" | "destructive" | "link"', default: '"default"' },
+    size: { type: '"xs" | "sm" | "default" | "lg" | "icon" | "icon-xs" | "icon-sm" | "icon-lg"', default: '"default"', description: "Default is 32px tall: desktop density." },
+    asChild: { type: "boolean", default: "false", description: "Render the child element instead of a button." },
+  }}
+/>
+
+`buttonVariants` is exported for styling other elements as buttons.

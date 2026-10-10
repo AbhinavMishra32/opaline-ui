@@ -1,0 +1,83 @@
+---
+title: Theming
+description: Tokens, materials, and how to make Opaline yours.
+icon: Palette
+---
+
+All of Opaline's styling comes from one stylesheet of CSS variables. Components never hard-code a colour or a radius, they read a token, so changing the token changes everything that reads it.
+
+## Tokens
+
+The names follow shadcn/ui, so anything written for shadcn picks up Opaline's palette.
+
+| Token | Used for |
+| --- | --- |
+| `--background` / `--foreground` | The page and its text |
+| `--card`, `--popover` | Raised surfaces |
+| `--primary` | The one filled action on a screen |
+| `--muted` / `--muted-foreground` | Wells, secondary text |
+| `--accent` | Hover and selected rows |
+| `--border`, `--border-strong` | Hairlines |
+| `--sidebar*` | The tinted ground a pane sits on |
+| `--success`, `--warning`, `--destructive` | Verdicts, and only verdicts |
+| `--code-*` | Code blocks, inline code and syntax colours |
+| `--op-radius` | The base radius every other radius derives from |
+
+Override any of them under `:root` and `.dark`:
+
+```css title="app/globals.css"
+:root {
+  --op-radius: 0.5rem;
+  --primary: oklch(52% 0.18 265);
+  --primary-foreground: oklch(98% 0 0);
+}
+
+.dark {
+  --primary: oklch(70% 0.15 265);
+}
+```
+
+Tokens also cascade, so a token set on an element re-themes just that subtree:
+
+```tsx
+<div style={{ "--op-radius": "0.25rem" } as React.CSSProperties}>
+  <Card>…</Card>
+</div>
+```
+
+## Type scale
+
+Desktop UI runs smaller than the web. These sizes are Tailwind utilities:
+
+| Utility | Size | For |
+| --- | --- | --- |
+| `text-ui` | 13px | Controls, menus, rows |
+| `text-ui-sm` | 12px | Captions, metadata |
+| `text-content` | 14px | Body copy in panes |
+| `text-thread` | 14px | Thread prose |
+| `text-thread-tool` | 13px | Step rows and tool output |
+
+## Materials
+
+Surfaces are named classes rather than strings of utilities, so a glass menu looks the same everywhere:
+
+| Class | Material |
+| --- | --- |
+| `op-glass` | Translucent, blurred, with a rim and a sheen: floating controls |
+| `op-menu` | Glass tuned for menus |
+| `op-floating` | An opaque raised surface: popovers and palettes |
+| `op-sheet` | A squircle sheet, `corner-shape: superellipse()` where supported |
+| `op-pane` | A working pane inset on a sidebar |
+| `op-scroll` | Thin overlay scrollbars |
+| `op-shimmer` | The sweep across a running step's title |
+
+## The thread's scale
+
+Inside `.op-thread` the radii are rescoped by `--squircle-factor` (1.4), and the reading column is held to `--thread-width` (48rem). Both are set on the thread root and can be overridden there:
+
+```css
+.op-thread {
+  --thread-width: 40rem;
+  --squircle-factor: 1.2;
+}
+```

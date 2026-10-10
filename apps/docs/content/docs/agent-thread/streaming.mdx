@@ -1,0 +1,80 @@
+---
+title: Streaming
+description: Fold your agent's events into messages with reduceThread.
+icon: Radio
+---
+
+Most agent loops already emit something like *text delta*, *tool started*, *tool finished*. `reduceThread` folds those events into `ThreadMessage[]`, so wiring a custom backend is a `useReducer` away.
+
+```tsx
+import * as React from "react"
+import { AgentThread, reduceThread } from "@opaline/ui/thread"
+
+export function Chat() {
+  const [messages, dispatch] = React.useReducer(reduceThread, [])
+
+  async function send(text: string) {
+    const turn = crypto.randomUUID()
+    dispatch({ type: "user", id: crypto.randomUUID(), text })
+    dispatch({ type: "turn-start", id: turn })
+    for await (const event of runAgent(text)) dispatch(toThreadEvent(turn, event))
+    dispatch({ type: "turn-end", id: turn })
+  }
+
+  return <AgentThread messages={messages} onSend={send} />
+}
+```
+
+## Events
+
+Every event but `user` carries the turn's `id`. Events that open or close something take an optional `at` timestamp, which defaults to now.
+
+<TypeTable
+  type={{
+    "user": { type: "{ id; text; attachments?; at? }", description: "Appends a user message." },
+    "turn-start": { type: "{ id; at? }", description: "Starts an assistant turn. Optional: any event creates the turn if it doesn't exist." },
+    "text-delta": { type: "{ id; delta }", description: "Appends to the trailing text part, or starts one. Closes open reasoning." },
+    "reasoning-start": { type: "{ id; at? }", description: "Opens a block of thinking." },
+    "reasoning-delta": { type: "{ id; delta }", description: "Appends to the trailing thought, reopening it if nothing happened in between." },
+    "reasoning-end": { type: "{ id; at? }", description: "Settles the thought: “Thought for 4s”." },
+    "tool-start": { type: "{ id; callId; name; input?; title?; at? }", description: "A call begins. Closes open reasoning." },
+    "tool-update": { type: "{ id; callId; input?; detail?; diff? }", description: "Streamed input, or progress." },
+    "tool-end": { type: "{ id; callId; output?; error?; detail?; diff?; at? }", description: "Settles the call as done, or as an error when `error` is set." },
+    "reply-start": { type: "{ id; at? }", description: "The agent has stopped working and is answering. Closes the fold." },
+    "status": { type: "{ id; text; tone? }", description: "A quiet line in the work." },
+    "error": { type: "{ id; text; title? }", description: "Ends the turn in error with a card." },
+    "question": { type: "{ id; partId; questions; at? }", description: "The agent asks the person. Adds a pending question part." },
+    "question-answer": { type: "{ id?; partId; answers }", description: "Settles a question as answered." },
+    "question-cancel": { type: "{ id?; partId }", description: "Settles a question as not answered." },
+    "turn-end": { type: "{ id; at? }", description: "Settles every open part and records the turn's length." },
+  }}
+/>
+
+## Without reply-start
+
+If your agent doesn't say when the answer begins, skip `reply-start`. The thread treats the last run of text (plus any finished steps and cards after it) as the reply once the turn is done, and the fold closes then.
+
+Send `reply-start` when you can, though. Closing the fold the moment the answer begins is what makes a long turn feel fast.
+
+## Batching
+
+A fast model can emit hundreds of deltas a second. Buffer them and apply a frame's worth at once with `reduceThreadBatch`:
+
+```ts
+import { reduceThreadBatch, type ThreadEvent } from "@opaline/ui/thread"
+
+const queue: ThreadEvent[] = []
+let frame = 0
+
+function enqueue(event: ThreadEvent) {
+  queue.push(event)
+  frame ||= requestAnimationFrame(() => {
+    frame = 0
+    setMessages((current) => reduceThreadBatch(current, queue.splice(0)))
+  })
+}
+```
+
+## Long thoughts
+
+A turn that thinks for ninety seconds produces a very long string. Each text or reasoning part is capped at 40,000 characters, which keeps the head (the part worth reading) and stops a long turn from slowing the page.

@@ -1,0 +1,25 @@
+---
+title: Segmented
+description: A macOS-style segmented control for a value.
+icon: Rows2
+---
+
+<ComponentPreview name="segmented-demo" />
+
+```tsx
+import { Segmented } from "@opaline/ui"
+```
+
+One sunken track and one raised thumb sliding between equal segments. Equal widths let the thumb be pure CSS: nothing is measured, so it lands correctly on the first paint.
+
+Use Segmented to **set a value**. To switch what a panel shows, use [View Switch](/docs/components/view-switch).
+
+<TypeTable
+  type={{
+    value: { type: "T", required: true },
+    onChange: { type: "(value: T) => void", required: true },
+    options: { type: "{ value: T; label: string; icon?; disabled?; title? }[]", required: true },
+    ariaLabel: { type: "string", required: true },
+    disabled: { type: "boolean" },
+  }}
+/>

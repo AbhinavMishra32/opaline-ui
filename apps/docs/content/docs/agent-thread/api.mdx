@@ -1,0 +1,171 @@
+---
+title: API reference
+description: Every prop and type the thread exports.
+icon: BookOpen
+---
+
+Everything is exported from `@opaline/ui/thread`.
+
+## AgentThread
+
+<TypeTable
+  type={{
+    messages: { type: "ThreadMessage[]", required: true, description: "The conversation. See [Messages](/docs/agent-thread/messages)." },
+    onSend: { type: "(text: string, attachments: ComposerAttachment[]) => void", description: "Called when the person sends, with the ready attachments. `(text) => …` still works. Omit it to hide the composer." },
+    onStop: { type: "() => void", description: "Stops a running turn. Shown while the last turn is streaming." },
+    attachments: { type: "ComposerAttachment[]", description: "Images on the draft. Controlled: add them in `onAttach`, clear them after `onSend`." },
+    onAttach: { type: "(files: File[]) => void", description: "Files picked, pasted or dropped, filtered to images. Shows the attach button." },
+    onRemoveAttachment: { type: "(id: string) => void", description: "Removes a chip." },
+    onAnswer: { type: "(partId, answers: QuestionAnswer[]) => void | Promise<void>", description: "Answers a pending `question` part. A promise shows the card as sending until it settles." },
+    onCancelQuestion: { type: "(partId) => void", description: "Shows Skip on the question card." },
+    questionPlacement: { type: "\"composer\" | \"inline\"", default: "\"composer\"", description: "Where a pending question is answered: in the composer's place, or as a card in the transcript." },
+    scrollKey: { type: "string", description: "Remembers this transcript's scroll position across remounts." },
+    composer: { type: "Omit<ComposerProps, \"onSubmit\" | \"onStop\" | \"busy\">", description: "Everything else the composer takes." },
+    header: { type: "ReactNode", description: "Above the first message." },
+    empty: { type: "ReactNode", description: "Centred when there are no messages." },
+    footer: { type: "ReactNode", description: "After the last message." },
+    className: { type: "string" },
+  }}
+/>
+
+It also takes every option of `ThreadConfig` and `ThreadEvents`.
+
+## Composer
+
+See [Composition](/docs/agent-thread/composition#the-composer).
+
+```ts
+type ComposerAttachment = Attachment & {
+  status?: "uploading" | "ready" | "error" // default "ready"
+  progress?: number                        // 0–1
+  error?: string
+}
+```
+
+## ThreadConfig
+
+<TypeTable
+  type={{
+    tools: { type: "ToolRegistry", description: "How each tool is drawn, by name. See [Tools](/docs/agent-thread/tools)." },
+    labels: { type: "Partial<ThreadLabels>", description: "Every string the thread draws." },
+    renderMarkdown: { type: "(text, { streaming }) => ReactNode", description: "Replaces the built-in markdown renderer." },
+    images: { type: "(src) => string | null", description: "Which markdown images may load: return the URL to load, or null to print the line as text. Default `httpsImages` (remote https only)." },
+    highlight: { type: "(code, language) => ReactNode", description: "Replaces the built-in highlighter for fenced code." },
+    renderPart: { type: "(part: CustomPart) => ReactNode", description: "Draws `custom` parts." },
+    onOpenFile: { type: "(path: string) => void", description: "Makes path subjects, file views and `file` references clickable." },
+    onOpenUrl: { type: "(url: string) => void", description: "Follows links in prose and search results. Without it links are anchors opening a new tab." },
+    references: { type: "ReferenceConfig", description: "`[[kind:target|label]]` references: `{ onOpen?, exists?, onCreate?, icon?, footer? }`." },
+    codeLanguage: { type: "string", description: "The language inline code is coloured as." },
+    renderCodeBlock: { type: "({ code, language }) => ReactNode | undefined", description: "Draws a fenced block yourself; `undefined` falls through." },
+    duration: { type: "\"playful\" | \"precise\" | (ms) => string", default: "\"playful\"", description: "How a settled turn names its length." },
+    fold: { type: "\"auto\" | \"open\" | \"closed\" | \"none\"", default: "\"auto\"", description: "The work fold's behaviour." },
+    animate: { type: "boolean", default: "true", description: "Entrances and folds. Off for reduced-motion users regardless." },
+  }}
+/>
+
+## ThreadEvents
+
+<TypeTable
+  type={{
+    onEdit: { type: "(messageId, text) => void", description: "Shows edit on user messages." },
+    onRate: { type: "(messageId, rating: \"good\" | \"bad\" | null) => void", description: "Shows a rating menu on replies. `null` withdraws a rating." },
+    onCopy: { type: "(text, messageId) => void", description: "Replaces the default clipboard copy." },
+    renderActions: { type: "(message: AssistantMessage) => ReactNode", description: "Extra actions in a reply's footer." },
+    onAnswer: { type: "(partId, answers: QuestionAnswer[]) => void | Promise<void>", description: "Answers a `question` part." },
+    onCancelQuestion: { type: "(partId) => void", description: "Declines a `question` part." },
+    onLoadWork: { type: "(messageId) => void | Promise<void>", description: "Fetches a turn's `deferredSteps` when its fold opens. Reject to offer a retry." },
+    questionPlacement: { type: "\"composer\" | \"inline\"", description: "Set by `AgentThread`; on `Thread`, defaults to the transcript row only." },
+  }}
+/>
+
+## ThreadLabels
+
+<TypeTable
+  type={{
+    working: { type: "(elapsed: string) => string", default: "Working for {elapsed}" },
+    worked: { type: "(length: string) => string", default: "Worked for {length}" },
+    connecting: { type: "string", default: "Connecting to the model" },
+    waiting: { type: "string", default: "Working" },
+    thinking: { type: "string", default: "Thinking" },
+    thoughtFor: { type: "(seconds: number) => string", default: "Thought for {seconds}s" },
+    copy: { type: "string", default: "Copy" },
+    copied: { type: "string", default: "Copied" },
+    edit: { type: "string", default: "Edit and run again from here" },
+    resend: { type: "string", default: "Send again" },
+    cancel: { type: "string", default: "Cancel" },
+    rate: { type: "string", default: "Rate this response" },
+    rateGood: { type: "string", default: "Good response" },
+    rateBad: { type: "string", default: "Bad response" },
+    jumpToLatest: { type: "string", default: "Jump to latest" },
+    send: { type: "string", default: "Send" },
+    stop: { type: "string", default: "Stop" },
+    placeholder: { type: "string", default: "Ask anything…" },
+    turnFailed: { type: "string", default: "That turn did not finish" },
+    showDetails: { type: "string", default: "Show details" },
+    hideDetails: { type: "string", default: "Hide details" },
+    input: { type: "string", default: "Input" },
+    output: { type: "string", default: "Output" },
+    failed: { type: "string", default: "Failed" },
+    showFullOutput: { type: "(lines: number) => string", default: "Show full output · {lines} lines" },
+    collapseOutput: { type: "string", default: "Collapse output" },
+    pending: { type: "string", default: "Waiting for the agent to finish this step" },
+    copyFailed: { type: "string", default: "Copy failed — try again" },
+    rated: { type: "(verdict: string) => string", default: "{verdict} — rate again to change" },
+    waitingForAnswer: { type: "string", default: "Waiting for your answer" },
+    thinkingBefore: { type: "string", default: "Thinking" },
+    thinkingAfter: { type: "string", default: "What it made of it" },
+    done: { type: "string", default: "Done" },
+    foldTitle: { type: "(length, open) => string", default: "{length} of work — click to hide/see the steps" },
+    loadingSteps: { type: "string", default: "Loading the steps…" },
+    stepsFailed: { type: "string", default: "Those steps could not be loaded. Try again" },
+    steering: { type: "string", default: "Return to send — the agent picks this up at its next step" },
+    attach: { type: "string", default: "Attach images" },
+    removeAttachment: { type: "(name) => string", default: "Remove {name}" },
+    uploading: { type: "string", default: "Uploading" },
+    attachmentFailed: { type: "string", default: "Could not upload" },
+    dropToAttach: { type: "string", default: "Drop images to attach" },
+    viewImage: { type: "(name) => string", default: "View {name}" },
+    relativeTime: { type: "(ms) => string", default: "just now, 4 min ago, 2 h ago…" },
+    showAllLines: { type: "(lines) => string", default: "Show all {lines} lines" },
+    exitCode: { type: "(code) => string", default: "exit {code}" },
+    noResults: { type: "string", default: "No results" },
+    customAnswer: { type: "string", default: "Or type your own answer…" },
+    answerPlaceholder: { type: "string", default: "Type your answer…" },
+    answerPlaceholderSole: { type: "string", default: "Answer in your own words." },
+    questionHintPick: { type: "string", default: "Press a number, or click" },
+    back: { type: "string", default: "Back" },
+    sendAnswer: { type: "string", default: "Send answer" },
+    nextQuestion: { type: "string", default: "Next question" },
+    dismissQuestion: { type: "string", default: "Skip" },
+    questionCancelled: { type: "string", default: "Not answered" },
+  }}
+/>
+
+The question card's other hints (`ownAnswer`, `questionSending`, `questionHintTyping`, `questionHintMultiple`, `questionHintReady`) are labels too.
+
+`defaultLabels` is exported if you want to build on it.
+
+## Functions
+
+| Export | Signature |
+| --- | --- |
+| `reduceThread` | `(messages, event: ThreadEvent) => ThreadMessage[]` |
+| `reduceThreadBatch` | `(messages, events: ThreadEvent[]) => ThreadMessage[]` |
+| `useAISDKThread` | `(messages: AISDKMessage[], status?) => ThreadMessage[]` |
+| `fromAISDK` | `(messages, status?, timings?, { questions? }) => ThreadMessage[]` |
+| `formatQuestionAnswers` | `(questions, answers) => string`, the answer text for the agent |
+| `questionExchange` | `(input, output) => { question, answer, choices }[]`, reads an ask tool call |
+| `answersFromText` | `(questions, output) => QuestionAnswer[]` |
+| `groupParts` | `(parts) => PartRow[]`, the rows a turn draws |
+| `isOutcome` | `(part) => boolean`, an answered question |
+| `pendingQuestion` | `(messages) => QuestionPart \| undefined` |
+| `parseReference` / `collectReferences` | `[[kind:target\|label]]` → `{ kind, target, label }` |
+| `plainMath` | `(text) => string`, `\(O(n^2)\)` → `O(n²)` |
+| `closeOff` | `(json) => string`, closes a truncated JSON prefix |
+| `defineTools` | `(registry) => registry`, typed |
+| `defineTool` | `<Input, Output>(definition) => definition`, typed |
+| `inferTool` | `(name) => { icon, orb, verb }` |
+| `resolveTool` | `(part, registry) => { title, subject, detail, icon, orb, … }` |
+| `splitTurn` | `(message) => { work, reply }` |
+| `formatDuration` | `(ms) => string`, e.g. `"2m 14s"`, `"1d 2h 0m"` |
+| `tokenize` | `(code, language) => Token[]`, the built-in highlighter |

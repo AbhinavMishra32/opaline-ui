@@ -1,0 +1,61 @@
+---
+title: Questions
+description: The agent asks, the person picks or types, the turn goes on.
+icon: MessageCircleQuestion
+---
+
+A `question` part is the agent stopping to ask. While it's pending, `AgentThread` swaps the composer for a card: options on number keys, a field for an answer in the person's own words, Back and Next across several questions. Once answered, the exchange stays in the transcript and its answer shows under the fold.
+
+<ComponentPreview name="question-demo" height={520} align="stretch" />
+
+```ts
+type QuestionPart = {
+  type: "question"
+  id: string
+  questions: Question[]
+  status: "pending" | "answered" | "cancelled"
+  answers?: QuestionAnswer[]          // one per question, once answered
+}
+
+type Question = {
+  header: string                      // a word or two: "Scope"
+  question: string
+  options: { label: string; description?: string }[]
+  multiple?: boolean                  // pick several
+  custom?: boolean                    // allow typing an answer (default true)
+}
+
+type QuestionAnswer = { selected: string[]; custom?: string }
+```
+
+## Answering
+
+```tsx
+<AgentThread
+  messages={messages}
+  onAnswer={async (partId, answers) => {
+    await sendToolResult(partId, formatQuestionAnswers(questions, answers))
+  }}
+  onCancelQuestion={(partId) => sendToolResult(partId, { status: "cancelled" })}
+/>
+```
+
+Return a promise from `onAnswer` and the card shows it's sending until it settles. Settle the part yourself (set `status` and `answers`, or dispatch `question-answer` to `reduceThread`); the card goes and the composer comes back.
+
+`formatQuestionAnswers` writes the answers as text for the agent: the answer alone for one question, `Header: answer` lines for several. `answersFromText` reads that back.
+
+`questionPlacement="inline"` draws the card in the transcript instead of in the composer's place.
+
+## With the AI SDK
+
+`fromAISDK` turns an ask tool (`ask_user`, `AskUserQuestion`, `question`…) whose input carries `questions` into a question part, pending until the tool has output. Answer with `addToolResult({ tool, toolCallId: partId, output: formatQuestionAnswers(questions, answers) })`. Pass `{ questions: false }` to keep these as tool rows.
+
+## On its own
+
+`AskUserQuestion` is the card without a thread:
+
+```tsx
+<AskUserQuestion questions={questions} onSubmit={(answers) => …} onCancel={skip} busy={sending} />
+```
+
+`QuestionCard` draws a `QuestionPart` in any state.

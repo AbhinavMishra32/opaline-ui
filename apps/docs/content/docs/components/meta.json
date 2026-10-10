@@ -1,4 +1,31 @@
 {
   "title": "Components",
-  "pages": ["index", "button", "badge", "card", "input", "switch", "tooltip", "dialog", "separator"]
+  "pages": [
+    "alert",
+    "badge",
+    "button",
+    "card",
+    "collapsible",
+    "choice-group",
+    "command",
+    "dialog",
+    "dropdown-menu",
+    "empty",
+    "field",
+    "hover-card",
+    "input",
+    "input-group",
+    "kbd",
+    "meter",
+    "popover",
+    "segmented",
+    "select",
+    "separator",
+    "skeleton",
+    "switch",
+    "textarea",
+    "toggle",
+    "tooltip",
+    "view-switch"
+  ]
 }

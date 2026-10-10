@@ -1,0 +1,113 @@
+---
+title: Configuration
+description: Labels, markdown, highlighting, the fold, and motion.
+icon: Settings2
+---
+
+Every option can be passed to `<AgentThread>`, to `<Thread>`, or to a `<ThreadProvider>` higher up. Providers nest, and an inner one merges over the outer, so an app can register its tools once and a single screen can change a label.
+
+```tsx
+<ThreadProvider tools={tools} duration="precise">
+  <App />
+</ThreadProvider>
+```
+
+## Labels
+
+Every string the thread draws is a label, for copy changes or translation. Some are functions:
+
+```tsx
+<AgentThread
+  labels={{
+    placeholder: "Ask the agent anything",
+    working: (elapsed) => `Pensando · ${elapsed}`,
+    worked: (length) => `Trabajó ${length}`,
+    copy: "Copiar",
+  }}
+  messages={messages}
+/>
+```
+
+See [`ThreadLabels`](/docs/agent-thread/api#threadlabels) for the full list.
+
+## Duration
+
+How a settled turn names its length.
+
+| Value | Reads |
+| --- | --- |
+| `"playful"` (default) | *one sip of coffee* for a short turn, *2m 14s* for a long one |
+| `"precise"` | always *14s*, *2m 14s* |
+| `(ms) => string` | whatever you return |
+
+## Fold
+
+| Value | Behaviour |
+| --- | --- |
+| `"auto"` (default) | Open while the agent works, closes when the reply starts |
+| `"open"` | Always open |
+| `"closed"` | Always closed, even while working |
+| `"none"` | No fold: steps drawn inline above the reply |
+
+## Markdown
+
+The built-in renderer covers headings, lists, quotes, tables, rules, images, links, inline code and fenced code. To use your own:
+
+```tsx
+import ReactMarkdown from "react-markdown"
+
+<AgentThread renderMarkdown={(text) => <ReactMarkdown>{text}</ReactMarkdown>} messages={messages} />
+```
+
+### Images
+
+An image on a line of its own (`![alt](src)`) loads only from remote **https** by default, because a model has no business pointing at local files. If your app serves its own media, say signed links on its API, widen the policy to your origin with `images` (on the thread, or on a standalone `<Markdown>`):
+
+```tsx
+const ownMedia = (src: string) => (src.startsWith(apiOrigin) || src.startsWith("https://") ? src : null)
+
+<AgentThread images={ownMedia} messages={messages} />
+<Markdown source={card} images={ownMedia} />
+```
+
+Return `null` and the line prints as the markdown it was.
+
+## Highlighting
+
+Fenced code uses a small built-in tokenizer with no dependencies. To use Shiki or Prism, return highlighted nodes:
+
+```tsx
+<AgentThread highlight={(code, language) => <MyHighlighter code={code} language={language} />} messages={messages} />
+```
+
+## Custom parts
+
+A `custom` part is drawn by `renderPart`. Use it for anything that isn't text or a tool: a chart, a proposal card, a question with buttons.
+
+```tsx
+<AgentThread
+  renderPart={(part) => (part.kind === "chart" ? <Chart data={part.data} /> : null)}
+  messages={messages}
+/>
+```
+
+## Opening files
+
+Pass `onOpenFile` and any step whose subject looks like a path becomes a link:
+
+```tsx
+<AgentThread onOpenFile={(path) => editor.open(path)} messages={messages} />
+```
+
+## Events
+
+| Prop | Adds |
+| --- | --- |
+| `onEdit(id, text)` | Edit on user messages |
+| `onRate(id, rating)` | A rating menu on replies |
+| `onCopy(text, id)` | Replaces the default clipboard copy |
+| `renderActions(message)` | Your own buttons in a reply's footer |
+
+## Motion
+
+Entrances, the fold and the send arrow animate. `prefers-reduced-motion` turns them off, and so does `animate={false}`.

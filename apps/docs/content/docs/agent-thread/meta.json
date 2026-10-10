@@ -1,0 +1,15 @@
+{
+  "title": "Agent Thread",
+  "pages": [
+    "index",
+    "messages",
+    "tools",
+    "questions",
+    "streaming",
+    "ai-sdk",
+    "configuration",
+    "composition",
+    "model-picker",
+    "api"
+  ]
+}

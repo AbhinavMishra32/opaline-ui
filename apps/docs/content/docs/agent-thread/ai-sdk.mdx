@@ -1,0 +1,65 @@
+---
+title: AI SDK
+description: Draw useChat from the Vercel AI SDK as an Agent Thread.
+icon: Plug
+---
+
+`useAISDKThread` turns the messages from the [AI SDK](https://ai-sdk.dev)'s `useChat` into thread messages. Opaline types them structurally, so it doesn't depend on the `ai` package.
+
+```tsx
+"use client"
+
+import { useChat } from "@ai-sdk/react"
+import { AgentThread, useAISDKThread } from "@opaline/ui/thread"
+
+export function Chat() {
+  const { messages, status, sendMessage, stop } = useChat()
+  const thread = useAISDKThread(messages, status)
+
+  return <AgentThread messages={thread} onSend={(text) => sendMessage({ text })} onStop={stop} />
+}
+```
+
+## What's mapped
+
+| AI SDK part | Thread part |
+| --- | --- |
+| `text` | `text` |
+| `reasoning` | `reasoning`, streaming while the turn is |
+| `tool-<name>` | `tool` named `<name>` |
+| `dynamic-tool` | `tool` named by `toolName` |
+| `input-streaming`, `input-available` | `status: "running"` |
+| `output-available` | `status: "done"` with `output` |
+| `output-error` | `status: "error"` with `errorText` |
+
+While `status` is `"submitted"` and nothing has arrived yet, the thread shows a connecting line, so the person isn't looking at nothing.
+
+## Timings
+
+The AI SDK doesn't record when parts start and end. The hook does: it remembers when it first saw each part and when it settled, which gives the thread *Thought for 4s*, per-step timing and *Worked for 14s*.
+
+Parts that were already finished the first time it saw them (history loaded from a database) get no timing. A missing duration is better than a wrong one.
+
+To render on the server, or outside React, use the pure function:
+
+```ts
+import { fromAISDK } from "@opaline/ui/thread"
+
+const thread = fromAISDK(messages, "ready")
+```
+
+## Tools
+
+AI SDK tool names flow straight into the [registry](/docs/agent-thread/tools), so a tool defined as `getWeather` on the server is configured as `getWeather` here:
+
+```tsx
+const tools = defineTools({
+  getWeather: defineTool<{ city: string }, { temp: number }>({
+    title: ({ status }) => (status === "running" ? "Checking the weather" : "Checked the weather"),
+    subject: ({ input }) => input.city,
+    detail: ({ output }) => output && `${output.temp}°`,
+  }),
+})
+
+<AgentThread messages={thread} tools={tools} onSend={…} />
+```

@@ -1,15 +1,19 @@
 ---
 title: Tooltip
-description: Context labels with optional keyboard hints.
+description: A label for a control that has none.
+icon: MessageSquareText
 ---
 
-<ComponentPreview name="tooltip" />
+<ComponentPreview name="tooltip-demo" />
 
 ```tsx
-<TooltipProvider>
-  <Tooltip>
-    <TooltipTrigger asChild><Button>Notifications</Button></TooltipTrigger>
-    <TooltipContent>Notifications <TooltipKeys>⌘N</TooltipKeys></TooltipContent>
-  </Tooltip>
-</TooltipProvider>
+import { Tooltip } from "@opaline/ui"
 ```
+
+`TooltipKeys` adds a keyboard shortcut chip at the trailing edge.
+
+Tooltips need a `TooltipProvider` somewhere above them. `AgentThread` brings its own.
+
+## Parts
+
+`TooltipProvider`, `Tooltip`, `TooltipTrigger`, `TooltipContent`, `TooltipKeys`.

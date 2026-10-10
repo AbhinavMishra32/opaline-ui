@@ -1,12 +1,15 @@
 ---
 title: Switch
-description: A binary setting control with compact Spar geometry.
+description: An on/off control that takes effect immediately.
+icon: ToggleRight
 ---
 
-<ComponentPreview name="switch" />
+<ComponentPreview name="switch-demo" />
 
 ```tsx
-import { Switch } from "@/components/ui/switch";
-
-<Switch defaultChecked aria-label="Enable notifications" />
+import { Switch } from "@opaline/ui"
 ```
+
+On is the brand ink and the knob takes the page colour, so the pair inverts cleanly in dark mode. The knob is a capsule that keeps its shape the whole way across.
+
+<TypeTable type={{ size: { type: '"default" | "sm"', default: '"default"', description: "`sm` fits a 32px menu row." } }} />

@@ -1,12 +1,25 @@
 ---
 title: Card
-description: A complete, softly raised surface for grouped content and actions.
+description: A raised surface for a group of settings or a summary.
+icon: Square
 ---
 
-<ComponentPreview name="card" />
+<ComponentPreview name="card-demo" />
 
 ```tsx
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@opaline/ui"
 ```
 
-Use the full composition. Header, content, and footer preserve the vertical rhythm across cards.
+`Card` is drawn with a hairline ring and a soft shadow rather than a border, so it reads as raised on any ground.
+
+`CardRow` is a settings row: a label on the left, a control on the right, hairlines between rows.
+
+For a working area inset into a window, like an app's main pane, use `Sheet`, a squircle surface on the page background:
+
+```tsx
+<Sheet className="m-2 flex-1">…</Sheet>
+```
+
+## Parts
+
+`Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter`, `CardRow`, `Sheet`.

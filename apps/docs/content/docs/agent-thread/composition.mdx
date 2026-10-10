@@ -1,0 +1,130 @@
+---
+title: Composition
+description: Build your own thread from the parts AgentThread is made of.
+icon: Blocks
+---
+
+`<AgentThread>` is a convenience. It's exactly this:
+
+```tsx
+<Thread {...config}>
+  <ThreadViewport>
+    {header}
+    <ThreadMessages messages={messages} />
+    {footer}
+  </ThreadViewport>
+  <Composer busy={busy} onSubmit={onSend} onStop={onStop} />
+</Thread>
+```
+
+Reach for the parts when you need something in between: a toolbar above the composer, a context card at the top, a model picker, a thread with no composer at all.
+
+<ComponentPreview name="thread-compound" height={440} align="stretch" />
+
+## Parts
+
+| Part | Does |
+| --- | --- |
+| `Thread` | Root. Holds configuration, events and scroll state. Takes every [configuration](/docs/agent-thread/configuration) option. |
+| `ThreadViewport` | The scrolling column, held to a reading width, with edges that fade while there's content past them. |
+| `ThreadMessages` | Draws every message by its role. Messages present on the first render are still; new ones arrive. |
+| `ThreadScrollButton` | Jump to latest. Already inside `ThreadViewport`; use it directly to place it yourself. |
+| `Composer` | The field. Grows with the draft, sends on Return, offers Stop while busy. |
+| `ComposerPill` | A quiet control for the composer's lower row. |
+
+## Drawing messages yourself
+
+`ThreadMessages` is a map over roles. To interleave your own rows, map the messages yourself with the message components:
+
+```tsx
+import { AssistantMessage, SystemMessage, UserMessage } from "@opaline/ui/thread"
+
+{messages.map((message) =>
+  message.role === "user" ? (
+    <UserMessage key={message.id} message={message} />
+  ) : message.role === "assistant" ? (
+    <AssistantMessage key={message.id} latest={message.id === lastId} message={message} />
+  ) : (
+    <SystemMessage key={message.id} message={message} />
+  ),
+)}
+```
+
+## Lower-level pieces
+
+The rows are exported too, for transcripts outside a conversation, like an activity log or a run history:
+
+- `MessageParts` draws a list of parts with the thread's spacing.
+- `WorkFold` is the fold on its own.
+- `ToolStep`, `ReasoningStep`, `StatusStep`, `ErrorCard` are single rows.
+- `Orb` is the animated mark, in nine kinds.
+- `Markdown` and `CodeBlock` are the renderer.
+- `splitTurn(message)` returns `{ work, reply }`.
+
+```tsx
+import { MessageParts, WorkFold } from "@opaline/ui/thread"
+
+<WorkFold durationMs={14_000} live={false}>
+  <MessageParts parts={run.parts} />
+</WorkFold>
+```
+
+## Scroll state
+
+`useThreadScroll()` exposes the viewport's state for building your own controls:
+
+```tsx
+const { pinned, scrollToLatest } = useThreadScroll()
+```
+
+## The composer
+
+<ComponentPreview name="composer-demo" align="center" />
+
+### Images
+
+Paste, drop or pick images. The composer hands you the files; you upload them and pass the chips back.
+
+<ComponentPreview name="composer-attachments-demo" align="center" />
+
+```tsx
+const [attachments, setAttachments] = useState<ComposerAttachment[]>([])
+
+<Composer
+  attachments={attachments}
+  onAttach={(files) => setAttachments((list) => [...list, ...files.map(toUploadingChip)])}
+  onRemoveAttachment={(id) => setAttachments((list) => list.filter((item) => item.id !== id))}
+  onSubmit={(text, images) => { send(text, images); setAttachments([]) }}
+/>
+```
+
+`AttachmentChip` draws one chip on its own, and `acceptsFile(file, accept)` applies an `accept` string.
+
+<TypeTable
+  type={{
+    onSubmit: { type: "(text: string, attachments: ComposerAttachment[]) => void", description: "Called with the trimmed draft and the ready attachments. The composer clears its text; clear `attachments` yourself." },
+    value: { type: "string", description: "Controlled draft. Leave out to let the composer hold it." },
+    onValueChange: { type: "(value: string) => void" },
+    busy: { type: "boolean", default: "false", description: "A turn is running. Shows Stop when `onStop` is given and the field is empty." },
+    onStop: { type: "() => void" },
+    steerable: { type: "boolean", default: "true", description: "Let the person send while a turn runs." },
+    attachments: { type: "ComposerAttachment[]", description: "Chips above the field. `status: \"uploading\"` blocks sending; `progress` (0–1) draws a ring." },
+    onAttach: { type: "(files: File[]) => void", description: "Files picked, pasted or dropped, filtered by `accept`. Shows the attach button. Before this release it took no arguments and fired on click; use `onAttachClick` for that." },
+    onAttachClick: { type: "() => void", description: "Opens your own picker instead of the browser's." },
+    onRemoveAttachment: { type: "(id: string) => void" },
+    accept: { type: "string", default: "\"image/*\"" },
+    multiple: { type: "boolean", default: "true" },
+    minLength: { type: "number", default: "1", description: "Characters needed to send text alone." },
+    focusRequest: { type: "number", description: "Change it to move focus to the field." },
+    notice: { type: "ReactNode", description: "A line above the shell, such as an upload error." },
+    ready: { type: "boolean", default: "true", description: "False disables Send without disabling typing." },
+    placeholder: { type: "string", default: "labels.placeholder" },
+    header: { type: "ReactNode", description: "Inside the shell, above the field: attachments, a banner." },
+    leading: { type: "ReactNode", description: "In the row under the shell, before the hint." },
+    trailing: { type: "ReactNode", description: "In that row, right before Send." },
+    hint: { type: "ReactNode", description: "The quiet line in that row." },
+    maxHeight: { type: "number", default: "176", description: "Height in px before the field scrolls." },
+    disabled: { type: "boolean" },
+    autoFocus: { type: "boolean" },
+  }}
+/>

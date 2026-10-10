@@ -1,0 +1,98 @@
+---
+title: Model picker
+description: The composer's model, effort and context controls.
+icon: Cpu
+---
+
+Three controls that read as one line under the composer: how full the context is, which model, and how hard it thinks.
+
+<ComponentPreview name="model-picker-demo" />
+
+At rest they're text, with no pills or borders: the model in force is worth reading, and nothing else there is. The pill arrives with the pointer, and the chevron unfolds without shifting the name. Group them with a tight gap (`gap-0.5`) so they read as one statement rather than three controls.
+
+## In a composer
+
+Pass them to the composer's `leading` slot:
+
+```tsx
+<AgentThread
+  composer={{
+    leading: (
+      <div className="flex items-center gap-0.5">
+        <ContextUsage total={200_000} used={tokens} />
+        <ModelPicker providers={providers} value={model} onValueChange={setModel} />
+        <EffortPicker value={effort} onValueChange={setEffort} />
+      </div>
+    ),
+  }}
+  messages={messages}
+/>
+```
+
+## ModelPicker
+
+Several providers become submenus. One provider becomes a flat list. Typing collapses everything into a single search across every model.
+
+```ts
+const providers: ModelProvider[] = [
+  {
+    id: "anthropic",
+    name: "Anthropic",
+    models: [
+      { id: "claude-opus-5-5", name: "Opus 5.5", description: "Most capable", reasoning: true },
+      { id: "claude-haiku-4-5", name: "Haiku 4.5" },
+    ],
+  },
+]
+```
+
+The provider's mark comes from `ProviderIcon`, which knows the common vendors by id: `openai`, `anthropic`, `claude`, `google`, `xai`, `deepseek`, `moonshot`, `kimi`, `zai`, `minimax`, `openrouter`, `vercel`, `cloudflare`, `copilot`, `cline`, `opencode`, `ollama`, `lmstudio`. Anything else gets a neutral plug, or pass your own `icon`.
+
+<TypeTable
+  type={{
+    providers: { type: "ModelProvider[]", required: true },
+    value: { type: "{ provider: string; model: string }", required: true },
+    onValueChange: { type: "(value) => void", required: true },
+    onOpenSettings: { type: "() => void", description: "Adds a Settings row at the foot of the menu." },
+    shortcut: { type: "string | false", default: '"m"', description: "Opens the menu on ⇧⌘ + key." },
+    searchPlaceholder: { type: "string", default: '"Search models"' },
+    label: { type: "string", default: '"Model"' },
+  }}
+/>
+
+## EffortPicker
+
+Only show it when the model can reason: an effort dial for a model that can't think is a control with nothing to control. Fast mode isn't a rung on the ladder of efforts but how the turn is served, so it gets its own heading and a switch.
+
+<TypeTable
+  type={{
+    value: { type: "string", required: true },
+    onValueChange: { type: "(value: string) => void", required: true },
+    efforts: { type: "{ id; label }[]", default: "Off, Low, Medium, High, Extra High" },
+    fastMode: { type: "boolean", description: "Shows the Fast mode switch when given with its handler." },
+    onFastModeChange: { type: "(enabled: boolean) => void" },
+    shortcut: { type: "string | false", default: '"."' },
+  }}
+/>
+
+## ContextUsage
+
+A ring for how full the window is, with the numbers on hover. Children add rows below, for a reading at another scale such as a subscription's remaining quota:
+
+```tsx
+<ContextUsage used={64_000} total={200_000} onOpen={refreshQuota}>
+  <UsageRow label="Weekly" value="62% left" />
+</ContextUsage>
+```
+
+Or pass `quotas`, and each window gets a row saying how much is left, dotted amber under 30% and red under 10%. `used` and `total` are optional; with no reading at all the ring isn't drawn.
+
+```tsx
+<ContextUsage quotas={[{ label: "5 hours", usedPercent: 40 }, { label: "Weekly", usedPercent: 92 }]} />
+```
+
+`ModelControlGroup` sets the pickers side by side with even spacing.
+
+## Shortcuts
+
+⇧⌘M opens the model menu and ⇧⌘. opens effort. With several composers mounted (a chat kept alive behind another view), the key goes to the last one actually on screen, never to one parked in a hidden pane.

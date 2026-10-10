@@ -1,0 +1,24 @@
+---
+title: Meter
+description: A proportional bar of countable parts.
+icon: ChartNoAxesGantt
+---
+
+<ComponentPreview name="meter-demo" />
+
+```tsx
+import { Meter } from "@opaline/ui"
+```
+
+Bands are separated rather than blended, so you can read how much of each. They grow from zero on mount in sequence; turn that off with `animate={false}` when many meters render together.
+
+<TypeTable
+  type={{
+    bands: { type: "{ key; value; label; className }[]", required: true },
+    total: { type: "number", description: "Denominator when the bands are a fraction of a known whole." },
+    height: { type: "string", default: '"0.5rem"' },
+    animate: { type: "boolean", default: "true" },
+  }}
+/>
+
+`MeterKey` is a legend entry that carries its band's swatch.

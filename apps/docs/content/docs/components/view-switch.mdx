@@ -1,0 +1,22 @@
+---
+title: View Switch
+description: Tabs shaped like a segmented control.
+icon: PanelsTopLeft
+---
+
+<ComponentPreview name="view-switch-demo" />
+
+```tsx
+import { ViewSwitch } from "@opaline/ui"
+```
+
+The same shape as [Segmented](/docs/components/segmented), with the tablist keyboard contract: arrows move between tabs, Home and End jump to the ends. `badge` shows live status for a view you aren't looking at.
+
+<TypeTable
+  type={{
+    value: { type: "T", required: true },
+    onChange: { type: "(value: T) => void", required: true },
+    options: { type: "{ value: T; label: string; icon?; badge?: ReactNode }[]", required: true },
+    ariaLabel: { type: "string", required: true },
+  }}
+/>

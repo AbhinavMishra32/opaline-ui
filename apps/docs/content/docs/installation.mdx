@@ -1,0 +1,85 @@
+---
+title: Installation
+description: Add Opaline to a React app with Tailwind CSS v4.
+icon: Download
+---
+
+Opaline is styled with [Tailwind CSS v4](https://tailwindcss.com) and works with any React 19 framework: Next.js, Vite, React Router, Electron.
+
+## Install the package
+
+<Steps>
+<Step>
+
+### Add the dependency
+
+```bash
+npm install @opaline/ui
+```
+
+</Step>
+<Step>
+
+### Import the styles
+
+In your main stylesheet, after Tailwind, import Opaline's tokens and tell Tailwind to scan the package for class names:
+
+```css title="app/globals.css"
+@import "tailwindcss";
+@import "@opaline/ui/styles.css";
+
+@source "../node_modules/@opaline/ui/dist";
+```
+
+The `@source` path is relative to the stylesheet. Point it at wherever `node_modules` sits.
+
+</Step>
+<Step>
+
+### Load the fonts (optional)
+
+Opaline is drawn in Geist and Geist Mono and falls back to the system UI font. To get Geist:
+
+```bash
+npm install @fontsource-variable/geist @fontsource-variable/geist-mono
+```
+
+```css title="app/globals.css"
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
+```
+
+</Step>
+<Step>
+
+### Use it
+
+```tsx
+import { Button } from "@opaline/ui"
+import { AgentThread } from "@opaline/ui/thread"
+
+export function App() {
+  return <Button>Continue</Button>
+}
+```
+
+</Step>
+</Steps>
+
+## Dark mode
+
+Opaline follows a `.dark` class or a `data-theme="dark"` attribute on any ancestor, usually `<html>`. Libraries like [next-themes](https://github.com/pacocoursey/next-themes) set this for you:
+
+```tsx
+<ThemeProvider attribute="class">{children}</ThemeProvider>
+```
+
+## Tooltips
+
+Radix tooltips share open/close timing through a provider. `<AgentThread>` brings its own; anywhere else, wrap the app once:
+
+```tsx
+import { TooltipProvider } from "@opaline/ui"
+
+<TooltipProvider>{children}</TooltipProvider>
+```

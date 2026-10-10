@@ -1,0 +1,23 @@
+---
+title: Toggle
+description: A button that stays pressed, alone or in a group.
+icon: Bold
+---
+
+<ComponentPreview name="toggle-demo" />
+
+```tsx
+import { Toggle } from "@opaline/ui"
+```
+
+<TypeTable
+  type={{
+    variant: { type: '"default" | "outline"', default: '"default"' },
+    size: { type: '"sm" | "default" | "lg"', default: '"default"' },
+    spacing: { type: "number", default: "2", description: "On ToggleGroup: gap between items. `0` joins them." },
+  }}
+/>
+
+## Parts
+
+`Toggle`, `ToggleGroup`, `ToggleGroupItem`.

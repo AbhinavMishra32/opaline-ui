@@ -1,0 +1,56 @@
+---
+title: Choice Group
+description: A row of choices that each mean something, with keys that pick them.
+icon: ListChecks
+---
+
+<ComponentPreview name="choice-group-demo" />
+
+```tsx
+import { ChoiceGroup, RatingPicker } from "@opaline/ui"
+```
+
+A radio group underneath. Arrow keys move between options and Enter or Space picks, so moving never commits a choice by accident. An option's `shortcut` picks it from anywhere on the page outside a text field, and its key cap flashes so a keyboard pick is as visible as a click.
+
+```tsx
+<ChoiceGroup
+  aria-label="Grade"
+  options={[
+    { value: "wrong", label: "Wrong", tone: "danger", shortcut: "1" },
+    { value: "right", label: "Right", tone: "success", shortcut: "2" },
+  ]}
+  onValueChange={grade}
+/>
+```
+
+## RatingPicker
+
+Again, Hard, Good and Easy on keys 1 to 4, each with the interval it would schedule. `suggested` marks the option the scheduler would pick without picking it.
+
+```tsx
+<RatingPicker
+  intervals={{ again: "<1m", hard: "6m", good: "1d", easy: "4d" }}
+  suggested="good"
+  onValueChange={(rating) => review(card, rating)}
+/>
+```
+
+`include={["again", "good"]}` gives a two-button review, `labels` renames the answers and `shortcuts={null}` turns the keys off.
+
+## ChoiceGroup
+
+<TypeTable
+  type={{
+    options: { type: "ChoiceOption[]", description: "`{ value, label, sublabel?, tone?, shortcut?, disabled? }`" },
+    value: { type: "T | null", description: "Controlled choice." },
+    defaultValue: { type: "T | null" },
+    onValueChange: { type: "(value: T) => void", description: "On click, Enter or Space, or the option's shortcut." },
+    suggested: { type: "T", description: "Marked with a dashed outline and a pill, never selected for the person." },
+    suggestedLabel: { type: "string", default: "\"Suggested\"" },
+    disabled: { type: "boolean", default: "false" },
+    shortcutScope: { type: "\"global\" | \"group\" | \"none\"", default: "\"global\"", description: "`group` hears shortcuts only while focus is inside; `none` turns them off and hides the caps." },
+    layout: { type: "\"row\" | \"stack\"", default: "\"row\"", description: "Equal columns on one line, or one option per line." },
+  }}
+/>
+
+`tone` is `danger`, `warning`, `success`, `info` or `neutral`, from the `--tone-*` tokens, which follow dark mode.

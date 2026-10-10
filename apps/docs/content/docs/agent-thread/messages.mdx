@@ -1,0 +1,116 @@
+---
+title: Messages
+description: The data model. Plain objects in, a thread out.
+icon: Braces
+---
+
+A thread is an array of `ThreadMessage`. There are three roles:
+
+```ts
+type ThreadMessage = UserMessage | AssistantMessage | SystemMessage
+```
+
+## User messages
+
+```ts
+type UserMessage = {
+  id: string
+  role: "user"
+  text: string
+  createdAt?: number | string
+  /** Sent but not yet acknowledged: drawn dimmed. */
+  pending?: boolean
+  /** Images sent with the message, drawn as thumbnails that open full size. */
+  attachments?: Attachment[]
+}
+
+type Attachment = { id: string; url: string; name?: string; mimeType?: string; width?: number; height?: number }
+```
+
+Hovering a message shows how long ago it was sent when `createdAt` is set. `[[kind:target|label]]` references in the text are drawn as links.
+
+## Assistant messages
+
+An assistant message is a **turn**: an ordered list of parts.
+
+```ts
+type AssistantMessage = {
+  id: string
+  role: "assistant"
+  parts: MessagePart[]
+  status?: "streaming" | "done" | "error"
+  startedAt?: number
+  /** Index of the first part of the reply. Everything before it is work. */
+  replyFrom?: number
+  replyStartedAt?: number
+  durationMs?: number
+  rating?: "good" | "bad" | null
+  /** Steps left out of `parts`, fetched by `onLoadWork` when the fold opens. */
+  deferredSteps?: number
+}
+```
+
+### Work and reply
+
+The fold needs to know where the work ends and the answer begins. Set `replyFrom` to the index of the first reply part, which is what `reduceThread` does when it sees a `reply-start` event.
+
+Without it the thread infers the split: the **last run of text parts** is the reply, and everything before it is work. That's right for nearly every agent, because they finish by writing. Once the turn is over, finished steps and cards that come after those last words (saving a note, a result card) stay with the reply instead of folding it away; a step that is still running never does.
+
+### Parts
+
+<TypeTable
+  type={{
+    text: { type: '{ type: "text"; id; text }', description: "Markdown. Prose in the work fold, the answer after it." },
+    reasoning: { type: '{ type: "reasoning"; id; text; streaming?; startedAt?; endedAt? }', description: "Thinking. Its heading is the latest **bold** line; settles to “Thought for 4s”." },
+    tool: { type: '{ type: "tool"; id; name; status; input?; output?; error?; title?; detail?; diff?; startedAt?; endedAt? }', description: "One call. `status` is running, done or error." },
+    status: { type: '{ type: "status"; id; text; tone? }', description: "A quiet line: retrying, compacting context. `tone: \"warning\"` tints it." },
+    error: { type: '{ type: "error"; id; text; title? }', description: "A card that says what went wrong and what to do." },
+    question: { type: '{ type: "question"; id; questions; status; answers? }', description: "The agent asking the person. See [Questions](/docs/agent-thread/questions)." },
+    custom: { type: '{ type: "custom"; id; kind; data?; inline? }', description: "Anything else, drawn by `renderPart`." },
+  }}
+/>
+
+### Tool parts
+
+```ts
+type ToolPart = {
+  type: "tool"
+  id: string
+  name: string               // "read_file", "mcp__github__create_pr"
+  status: "running" | "done" | "error"
+  input?: unknown
+  output?: unknown
+  error?: string
+  title?: string             // overrides the registry and inference
+  detail?: string            // "3 matches", "50 passed"
+  diff?: { added: number; removed: number }
+  startedAt?: number
+  endedAt?: number
+}
+```
+
+Only `name` and `status` are required. The thread infers a title, icon and subject from the name and input, and `startedAt`/`endedAt` give the row its timing.
+
+## System messages
+
+Something that happened between turns: *Connected to acme/web*, *Context compacted*.
+
+```ts
+type SystemMessage = {
+  id: string
+  role: "system"
+  text: string
+  /** `event` (default): an icon row; the first sentence leads and the rest folds away.
+      `rule`: a centred title between hairlines. `divider`: the plain centred line. */
+  variant?: "event" | "rule" | "divider"
+  title?: string   // overrides the first sentence
+  detail?: string  // overrides the rest
+  tone?: "neutral" | "success" | "warning" | "danger" | "info"
+  icon?: ReactNode
+  createdAt?: number | string
+}
+```
+
+## Errors and status
+
+<ComponentPreview name="thread-errors" height={460} align="stretch" />

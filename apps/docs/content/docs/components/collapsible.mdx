@@ -1,0 +1,20 @@
+---
+title: Collapsible
+description: A panel that opens and closes with a spring.
+icon: ChevronsDownUp
+---
+
+<ComponentPreview name="collapsible-demo" />
+
+```tsx
+import { Collapsible } from "@opaline/ui"
+```
+
+The open height animates with motion, not a CSS keyframe, so it handles content that changes size while open.
+
+<TypeTable
+  type={{
+    gap: { type: "number", default: "0", description: "On CollapsibleContent: space above the open panel, in px, animated with the height." },
+    expandDuration: { type: "number", description: "On CollapsibleContent: override the spring's duration, in seconds." },
+  }}
+/>

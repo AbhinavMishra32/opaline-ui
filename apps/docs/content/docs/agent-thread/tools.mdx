@@ -1,0 +1,76 @@
+---
+title: Tools
+description: How each tool call is drawn, by name, with sensible defaults.
+icon: Wrench
+---
+
+Every tool call is one row: **mark**, **title**, **subject**, **detail**. While it runs, the mark is an animated orb; when it finishes, it becomes an icon.
+
+## Inference
+
+You don't have to register anything. The thread reads the tool's name and input:
+
+| Name looks like | Mark | Title |
+| --- | --- | --- |
+| `web_search`, `search_web` | Search | Searching the web → Searched the web |
+| `fetch`, `web_fetch`, `browse` | Globe | Fetching → Fetched |
+| `read`, `read_file`, `view`, `cat` | File | Reading → Read |
+| `list`, `ls`, `glob` | Folder | Listing → Listed |
+| `search`, `grep`, `find` | Search | Searching → Searched |
+| `write`, `create_file` | Pencil | Writing → Wrote |
+| `edit`, `apply_patch`, `str_replace` | Pencil | Editing → Edited |
+| `run`, `bash`, `exec`, `shell` | Terminal | Running → Ran |
+| `test`, `lint`, `typecheck` | Check | Checking → Checked |
+| `ask`, `ask_user` | Question | Asking → Asked |
+| `plan`, `todo` | List | Planning → Planned |
+
+Names are matched case-insensitively with hyphens and underscores alike, and MCP prefixes (`mcp__server__`) are stripped first. Anything else is humanised: `summarize_pr` reads *Summarize pr*.
+
+For a recognised tool, the **subject** comes from the input's most telling field: `path`, `file_path`, `url`, `query`, `pattern` or `command`. When it looks like a path and you pass `onOpenFile`, it's clickable.
+
+## Registering a tool
+
+Pass a registry to take over any part of a row:
+
+<ComponentPreview name="agent-thread-tools" height={420} align="stretch" />
+
+`defineTool<Input, Output>` types the callbacks against your tool's input and output. `defineTools` keeps the keys of the registry as you wrote them.
+
+```ts
+import { defineTool, defineTools } from "@opaline/ui/thread"
+
+const tools = defineTools({
+  create_pr: defineTool<{ title: string; branch: string }, { url: string; number: number }>({
+    title: ({ status }) => (status === "running" ? "Opening a PR" : "Opened a PR"),
+    subject: ({ input }) => input.title,
+    detail: ({ output }) => output && `#${output.number}`,
+  }),
+})
+```
+
+### Tool definition
+
+<TypeTable
+  type={{
+    icon: { type: "ComponentType<{ className?: string }>", description: "The mark once the call settles. Any icon component; Opaline's solid glyphs are under `icons`." },
+    orb: { type: "OrbKind", description: "The orb while it runs: working, searching, connecting, shaping, weaving, solving, listening, composing, breathing." },
+    title: { type: "string | (props) => string", description: "The row's verb. A function sees the status, so it can say “Running” then “Ran”." },
+    subject: { type: "(props) => string | undefined", description: "What it acted on: a path, a query, a command." },
+    detail: { type: "(props) => string | undefined", description: "A short result after the subject: “3 matches”." },
+    render: { type: "(props) => ReactNode", description: "The body when the row is expanded. Defaults to the raw input and output." },
+    bare: { type: "boolean", description: "Draw `render` without the panel around it, always visible." },
+    timed: { type: "boolean", default: "true", description: "Show how long the call took." },
+  }}
+/>
+
+Every callback receives `{ part, input, output, status }`.
+
+## Icons
+
+Opaline ships a set of solid glyphs for common steps, under one namespace:
+
+```ts
+import { icons } from "@opaline/ui/thread"
+
+const tools = defineTools({ deploy: { icon: icons.IconLightning } })
+```

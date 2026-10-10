@@ -1,18 +1,27 @@
 ---
-title: Opaline UI
-description: The source-first interface system behind Spar.
+title: Introduction
+description: React components for building agentic app interfaces.
+icon: Sparkles
 ---
 
-Opaline turns the interface grammar developed in Spar into a library you can install, read, and own. It is built for dense product software: agent workspaces, editors, desktop tools, and interfaces where restraint matters more than spectacle.
+Opaline UI is a set of React components for building the interface of an agentic app. At its centre is the **Agent Thread**, a conversation view for agents that work before they answer. Around it are the pieces every agent app needs: a composer, model and mode pickers, permission prompts, settings, menus, a command palette, all on Radix and drawn in one set of materials.
 
-## What makes it Opaline
+It's opinionated in the way good desktop software is. The palette is achromatic and colour is reserved for verdicts (passed, slow, failed). Controls are compact, a 32px button rather than a 40px one. Sheets are squircles, menus are glass, and focus reads as a surface lifting rather than a blue ring.
 
-- **Compact by default.** The primary button is 32px tall, not a marketing-site control dropped into an app.
-- **Warm neutral color.** OKLCH tokens stay legible and quietly warm in both themes.
-- **Layered surfaces.** Hairline borders, restrained shadow, translucency, and backdrop blur establish depth without noise.
-- **One geometry.** Controls use 8–10px corners; larger sheets earn 14–18px corners.
-- **Source ownership.** Install through the shadcn CLI and adapt the component in your application.
+<ComponentPreview name="agent-thread-demo" height={560} align="stretch" />
 
-## First components
+## What's inside
 
-The foundation release starts with Button, Badge, Card, Input, Textarea, Separator, Switch, Tooltip, and Dialog. Larger Spar patterns—menus, fields, composer controls, agent activity, thread disclosures, sidebars, and workspace surfaces—come next, built on these primitives rather than beside them.
+<Cards>
+  <Card title="Agent Thread" href="/docs/agent-thread" description="A transcript that folds the work away when the answer starts. Tool registry, streaming reducer, AI SDK adapter." />
+  <Card title="Components" href="/docs/components/button" description="Buttons, menus, dialogs, fields, switches and the rest, on Radix with Opaline's materials." />
+  <Card title="Theming" href="/docs/theming" description="One CSS file of tokens. Change a radius or an ink and everything that reads it moves together." />
+  <Card title="Installation" href="/docs/installation" description="Install the package and import the styles." />
+</Cards>
+
+## Principles
+
+- **Quiet by default.** Nothing animates, glows or takes colour without a reason. A running step gets an orb; a finished one gets an icon.
+- **Read before you click.** The thread is designed for scanning. Every step is one row: a mark, a verb, a subject. Detail is one click away, never in the way.
+- **Plain data in.** Components take props and the thread takes an array of messages. There is no store, no provider you must wrap the app in, and no backend.
+- **Composable when you need it.** `<AgentThread>` is the batteries-included version; `Thread`, `ThreadViewport`, `ThreadMessages` and `Composer` are the parts it's made of.
