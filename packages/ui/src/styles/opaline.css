@@ -1,0 +1,837 @@
+/* Opaline UI — components for building agentic app interfaces.
+
+   Import once, after Tailwind:
+
+     @import "tailwindcss";
+     @import "@opaline/ui/styles.css";
+
+   Everything here is a custom property, so a theme is a block of overrides on
+   :root (or any subtree). Dark mode follows `.dark` or `[data-theme="dark"]`
+   on any ancestor. */
+
+@import "tw-animate-css";
+
+@custom-variant dark (&:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));
+
+/* Registered so these can transition: an unregistered property animates
+   discretely, and a fade edge would jump instead of travel. */
+@property --op-fade-top {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --op-fade-bottom {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-miss: var(--miss);
+  --color-reference: var(--reference);
+  --color-reference-strong: var(--reference-strong);
+  --color-elevated: var(--elevated);
+  --color-tone-danger: var(--tone-danger);
+  --color-tone-warning: var(--tone-warning);
+  --color-tone-success: var(--tone-success);
+  --color-tone-info: var(--tone-info);
+  --color-brand: var(--brand);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-surface: var(--surface-primary);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-sunken: var(--surface-sunken);
+
+  /* Controls are plain arcs; only sheets carry the superellipse. The steps
+     nest: an outer corner equals the inner one plus the padding between. */
+  --radius-sm: calc(var(--op-radius) * 0.5);
+  --radius-md: calc(var(--op-radius) * 0.8);
+  --radius-lg: var(--op-radius);
+  --radius-xl: calc(var(--op-radius) * 1.4);
+  --radius-2xl: calc(var(--op-radius) * 1.2 * var(--op-curve));
+  --radius-item: calc(var(--op-radius) * 0.8);
+  --radius-menu: calc(var(--op-radius) * 1.2);
+
+  --font-sans: var(--op-font-sans);
+  --font-mono: var(--op-font-mono);
+}
+
+/* The type scale. A plain `@theme` (not inline) so utilities emit `var()` and
+   a size changed at runtime moves every surface that reads it together. */
+@theme {
+  /* Chrome: toolbars, panels, menus. Read at a glance. */
+  --text-ui: 0.8125rem;
+  --text-ui--line-height: 1.25rem;
+  --text-ui-sm: calc(var(--text-ui) - 0.0625rem);
+  --text-ui-sm--line-height: 1rem;
+
+  /* Content: anything read at length outside the thread. */
+  --text-content: 0.875rem;
+  --text-content--line-height: calc(var(--text-content) * 1.667);
+  --text-content-sm: calc(var(--text-content) * 0.85);
+  --text-content-sm--line-height: calc(var(--text-content-sm) * 1.5);
+  --text-content-title: calc(var(--text-content) * 1.3);
+  --text-content-title--line-height: calc(var(--text-content-title) * 1.3);
+
+  /* The sidebar runs a step above chrome: it is navigated by shape. */
+  --text-source: 0.875rem;
+  --text-source--line-height: 1.375rem;
+  --text-source-sm: calc(var(--text-source) - 0.125rem);
+  --text-source-sm--line-height: 1.25rem;
+
+  /* The agent thread is one size. Replies, step rows and captions share it,
+     so a thread reads as one column rather than three stacked surfaces. */
+  --text-thread: 0.875rem;
+  --text-thread--line-height: calc(var(--text-thread) * 1.6);
+  /* The machine layer inside it — payloads, code, diffs — one step under,
+     because monospace at the body's nominal size reads visibly larger. */
+  --text-thread-tool: 0.8125rem;
+  --text-thread-tool--line-height: 1.125rem;
+
+  --animate-op-shimmer: op-shimmer 2.4s linear infinite;
+  --animate-op-caret: op-caret 1.1s steps(1, end) infinite;
+}
+
+/* ---- Tokens: light -------------------------------------------------------- */
+
+:root {
+  color-scheme: light;
+
+  --op-radius: 0.625rem;
+  --op-font-sans: "Geist Variable", "Geist", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable Text", ui-sans-serif, system-ui, sans-serif;
+  --op-font-mono: "Geist Mono Variable", "Geist Mono", "SF Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* A superellipse hugs its corner box more tightly than an arc of the same
+     radius, so sheets carry a multiplier to read the same size. The
+     multiplier is only applied (`--op-curve`) where the browser can draw the
+     superellipse: on a plain arc it just makes the corner balloon. */
+  --squircle-factor: 1.65;
+  --op-curve: 1;
+  --hairline: 0.5px;
+
+  --background: oklch(100% 0 0);
+  --foreground: oklch(14.5% 0 0);
+  --brand: oklch(14.5% 0 0);
+
+  --surface-primary: oklch(100% 0 0);
+  --surface-secondary: oklch(100% 0 0 / 85%);
+  --surface-raised: var(--surface-secondary);
+  --surface-sunken: color-mix(in oklab, var(--foreground) 3%, var(--background));
+
+  --card: var(--surface-primary);
+  --card-foreground: var(--foreground);
+  --popover: oklch(99% 0 0);
+  --popover-foreground: var(--foreground);
+  --primary: oklch(14.5% 0 0 / 95%);
+  --primary-foreground: oklch(98.5% 0 0 / 95%);
+  --secondary: oklch(14.5% 0 0 / 6%);
+  --secondary-foreground: oklch(14.5% 0 0 / 78%);
+  --muted: oklch(14.5% 0 0 / 5%);
+  --muted-foreground: oklch(14.5% 0 0 / 55%);
+  --accent: oklch(14.5% 0 0 / 8%);
+  --accent-foreground: oklch(14.5% 0 0 / 85%);
+
+  /* Colour is reserved for verdicts. Everything else is ink on glass. */
+  --destructive: oklch(57.7% 0.245 27.325);
+  --success: oklch(52% 0.11 158);
+  --warning: oklch(62% 0.13 68);
+  /* A check that fell short: a clear orange, not --warning's amber, which
+     reads brown on a light surface. */
+  --miss: oklch(62% 0.19 42);
+  /* A reference the agent wrote reads as a link in a sentence: the one ink in
+     the transcript that is not a shade of the page. */
+  --reference: oklch(52% 0.17 255);
+  --reference-strong: oklch(44% 0.19 255);
+  /* A control's resting fill that is not a surface: idle send, attach, stop. */
+  --elevated: var(--muted);
+  /* Graded verdicts — Again, Hard, Good, Easy — and any tone a choice takes. */
+  --tone-danger: oklch(58% 0.19 27);
+  --tone-warning: oklch(66% 0.15 65);
+  --tone-success: oklch(60% 0.13 155);
+  --tone-info: oklch(58% 0.14 245);
+
+  --border: oklch(14.5% 0 0 / 10%);
+  --border-strong: oklch(14.5% 0 0 / 16%);
+  --border-surface: oklch(14.5% 0 0 / 10%);
+  --border-surface-strong: oklch(14.5% 0 0 / 15%);
+  --input: oklch(14.5% 0 0 / 10%);
+  --ring: oklch(14.5% 0 0 / 22%);
+
+  --sidebar: oklch(95.5% 0 0);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-accent: oklch(14.5% 0 0 / 6%);
+  --sidebar-accent-active: oklch(14.5% 0 0 / 8%);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: oklch(14.5% 0 0 / 8%);
+  --pane: oklch(99.4% 0 0);
+
+  --shadow-card: 0 1px 2px oklch(0% 0 0 / 4%);
+  /* Blocks inside a reading column: lift an edge off the page, no more. */
+  --shadow-panel: 0 2px 6px -2px oklch(0% 0 0 / 6%), 0 1px 2px oklch(0% 0 0 / 4%);
+  --shadow-sheet: 0 1px 2px oklch(0% 0 0 / 4%), 0 8px 20px -12px oklch(0% 0 0 / 13%);
+  --shadow-pane: -0.5px 0 1px -0.5px oklch(0% 0 0 / 7%), -2px 0 4px -2px oklch(0% 0 0 / 4%), -5px 0 10px -5px oklch(0% 0 0 / 3%);
+  --shadow-overlay: 0 20px 25px -5px oklch(0% 0 0 / 10%), 0 8px 10px -6px oklch(0% 0 0 / 10%);
+  --shadow-menu: 0 16px 40px -12px oklch(0% 0 0 / 20%), 0 4px 10px -4px oklch(0% 0 0 / 8%);
+  --shadow-composer: 0 4px 18px -6px color-mix(in srgb, var(--foreground) 8%, transparent);
+  --modal-scrim: oklch(0% 0 0 / 38%);
+
+  /* Glass: a mostly-opaque tint, a specular rim, a hairline for shape. */
+  --glass-fill: 82%;
+  --glass-rim: oklch(100% 0 0 / 80%);
+  --glass-sheen: oklch(100% 0 0 / 90%);
+  --glass-hairline: color-mix(in oklab, var(--foreground) 18%, transparent);
+  --menu-rim: color-mix(in oklab, #fff 80%, transparent);
+
+  /* The transcript's greys: tints of the foreground, so they follow it. */
+  --transcript-step: oklch(14.5% 0 0 / 60%);
+  --transcript-step-strong: oklch(14.5% 0 0 / 80%);
+  --transcript-step-mark: oklch(14.5% 0 0 / 50%);
+  --transcript-rail: oklch(14.5% 0 0 / 17%);
+  --user-bubble: color-mix(in oklab, var(--foreground) 5%, var(--background));
+
+  --code-background: #fcfcfc;
+  --code-foreground: #33363b;
+  --code-inline-foreground: color-mix(in oklab, var(--code-foreground) 50%, var(--foreground));
+  --code-inline-background: color-mix(in oklab, var(--foreground) 4.5%, var(--background));
+  --code-inline-border: color-mix(in oklab, var(--foreground) 11%, transparent);
+  --code-comment: #727780;
+  --code-keyword: #ce2734;
+  --code-type: #7b4bd2;
+  --code-function: #1a6fc9;
+  --code-string: #185a96;
+  --code-number: #1660b5;
+  --code-punctuation: #6f747c;
+  --code-constant: #1660b5;
+  --code-operator: #ce2734;
+}
+
+@supports (corner-shape: superellipse(2)) {
+  :root {
+    --op-curve: var(--squircle-factor);
+  }
+}
+
+/* ---- Tokens: dark ---------------------------------------------------------- */
+
+.dark,
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --background: oklch(23.5% 0 0);
+  --foreground: oklch(98.5% 0 0);
+  --brand: oklch(98.5% 0 0);
+
+  --surface-primary: oklch(98.5% 0 0 / 8%);
+  --surface-secondary: oklch(98.5% 0 0 / 6%);
+  --surface-raised: var(--surface-primary);
+  --surface-sunken: color-mix(in oklab, black 22%, var(--background));
+
+  --card: color-mix(in oklab, var(--foreground) 6%, var(--background));
+  --popover: oklch(29% 0 0);
+  --primary: oklch(98.5% 0 0 / 90%);
+  --primary-foreground: oklch(14.5% 0 0 / 92%);
+  --secondary: oklch(98.5% 0 0 / 8%);
+  --secondary-foreground: oklch(98.5% 0 0 / 78%);
+  --muted: oklch(98.5% 0 0 / 10%);
+  --muted-foreground: oklch(98.5% 0 0 / 55%);
+  --accent: oklch(98.5% 0 0 / 10%);
+  --accent-foreground: oklch(98.5% 0 0 / 85%);
+
+  /* Same hues, lifted for a dark ground: lightness up, chroma held. */
+  --destructive: oklch(70.4% 0.191 22.216);
+  --success: oklch(78% 0.14 158);
+  --warning: oklch(82% 0.14 78);
+  --miss: oklch(74% 0.16 48);
+  --reference: oklch(75% 0.13 250);
+  --reference-strong: oklch(84% 0.12 250);
+  --elevated: var(--surface-secondary);
+  --tone-danger: oklch(70% 0.16 27);
+  --tone-warning: oklch(78% 0.13 70);
+  --tone-success: oklch(76% 0.13 155);
+  --tone-info: oklch(74% 0.12 245);
+
+  --border: oklch(98.5% 0 0 / 10%);
+  --border-strong: oklch(98.5% 0 0 / 16%);
+  --border-surface: oklch(98.5% 0 0 / 15%);
+  --border-surface-strong: oklch(98.5% 0 0 / 20%);
+  --input: oklch(98.5% 0 0 / 12%);
+  --ring: oklch(98.5% 0 0 / 26%);
+
+  /* Lighter than the pane, not darker: the sidebar is what the content
+     sits on, so it catches more light. */
+  --sidebar: oklch(28.5% 0 0);
+  --sidebar-accent: oklch(98.5% 0 0 / 7%);
+  --sidebar-accent-active: oklch(98.5% 0 0 / 10%);
+  --sidebar-border: oklch(98.5% 0 0 / 9%);
+  --pane: oklch(23.5% 0 0);
+
+  --shadow-card: 0 1px 2px oklch(0% 0 0 / 20%);
+  --shadow-panel: 0 2px 8px -2px oklch(0% 0 0 / 28%), 0 1px 2px oklch(0% 0 0 / 20%);
+  --shadow-sheet: 0 1px 2px oklch(0% 0 0 / 26%), 0 10px 26px -14px oklch(0% 0 0 / 55%);
+  /* Dark separates with light: a lit leading edge instead of a black smear. */
+  --shadow-pane: -1px 0 0 0 oklch(100% 0 0 / 9%), -2px 0 4px -2px oklch(0% 0 0 / 16%), -6px 0 12px -6px oklch(0% 0 0 / 10%);
+  --shadow-overlay: 0 20px 25px -5px oklch(0% 0 0 / 40%), 0 8px 10px -6px oklch(0% 0 0 / 40%);
+  --shadow-menu: 0 16px 40px -10px oklch(0% 0 0 / 55%), 0 4px 12px -4px oklch(0% 0 0 / 40%);
+  --shadow-composer: 0 6px 24px -10px oklch(0% 0 0 / 45%);
+  --modal-scrim: oklch(0% 0 0 / 62%);
+
+  /* A white rim at 80% would read as drawn trim; it drops to a faint sheen
+     and the hairline carries the shape. */
+  --glass-fill: 78%;
+  --glass-rim: oklch(100% 0 0 / 8%);
+  --glass-sheen: oklch(100% 0 0 / 12%);
+  --glass-hairline: oklch(0% 0 0 / 55%);
+  --menu-rim: color-mix(in oklab, #fff 10%, transparent);
+
+  --transcript-step: oklch(98.5% 0 0 / 50%);
+  --transcript-step-strong: oklch(98.5% 0 0 / 78%);
+  --transcript-step-mark: oklch(98.5% 0 0 / 40%);
+  --transcript-rail: oklch(98.5% 0 0 / 24%);
+  --user-bubble: color-mix(in oklab, var(--foreground) 8%, var(--background));
+
+  --code-background: #191919;
+  --code-foreground: #c9d1d9;
+  --code-inline-foreground: var(--code-foreground);
+  --code-inline-background: color-mix(in oklab, var(--code-foreground) 12%, transparent);
+  --code-inline-border: transparent;
+  --code-comment: #8b949e;
+  --code-keyword: #ff8177;
+  --code-type: #d2a8ff;
+  --code-function: #66b8ff;
+  --code-string: #8bd891;
+  --code-number: #79c0ff;
+  --code-punctuation: #b3bac2;
+  --code-constant: #79c0ff;
+  --code-operator: #ff8177;
+}
+
+/* ---- Base ------------------------------------------------------------------ */
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    border-color: var(--border);
+  }
+
+  /* Real squircles on the sheets, where the corner is big enough to see the
+     curve. Under ~14px a superellipse only makes a control look inflated, so
+     every control-sized radius opts back out. */
+  @supports (corner-shape: superellipse(2)) {
+    [class*="rounded-2xl"],
+    [class*="rounded-3xl"],
+    .op-sheet,
+    .op-pane {
+      corner-shape: superellipse(var(--squircle-factor));
+    }
+    /* The rim is drawn on a pseudo-element, which inherits the radius but not
+       the shape: without this it traces an arc inside a squircle, and the
+       corner shows two curves. */
+    .op-sheet::before {
+      corner-shape: inherit;
+    }
+  }
+
+  body {
+    font-family: var(--font-sans);
+    font-synthesis: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--foreground) 16%, transparent);
+  }
+}
+
+/* ---- Materials --------------------------------------------------------------
+   Named surfaces rather than strings of utilities. Two arbitrary values in one
+   utility family (a border width beside a border colour) cannot be told apart
+   by tailwind-merge, and the merge silently drops one. A class cannot drift. */
+
+@layer components {
+  .op-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--foreground) 18%, transparent) transparent;
+  }
+  .op-scroll::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+  }
+  .op-scroll::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: 9999px;
+    background-clip: content-box;
+    background-color: color-mix(in srgb, var(--foreground) 16%, transparent);
+  }
+  .op-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: color-mix(in srgb, var(--foreground) 28%, transparent);
+  }
+  .op-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* Glass reproduces the *read* of a native material: a frosted, mostly
+     opaque fill; a bright inset rim, the specular edge; a hairline for shape.
+     The blur stays small — past ~12px text behind it turns to mush. */
+  .op-glass {
+    background: color-mix(in oklab, var(--popover) var(--glass-fill), transparent);
+    box-shadow:
+      inset 0 0 0 1px var(--glass-rim),
+      inset 0 1px 0 0 var(--glass-sheen),
+      0 0 0 0.5px var(--glass-hairline),
+      var(--shadow-overlay);
+    backdrop-filter: blur(8px) saturate(120%);
+    isolation: isolate;
+  }
+
+  .op-floating {
+    border-radius: var(--radius-menu);
+    background: color-mix(in oklab, var(--popover) var(--glass-fill), transparent);
+    box-shadow:
+      inset 0 0 0 1px var(--glass-rim),
+      inset 0 1px 0 0 var(--glass-sheen),
+      0 0 0 0.5px var(--glass-hairline),
+      var(--shadow-overlay);
+    backdrop-filter: blur(8px) saturate(120%);
+    isolation: isolate;
+  }
+
+  /* No sheen on a menu: a top highlight on a 12px corner makes a list of rows
+     read as a miniature window. */
+  .op-menu {
+    border-radius: var(--radius-menu);
+    background: color-mix(in oklab, var(--popover) 80%, transparent);
+    box-shadow:
+      inset 0 0 0 1px var(--menu-rim),
+      0 0 0 0.5px color-mix(in oklab, var(--foreground) 20%, transparent),
+      0 10px 15px -3px rgb(0 0 0 / 0.1),
+      0 4px 6px -4px rgb(0 0 0 / 0.1);
+    backdrop-filter: blur(8px);
+    isolation: isolate;
+  }
+
+  /* The same shell without the blur, for a popup that moves under the cursor:
+     a backdrop filter recomputed every frame turns a slide into a judder. */
+  .op-menu-opaque {
+    border-radius: var(--radius-menu);
+    background: var(--popover);
+    box-shadow:
+      inset 0 0 0 1px var(--glass-rim),
+      inset 0 1px 0 0 var(--glass-sheen),
+      0 0 0 0.5px var(--glass-hairline),
+      var(--shadow-menu);
+    isolation: isolate;
+  }
+
+  .op-tooltip {
+    box-shadow:
+      inset 0 0 0 1px var(--menu-rim),
+      0 0 0 0.5px color-mix(in oklab, var(--foreground) 20%, transparent),
+      0 4px 8px -3px rgb(0 0 0 / 0.15);
+  }
+
+  /* A working sheet inset into a canvas of almost its own value. The edge is
+     drawn over the content so a child that paints its own fill cannot hide it. */
+  .op-sheet {
+    position: relative;
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-sheet);
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .op-sheet::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--foreground) 10%, transparent);
+    pointer-events: none;
+  }
+  .dark .op-sheet::before,
+  [data-theme="dark"] .op-sheet::before {
+    box-shadow: none;
+  }
+
+  /* The content pane as an inset sheet on the sidebar: rounded on its leading
+     edge so the sidebar's material appears to continue behind it. */
+  .op-pane {
+    background: var(--pane);
+    border-start-start-radius: var(--radius-2xl);
+    border-end-start-radius: var(--radius-2xl);
+    box-shadow:
+      inset 0 0 0 0.5px var(--sidebar-border),
+      var(--shadow-pane);
+    overflow: hidden;
+  }
+
+  /* The press, and only the press. */
+  .op-press {
+    transition-property: opacity, scale;
+    transition-duration: 150ms;
+  }
+  .op-press:active {
+    scale: 97%;
+    opacity: 0.9;
+  }
+
+  /* A status label sweeps a highlight across its text rather than spinning,
+     which reads quieter in a window that stays open for hours. */
+  .op-shimmer {
+    user-select: none;
+    -webkit-user-select: none;
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--foreground) 38%, transparent) 0%,
+      color-mix(in srgb, var(--foreground) 38%, transparent) 35%,
+      var(--foreground) 50%,
+      color-mix(in srgb, var(--foreground) 38%, transparent) 65%,
+      color-mix(in srgb, var(--foreground) 38%, transparent) 100%
+    );
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: op-shimmer 2.4s linear infinite;
+  }
+
+  .op-caret::after {
+    content: "";
+    display: inline-block;
+    width: 0.45em;
+    height: 1em;
+    margin-left: 0.15em;
+    vertical-align: text-bottom;
+    border-radius: 1px;
+    background: currentColor;
+    animation: op-caret 1.1s steps(1, end) infinite;
+  }
+
+  /* Both ends of a scroller dissolve while there is content past them. A mask,
+     not a gradient, so it works over glass where there is no flat colour. */
+  .op-fade-edges {
+    mask-image: linear-gradient(to bottom, transparent 0, #000 var(--op-fade-top), #000 calc(100% - var(--op-fade-bottom)), transparent 100%);
+    transition: --op-fade-top 180ms ease, --op-fade-bottom 180ms ease;
+  }
+
+  /* A capsule that stays round under the superellipse: footer tags, chips. */
+  .op-pill {
+    border-radius: 999px;
+    corner-shape: round;
+  }
+
+  /* ---- The agent thread ---------------------------------------------------- */
+
+  .op-thread {
+    --thread-width: 48rem;
+    font-size: var(--text-thread);
+    line-height: var(--text-thread--line-height);
+    /* The thread runs the superellipse at every radius, so its factor is
+       flatter: the curve that reads as material on a sheet is a blob on a chip. */
+    --squircle-factor: 1.4;
+    --op-curve: 1;
+    --radius-md: calc(0.375rem * var(--op-curve));
+    --radius-lg: calc(0.5rem * var(--op-curve));
+    --radius-xl: calc(0.75rem * var(--op-curve));
+    --radius-2xl: calc(1rem * var(--op-curve));
+  }
+  @supports (corner-shape: superellipse(2)) {
+    .op-thread {
+      --op-curve: 1.4;
+    }
+    .op-thread :is([class~="rounded-md"], [class~="rounded-lg"], [class~="rounded-xl"], [class~="rounded-2xl"], .op-bubble) {
+      corner-shape: superellipse(var(--squircle-factor));
+    }
+    .op-thread [class*="rounded-full"] {
+      corner-shape: round;
+    }
+  }
+  .op-thread-column {
+    width: 100%;
+    max-width: var(--thread-width, 48rem);
+    margin-inline: auto;
+  }
+  .op-thread-scroller {
+    padding-inline: 1rem;
+    padding-block-end: 1.5rem;
+  }
+  .op-bubble {
+    border-radius: calc(1rem * 1.4);
+    background: var(--user-bubble);
+    line-height: 1.5;
+  }
+
+  /* Payloads run the machine layer's size. Set once on the panel; everything
+     inside inherits so native pre/code cannot climb back out of it. */
+  .op-tool-detail {
+    font-size: var(--text-thread-tool);
+    line-height: var(--text-thread-tool--line-height);
+  }
+  .op-tool-detail :where(*) {
+    font-size: inherit;
+  }
+
+  /* Every block a turn can contain — a fenced block in a reply, the panel a
+     tool row opens, a card — is one material, declared once. */
+  .op-block {
+    border: 0.5px solid var(--border-surface-strong);
+    background: color-mix(in oklab, var(--code-background) 80%, transparent);
+    box-shadow: var(--shadow-panel);
+    border-radius: calc(1rem * 1.4);
+  }
+  @supports (corner-shape: superellipse(2)) {
+    .op-block {
+      corner-shape: superellipse(1.4);
+    }
+  }
+  .op-block-solid {
+    background: var(--code-background);
+  }
+
+  .op-composer {
+    border-radius: var(--radius-2xl);
+    background: color-mix(in oklab, var(--popover) var(--glass-fill), transparent);
+    box-shadow:
+      inset 0 0 0 1px var(--glass-rim),
+      inset 0 1px 0 0 var(--glass-sheen),
+      0 0 0 0.5px var(--glass-hairline),
+      var(--shadow-composer);
+    backdrop-filter: blur(8px) saturate(120%);
+    isolation: isolate;
+    transition: box-shadow 0.15s ease;
+  }
+  /* Focus reads as the surface lifting, not as a coloured outline. */
+  .op-composer:focus-within {
+    box-shadow:
+      inset 0 0 0 1px var(--glass-rim),
+      inset 0 1px 0 0 var(--glass-sheen),
+      0 0 0 0.5px color-mix(in oklab, var(--foreground) 32%, transparent),
+      var(--shadow-composer);
+  }
+
+  /* A panel held to a height that fades at whichever end has more. */
+  .op-faded {
+    max-height: var(--op-faded-max, 9rem);
+    overflow: auto;
+  }
+  .op-faded[data-fade="top"] { mask-image: linear-gradient(to bottom, transparent, black 1.15rem); }
+  .op-faded[data-fade="bottom"] { mask-image: linear-gradient(to top, transparent, black 1.15rem); }
+  .op-faded[data-fade="both"] { mask-image: linear-gradient(to bottom, transparent, black 1.15rem, black calc(100% - 1.15rem), transparent); }
+
+  /* ---- Prose ----------------------------------------------------------------
+     One unit, the body size over four, drives every margin. Headings are weight
+     and space, not size: nothing in a thread is larger than anything else. */
+
+  .op-prose {
+    --md-font-size: var(--text-thread);
+    --md-line-height: calc(var(--md-font-size) * 1.625);
+    --md-space: calc(var(--md-font-size) / 4);
+    font-size: var(--md-font-size);
+    line-height: var(--md-line-height);
+    /* Just off full strength: pure ink at reading size buzzes. */
+    color: color-mix(in oklab, var(--foreground) 92%, transparent);
+    overflow-wrap: anywhere;
+  }
+  /* In the transcript the reply is the page's main text: full ink, as Spar sets it. */
+  .op-thread .op-prose { color: var(--foreground); }
+  .op-prose > :first-child { margin-top: 0; }
+  .op-prose > :last-child { margin-bottom: 0; }
+  .op-prose p { margin: 0 0 var(--md-space); white-space: pre-wrap; }
+  .op-prose > p:not(:first-child) { margin-top: calc(var(--md-space) * 3.5); }
+  .op-prose > p + p { margin-block: calc(var(--md-space) * 4); }
+  .op-prose :is(h1, h2, h3, h4, h5, h6) {
+    font-size: var(--md-font-size);
+    line-height: var(--md-line-height);
+    font-weight: 700;
+    letter-spacing: -0.011em;
+    color: var(--foreground);
+  }
+  .op-prose h1 { margin: 0 0 calc(var(--md-space) * 2); }
+  .op-prose :is(h2, h3) { margin: calc(var(--md-space) * 5) 0 calc(var(--md-space) * 2); }
+  .op-prose h4 { margin: calc(var(--md-space) * 4) 0 0; line-height: calc(var(--md-space) * 6); }
+  .op-prose > ul + :is(h1, h2, h3, h4, h5, h6) { margin-top: calc(var(--md-space) * 6); }
+  .op-prose :is(h5, h6) { margin: 0; }
+  .op-prose h4 + p { margin-top: 0; }
+  .op-prose :is(ul, ol) {
+    margin: 0;
+    padding-inline-start: var(--md-line-height);
+    list-style-position: outside;
+  }
+  .op-prose ul { list-style-type: disc; }
+  .op-prose ul ul { list-style-type: circle; }
+  .op-prose ul ul ul { list-style-type: square; }
+  .op-prose ol { list-style-type: decimal; }
+  .op-prose > :is(ul, ol):not(:first-child) { margin-top: calc(var(--md-space) * 3); }
+  .op-prose > p + :is(ul, ol) { margin-top: 0; }
+  .op-prose li { padding-inline-start: calc(var(--md-space) * 1.5); }
+  .op-prose li + li { margin-top: calc(var(--md-space) * 1.5); }
+  .op-prose li > p { margin: 0; }
+  .op-prose li > p + p { margin-top: calc(var(--md-space) * 2); }
+  /* Markers in the text colour and heavy: they read as structure, not dashes. */
+  .op-prose :is(ul, ol) > li::marker { color: var(--foreground); font-weight: 700; }
+  .op-prose :is(strong, b) { font-weight: 700; color: var(--foreground); }
+  .op-prose a { color: var(--reference); text-decoration: none; }
+  .op-prose a:hover { text-decoration: underline; text-underline-offset: 2px; }
+  .op-prose blockquote {
+    position: relative;
+    margin: 0 0 calc(var(--md-space) * 2);
+    padding-block: calc(var(--md-space) * 2);
+    padding-inline-start: calc(var(--md-space) * 6);
+  }
+  .op-prose blockquote::after {
+    content: "";
+    position: absolute;
+    inset-inline-start: 0;
+    top: calc(var(--md-space) * 2);
+    bottom: calc(var(--md-space) * 2);
+    width: var(--md-space);
+    border-radius: calc(var(--md-space) / 2);
+    background-color: var(--border-strong);
+  }
+  .op-prose blockquote > * { margin-block: 0; }
+  .op-prose blockquote > * + * { margin-top: calc(var(--md-space) * 2); }
+  .op-prose hr {
+    height: 0;
+    margin: calc(var(--md-space) * 7) 0;
+    border: 0;
+    border-top: 1px solid var(--border-strong);
+  }
+  .op-prose hr + * { margin-top: 0; }
+  /* Inline code is a drawn object with real padding: identifiers are what a
+     reader copies out of a sentence. Cloned decoration keeps both corners when
+     a chip wraps. */
+  .op-prose :not(pre) > code,
+  .op-code-inline {
+    border-radius: calc(var(--radius-sm) + 1px);
+    border: 1px solid var(--code-inline-border);
+    background: var(--code-inline-background);
+    color: var(--code-inline-foreground);
+    padding: 0 calc(var(--md-space, 0.22rem) * 1.25);
+    font-family: var(--font-mono);
+    font-size: 0.92em;
+    font-weight: 500;
+    line-height: 1.35;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  .op-prose table {
+    width: 100%;
+    margin-block: calc(var(--md-space) * 4);
+    border-collapse: collapse;
+  }
+  .op-prose :is(th, td) {
+    padding: calc(var(--md-space) * 1.5) calc(var(--md-space) * 2.5);
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+  }
+  .op-prose th { font-weight: 600; color: var(--foreground); }
+
+  /* ---- Code blocks ---------------------------------------------------------- */
+
+  .op-code {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    margin-block: 1rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-thread-tool);
+    line-height: 1.55;
+  }
+  .op-code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    height: 2rem;
+    padding: 0.5rem 0.5rem 0;
+    color: var(--muted-foreground);
+    font-family: var(--font-sans);
+    font-size: var(--text-ui-sm);
+  }
+  .op-code-language { display: inline-flex; align-items: center; gap: 0.375rem; min-width: 0; margin-left: 4px; }
+  .op-code-actions button { padding: 4px; border-radius: 4px; }
+  .op-code-body {
+    max-height: 25rem;
+    overflow: auto;
+    margin: 0;
+    padding: 8px 8px 12px;
+    color: var(--code-foreground);
+    font-size: calc(var(--text-thread) - 1px);
+    line-height: 1.6;
+    counter-reset: op-line;
+    tab-size: 4;
+  }
+  .op-code-line { display: block; min-height: 1.6em; }
+  .op-code[data-line-numbers="true"] .op-code-line::before {
+    content: counter(op-line);
+    counter-increment: op-line;
+    display: inline-block;
+    width: 1.5rem;
+    margin-right: 1rem;
+    text-align: right;
+    color: color-mix(in oklab, var(--muted-foreground) 50%, transparent);
+    user-select: none;
+  }
+  .op-tok-comment { color: var(--code-comment); font-style: italic; }
+  .op-tok-keyword { color: var(--code-keyword); }
+  .op-tok-type { color: var(--code-type); }
+  .op-tok-function { color: var(--code-function); }
+  .op-tok-string { color: var(--code-string); }
+  .op-tok-number { color: var(--code-number); }
+  .op-tok-punctuation { color: var(--code-punctuation); }
+  .op-tok-constant { color: var(--code-constant); }
+  .op-tok-operator { color: var(--code-operator); }
+  /* A plain name: the code's own ink. A slot of its own so a theme can tint it. */
+  .op-tok-variable { color: inherit; }
+  .op-tok-added { background: color-mix(in oklab, var(--success) 12%, transparent); }
+  .op-tok-removed { background: color-mix(in oklab, var(--destructive) 12%, transparent); }
+}
+
+@keyframes op-shimmer {
+  from { background-position: 140% 0; }
+  to { background-position: -40% 0; }
+}
+
+@keyframes op-caret {
+  0%, 45% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .op-shimmer,
+  .op-caret::after {
+    animation: none;
+  }
+  .op-shimmer {
+    color: var(--muted-foreground);
+    background: none;
+  }
+}
