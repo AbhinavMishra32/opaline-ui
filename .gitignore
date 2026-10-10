@@ -2,7 +2,12 @@ node_modules
 .next
 .source
 dist
-apps/docs/public/r
+next-env.d.ts
 *.tsbuildinfo
 .DS_Store
 .vercel
+
+# Launch film music: large binaries, kept out of the repo
+launch-music.mp3
+launch-music-trimmed.mov
+.kilo
