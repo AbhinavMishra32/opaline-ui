@@ -158,6 +158,71 @@ describe("applyAGUIMessage", () => {
   })
 })
 
+describe("tool calls that never finish", () => {
+  it("settles a tool call still running when its run ends as stopped", () => {
+    const messages = applyAll([
+      { type: "RUN_STARTED", runId: "run-1", timestamp: 1000 },
+      { type: "TOOL_CALL_START", toolCallId: "c1", toolCallName: "read_file", timestamp: 1000 },
+      { type: "TOOL_CALL_ARGS", toolCallId: "c1", delta: '{"path":"a.t' },
+      { type: "RUN_FINISHED", runId: "run-1", timestamp: 2000 },
+    ])
+
+    expect(onlyTurn(messages).parts).toMatchObject([
+      // The arguments stay as far as they got; the row reads cut-off JSON itself.
+      { type: "tool", id: "c1", status: "error", error: "Stopped before it finished.", input: '{"path":"a.t', endedAt: 2000 },
+    ])
+  })
+
+  it("settles it the same way when the run fails", () => {
+    const messages = applyAll([
+      { type: "RUN_STARTED", runId: "run-1", timestamp: 1000 },
+      { type: "TOOL_CALL_START", toolCallId: "c1", toolCallName: "read_file", timestamp: 1000 },
+      { type: "RUN_ERROR", message: "The model is down", timestamp: 2000 },
+    ], "run-1")
+
+    expect(onlyTurn(messages).parts[0]).toMatchObject({ type: "tool", status: "error", error: "Stopped before it finished." })
+  })
+
+  it("leaves finished tool calls as they are", () => {
+    const messages = applyAll([
+      { type: "RUN_STARTED", runId: "run-1", timestamp: 1000 },
+      { type: "TOOL_CALL_START", toolCallId: "c1", toolCallName: "read_file", timestamp: 1000 },
+      { type: "TOOL_CALL_RESULT", toolCallId: "c1", content: "export {}", timestamp: 1500 },
+      { type: "RUN_FINISHED", runId: "run-1", timestamp: 2000 },
+    ])
+
+    expect(onlyTurn(messages).parts[0]).toMatchObject({ status: "done", output: "export {}", endedAt: 1500 })
+  })
+
+  it("shows a saved call without a result as stopped, not running", () => {
+    const messages = messagesFromAGUI([
+      { id: "u1", role: "user", content: "read a.ts" },
+      {
+        id: "a1",
+        role: "assistant",
+        toolCalls: [{ id: "c1", type: "function", function: { name: "read_file", arguments: '{"path":"a.ts"}' } }],
+      },
+    ])
+
+    expect(messages[1]).toMatchObject({
+      status: "done",
+      parts: [{ type: "tool", id: "c1", status: "error", error: "Stopped before it finished.", input: { path: "a.ts" } }],
+    })
+  })
+
+  it("settles a call when its saved result arrives, with when it ended", () => {
+    const started = applyAll([
+      { type: "RUN_STARTED", runId: "run-1", timestamp: 1000 },
+      { type: "TOOL_CALL_START", toolCallId: "c1", toolCallName: "clock", timestamp: 1000 },
+    ])
+    const messages = applyAGUIMessage(started, { id: "m1", role: "tool", toolCallId: "c1", content: "9:00" }, "run-1")
+
+    const part = onlyTurn(messages).parts[0]
+    expect(part).toMatchObject({ status: "done", output: "9:00" })
+    expect(part?.type === "tool" ? part.endedAt : undefined).toEqual(expect.any(Number))
+  })
+})
+
 describe("messagesFromAGUI", () => {
   it("turns a saved chat into the thread: each reply's messages become one finished turn", () => {
     const messages = messagesFromAGUI([

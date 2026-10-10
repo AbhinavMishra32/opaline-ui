@@ -86,12 +86,13 @@ export function applyAGUIEvent(messages: ThreadMessage[], event: AGUIEvent | Oth
 
     case "RUN_FINISHED":
       return updateTurn(messages, runId ?? known.runId, (turn) => {
-        return { ...closeReasoning(turn, time), status: "done", ...durationOf(turn, time) }
+        const closed = closeTools(closeReasoning(turn, time), time)
+        return { ...closed, status: "done", ...durationOf(turn, time) }
       })
 
     case "RUN_ERROR":
       return updateTurn(messages, runId, (turn) => {
-        const closed = closeReasoning(turn, time)
+        const closed = closeTools(closeReasoning(turn, time), time)
         const withError = upsertPart(closed, { type: "error", id: `${turn.id}:error`, text: known.message })
         return { ...withError, status: "error", ...durationOf(turn, time) }
       })
@@ -230,10 +231,11 @@ export function applyAGUIMessage(messages: ThreadMessage[], message: AGUIMessage
 
     case "tool":
       return updateTool(messages, runId, message.toolCallId, (part) => {
+        const endedAt = part.endedAt ?? Date.now()
         if (message.error) {
-          return { ...part, output: message.content, error: message.error, status: "error" }
+          return { ...part, output: message.content, error: message.error, status: "error", endedAt }
         }
-        return { ...part, output: message.content, status: "done" }
+        return { ...part, output: message.content, status: "done", endedAt }
       })
 
     default:
@@ -263,11 +265,11 @@ export function messagesFromAGUI(history: AGUIMessage[]): ThreadMessage[] {
     messages = applyAGUIMessage(messages, message, runId ?? turnId)
   }
 
-  // Read back from storage: every turn is over.
+  // Read back from storage: every turn is over, and so is every tool call in it.
   const finished: ThreadMessage[] = []
   for (const message of messages) {
     if (message.role === "assistant") {
-      finished.push({ ...message, status: "done" })
+      finished.push({ ...closeTools(message, undefined), status: "done" })
     } else {
       finished.push(message)
     }
@@ -384,6 +386,35 @@ function upsertPart(turn: AssistantMessage, part: MessagePart): AssistantMessage
 }
 
 /** Ends every thought still open: the agent moved on to text, a tool, or stopped. */
+/**
+ * A turn is over, but some of its tool calls never got a result: the run was
+ * stopped (or broke) while they were being written or run. They'd spin
+ * forever, so they settle as stopped.
+ */
+function closeTools(turn: AssistantMessage, time: number | undefined): AssistantMessage {
+  const open = turn.parts.some((part) => part.type === "tool" && part.status === "running")
+  if (!open) {
+    return turn
+  }
+
+  const parts: MessagePart[] = []
+  for (const part of turn.parts) {
+    if (part.type === "tool" && part.status === "running") {
+      const stopped: ToolPart = { ...part, input: parseArguments(part.input), status: "error", error: STOPPED_TOOL }
+      if (time !== undefined) {
+        stopped.endedAt = time
+      }
+      parts.push(stopped)
+    } else {
+      parts.push(part)
+    }
+  }
+  return { ...turn, parts }
+}
+
+/** What a tool call that never finished says. */
+const STOPPED_TOOL = "Stopped before it finished."
+
 function closeReasoning(turn: AssistantMessage, time: number): AssistantMessage {
   const open = turn.parts.some((part) => part.type === "reasoning" && part.streaming)
   if (!open) {
