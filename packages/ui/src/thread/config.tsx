@@ -28,6 +28,7 @@ export type ThreadLabels = {
   input: string
   output: string
   failed: string
+  stopped: string
   showFullOutput: (lines: number) => string
   collapseOutput: string
   pending: string
@@ -107,6 +108,7 @@ export const defaultLabels: ThreadLabels = {
   input: "Input",
   output: "Output",
   failed: "Failed",
+  stopped: "Stopped",
   showFullOutput: (lines) => `Show full output · ${lines} lines`,
   collapseOutput: "Collapse output",
   pending: "Waiting for the agent to finish this step",

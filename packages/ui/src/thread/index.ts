@@ -86,6 +86,10 @@ export {
   type AGUIToolCall,
   type AGUIContentPart,
   type OtherAGUIEvent,
+  type AGUIToolActivity,
+  type AGUIToolOutput,
+  TOOL_ACTIVITY_EVENT,
+  TOOL_OUTPUT_EVENT,
 } from "./ag-ui"
 export {
   fromAISDK,

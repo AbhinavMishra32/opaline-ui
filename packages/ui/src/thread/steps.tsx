@@ -321,12 +321,13 @@ export function ToolStep({
   const tool = resolveTool(part, config.tools)
   const running = part.status === "running"
   const failed = part.status === "error"
+  const stopped = part.status === "stopped"
 
   const asks = tool.kind === "ask"
   const registered = tool.definition.render && !failed ? tool.definition.render(tool.props) : undefined
   const builtIn = registered === undefined && !failed && !tool.definition.render ? defaultToolView(tool.kind, part, tool.props.input, tool.props.output) : undefined
   const custom = registered !== undefined ? registered : builtIn
-  const hasRaw = Boolean(formatPayload(part.input).trim() || formatPayload(part.output).trim() || part.error)
+  const hasRaw = Boolean(formatPayload(tool.props.input).trim() || formatPayload(part.output).trim() || part.error)
   const before = thinking?.text.trim() ? thinking.text : ""
   const later = after?.text.trim() ? after.text : ""
   const drawn = custom !== undefined ? custom !== null && custom !== false : hasRaw
@@ -369,6 +370,9 @@ export function ToolStep({
       {part.diff && <DiffStat added={part.diff.added} removed={part.diff.removed} />}
       {failed && (
         <span className="shrink-0 rounded-md bg-accent px-1.5 py-0.5 text-thread-tool font-medium text-destructive">{config.labels.failed}</span>
+      )}
+      {stopped && (
+        <span className="shrink-0 rounded-md bg-accent px-1.5 py-0.5 text-thread-tool font-medium text-[var(--transcript-step-mark)]">{config.labels.stopped}</span>
       )}
       {panel && <Caret open={open} />}
     </>
@@ -432,11 +436,11 @@ export function ToolStep({
                   {/* Why it did this, then what it did, then what it made of it. */}
                   {before && <Thinking heading={config.labels.thinkingBefore} ruled={drawn} text={before} />}
                   {!drawn ? null : failed ? (
-                    <RawPayload input={part.input} output={part.error ?? part.output} status={config.labels.failed} />
+                    <RawPayload input={tool.props.input} output={part.error ?? part.output} status={config.labels.failed} />
                   ) : custom !== undefined ? (
                     custom
                   ) : (
-                    <RawPayload input={part.input} output={part.output} {...(part.status === "done" ? { status: config.labels.done } : {})} />
+                    <RawPayload input={tool.props.input} output={part.output} {...(part.status === "done" ? { status: config.labels.done } : {})} {...(stopped ? { status: config.labels.stopped } : {})} />
                   )}
                   {later && (
                     <div className={cn(drawn && "border-t border-[var(--border-surface-strong)]/60")}>

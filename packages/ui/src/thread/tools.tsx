@@ -158,16 +158,23 @@ export function resolveTool(part: ToolPart, registry: ToolRegistry): ResolvedToo
   const inferred = inferTool(part.name)
   const props: ToolRenderProps = {
     part,
-    input: parseMaybeJson(part.input),
+    input: withoutKeys(parseMaybeJson(part.input), part.labelKeys),
     output: parseMaybeJson(part.output),
     status: part.status,
   }
   const running = part.status === "running"
   const registered = typeof definition.title === "function" ? definition.title(props) : definition.title
   const verb = running ? inferred.verb[0] : inferred.verb[1]
-  const title = part.title ?? registered ?? (verb || humanise(part.name))
-  const subject = definition.subject ? definition.subject(props) : verb ? inferSubject(props.input) : undefined
-  const detail = part.detail ?? (definition.detail && !running ? definition.detail(props) : undefined)
+  const words = activityTitle(part)
+  const title = part.title ?? words ?? registered ?? (verb || humanise(part.name))
+  // The host's words already say what the call is about.
+  const subject = words ? undefined : definition.subject ? definition.subject(props) : verb ? inferSubject(props.input) : undefined
+  let detail = part.detail
+  if (detail === undefined && running) {
+    detail = lastLine(part.output)
+  } else if (detail === undefined && definition.detail) {
+    detail = definition.detail(props)
+  }
   return {
     definition,
     kind: inferred.kind,
@@ -180,11 +187,36 @@ export function resolveTool(part: ToolPart, registry: ToolRegistry): ResolvedToo
   }
 }
 
+/** A running tool's latest line of output, shown beside its title: "7" of "10\n9\n8\n7". */
+function lastLine(output: unknown): string | undefined {
+  if (typeof output !== "string") {
+    return undefined
+  }
+  const lines = output.split("\n").filter((line) => line.trim() !== "")
+  return lines.at(-1)
+}
+
+/** The host's words for the call, in the right tense: what it's doing, or what it did once it worked. */
+function activityTitle(part: ToolPart): string | undefined {
+  if (part.status === "done" && part.activityDone) return part.activityDone
+  return part.activity || undefined
+}
+
+/** The input without the keys that only carried the call's words. */
+function withoutKeys(input: unknown, keys: string[] | undefined): unknown {
+  if (!keys?.length || typeof input !== "object" || input === null || Array.isArray(input)) return input
+  const kept: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(input)) {
+    if (!keys.includes(key)) kept[key] = value
+  }
+  return kept
+}
+
 export function parseMaybeJson(value: unknown): unknown {
   if (typeof value !== "string") return value
   const trimmed = value.trim()
   if (!(trimmed.startsWith("{") || trimmed.startsWith("["))) return value
-  for (const candidate of [trimmed, closeOff(trimmed)]) {
+  for (const candidate of [trimmed, closeOff(trimmed), ...completions(trimmed)]) {
     try {
       return JSON.parse(candidate)
     } catch {
@@ -192,6 +224,65 @@ export function parseMaybeJson(value: unknown): unknown {
     }
   }
   return value
+}
+
+/**
+ * Ways to finish JSON that's still being written, best first: as it is with
+ * its open string and brackets closed (`{"command":"l` → `{"command":"l"}`),
+ * then cut back to each earlier comma, for a key or value cut in half
+ * (`{"path":"a.ts","comm` → `{"path":"a.ts"}`).
+ */
+function completions(body: string): string[] {
+  const candidates = [closeUp(body)]
+  const commas = commasOutsideStrings(body)
+  for (let index = commas.length - 1; index >= 0; index -= 1) {
+    candidates.push(closeUp(body.slice(0, commas[index])))
+  }
+  return candidates
+}
+
+/** The text with its open string and brackets closed. */
+function closeUp(body: string): string {
+  const stack: string[] = []
+  let inString = false
+  let escaped = false
+  for (const character of body) {
+    if (inString) {
+      if (escaped) escaped = false
+      else if (character === "\\") escaped = true
+      else if (character === '"') inString = false
+      continue
+    }
+    if (character === '"') inString = true
+    else if (character === "{") stack.push("}")
+    else if (character === "[") stack.push("]")
+    else if (character === "}" || character === "]") stack.pop()
+  }
+  let text = body
+  if (inString) {
+    // A string cut after a backslash would escape its own closing quote.
+    if (escaped) text = text.slice(0, -1)
+    text += '"'
+  }
+  return text + stack.reverse().join("")
+}
+
+function commasOutsideStrings(body: string): number[] {
+  const commas: number[] = []
+  let inString = false
+  let escaped = false
+  for (let index = 0; index < body.length; index += 1) {
+    const character = body[index]
+    if (inString) {
+      if (escaped) escaped = false
+      else if (character === "\\") escaped = true
+      else if (character === '"') inString = false
+      continue
+    }
+    if (character === '"') inString = true
+    else if (character === ",") commas.push(index)
+  }
+  return commas
 }
 
 /**
@@ -230,16 +321,23 @@ export function formatPayload(value: unknown): string {
     const trimmed = value.trim()
     if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
       try {
-        return JSON.stringify(JSON.parse(trimmed), null, 2)
+        return formatPayload(JSON.parse(trimmed))
       } catch {
         return value
       }
     }
     return value
   }
+  // No arguments (or none left once the words are taken out): nothing to show, not "{}".
+  if (isEmptyCollection(value)) return ""
   try {
     return JSON.stringify(value, null, 2)
   } catch {
     return String(value)
   }
+}
+
+function isEmptyCollection(value: unknown): boolean {
+  if (Array.isArray(value)) return value.length === 0
+  return typeof value === "object" && value !== null && Object.keys(value).length === 0
 }

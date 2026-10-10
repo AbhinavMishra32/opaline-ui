@@ -9,7 +9,8 @@ import type * as React from "react"
  * only read them.
  */
 
-export type ToolStatus = "running" | "done" | "error"
+/** `stopped`: the person pressed Stop before it finished. Not a failure. */
+export type ToolStatus = "running" | "done" | "error" | "stopped"
 
 export type TextPart = {
   type: "text"
@@ -47,6 +48,16 @@ export type ToolPart = {
   error?: string
   /** Overrides the registry's title for this one call. */
   title?: string
+  /**
+   * What the call is doing, in words, from the host: "Finding your chat model
+   * files". The row's title while it runs (and if it fails), over the
+   * registry's. It can arrive a few letters at a time.
+   */
+  activity?: string
+  /** The same once it has worked: "Found your chat model files". Falls back to `activity`. */
+  activityDone?: string
+  /** Input keys that only carry those words: left out wherever the input is shown. */
+  labelKeys?: string[]
   /** A short result beside the title — `23 matches`, `exit 0`. */
   detail?: string
   /** Lines changed, drawn as a `+12 -3` diff stat. */

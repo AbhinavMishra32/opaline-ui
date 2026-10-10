@@ -169,7 +169,7 @@ describe("tool calls that never finish", () => {
 
     expect(onlyTurn(messages).parts).toMatchObject([
       // The arguments stay as far as they got; the row reads cut-off JSON itself.
-      { type: "tool", id: "c1", status: "error", error: "Stopped before it finished.", input: '{"path":"a.t', endedAt: 2000 },
+      { type: "tool", id: "c1", status: "stopped", input: '{"path":"a.t', endedAt: 2000 },
     ])
   })
 
@@ -180,7 +180,7 @@ describe("tool calls that never finish", () => {
       { type: "RUN_ERROR", message: "The model is down", timestamp: 2000 },
     ], "run-1")
 
-    expect(onlyTurn(messages).parts[0]).toMatchObject({ type: "tool", status: "error", error: "Stopped before it finished." })
+    expect(onlyTurn(messages).parts[0]).toMatchObject({ type: "tool", status: "stopped" })
   })
 
   it("leaves finished tool calls as they are", () => {
@@ -206,7 +206,7 @@ describe("tool calls that never finish", () => {
 
     expect(messages[1]).toMatchObject({
       status: "done",
-      parts: [{ type: "tool", id: "c1", status: "error", error: "Stopped before it finished.", input: { path: "a.ts" } }],
+      parts: [{ type: "tool", id: "c1", status: "stopped", input: { path: "a.ts" } }],
     })
   })
 
@@ -220,6 +220,69 @@ describe("tool calls that never finish", () => {
     const part = onlyTurn(messages).parts[0]
     expect(part).toMatchObject({ status: "done", output: "9:00" })
     expect(part?.type === "tool" ? part.endedAt : undefined).toEqual(expect.any(Number))
+  })
+})
+
+describe("a tool call's words", () => {
+  it("takes them from CUSTOM tool.activity as they grow", () => {
+    const messages = applyAll([
+      { type: "RUN_STARTED", runId: "run-1", timestamp: 1000 },
+      { type: "TOOL_CALL_START", toolCallId: "c1", toolCallName: "shell", timestamp: 1000 },
+      { type: "CUSTOM", name: "tool.activity", value: { toolCallId: "c1", activity: "", labelKeys: ["activity", "activity_done"] } },
+      { type: "CUSTOM", name: "tool.activity", value: { toolCallId: "c1", activity: "Finding your" } },
+      { type: "CUSTOM", name: "tool.activity", value: { toolCallId: "c1", activity: "Finding your chat model files" } },
+    ])
+
+    expect(onlyTurn(messages).parts[0]).toMatchObject({
+      type: "tool",
+      status: "running",
+      activity: "Finding your chat model files",
+      labelKeys: ["activity", "activity_done"],
+    })
+  })
+
+  it("takes the finished words from the saved call", () => {
+    const started = applyAll([
+      { type: "RUN_STARTED", runId: "run-1", timestamp: 1000 },
+      { type: "TOOL_CALL_START", toolCallId: "c1", toolCallName: "shell", timestamp: 1000 },
+    ])
+    const messages = applyAGUIMessage(
+      started,
+      {
+        id: "a1",
+        role: "assistant",
+        toolCalls: [{ id: "c1", type: "function", function: { name: "shell", arguments: '{"command":"ls"}' } }],
+        metadata: { toolActivity: { c1: { activity: "Listing files", activityDone: "Listed files" } } },
+      },
+      "run-1",
+    )
+
+    expect(onlyTurn(messages).parts[0]).toMatchObject({ activity: "Listing files", activityDone: "Listed files", input: { command: "ls" } })
+  })
+
+  it("reads them back with a saved chat", () => {
+    const messages = messagesFromAGUI([
+      { id: "u1", role: "user", content: "list them" },
+      {
+        id: "a1",
+        role: "assistant",
+        toolCalls: [{ id: "c1", type: "function", function: { name: "shell", arguments: "{}" } }],
+        metadata: { runId: "run-1", toolActivity: { c1: { activity: "Listing files", activityDone: "Listed files" } } },
+      },
+      { id: "m1", role: "tool", toolCallId: "c1", content: "a.ts", metadata: { runId: "run-1" } },
+    ])
+
+    expect(messages[1]).toMatchObject({ parts: [{ status: "done", activity: "Listing files", activityDone: "Listed files" }] })
+  })
+
+  it("ignores other CUSTOM events", () => {
+    const start = applyAll([
+      { type: "RUN_STARTED", runId: "run-1", timestamp: 1000 },
+      { type: "TOOL_CALL_START", toolCallId: "c1", toolCallName: "shell", timestamp: 1000 },
+    ])
+    const after = applyAGUIEvent(start, { type: "CUSTOM", name: "something.else", value: { toolCallId: "c1", activity: "Nope" } })
+
+    expect(after).toBe(start)
   })
 })
 
@@ -245,5 +308,47 @@ describe("messagesFromAGUI", () => {
     ])
 
     expect(messages[1]).toMatchObject({ id: "run-1", role: "assistant" })
+  })
+})
+
+describe("a running tool's output", () => {
+  it("takes what the tool has so far from CUSTOM tool.output", () => {
+    const messages = applyAll([
+      { type: "RUN_STARTED", runId: "run-1", timestamp: 1000 },
+      { type: "TOOL_CALL_START", toolCallId: "c1", toolCallName: "countdown", timestamp: 1000 },
+      { type: "CUSTOM", name: "tool.output", value: { toolCallId: "c1", output: "3" } },
+      { type: "CUSTOM", name: "tool.output", value: { toolCallId: "c1", output: "3\n2" } },
+    ])
+
+    expect(onlyTurn(messages).parts[0]).toMatchObject({ type: "tool", status: "running", output: "3\n2" })
+  })
+
+  it("keeps the result once it has arrived", () => {
+    const started = applyAll([
+      { type: "RUN_STARTED", runId: "run-1", timestamp: 1000 },
+      { type: "TOOL_CALL_START", toolCallId: "c1", toolCallName: "countdown", timestamp: 1000 },
+    ])
+    const done = applyAGUIMessage(started, { id: "m1", role: "tool", toolCallId: "c1", content: "3\n2\n1\nDone." }, "run-1")
+    const late = applyAGUIEvent(done, { type: "CUSTOM", name: "tool.output", value: { toolCallId: "c1", output: "3\n2" } }, "run-1")
+
+    expect(onlyTurn(late).parts[0]).toMatchObject({ status: "done", output: "3\n2\n1\nDone." })
+  })
+})
+
+describe("a stopped tool call", () => {
+  it("is stopped, not failed, when its result says it was stopped", () => {
+    const started = applyAll([
+      { type: "RUN_STARTED", runId: "run-1", timestamp: 1000 },
+      { type: "TOOL_CALL_START", toolCallId: "c1", toolCallName: "countdown", timestamp: 1000 },
+    ])
+    const messages = applyAGUIMessage(
+      started,
+      { id: "m1", role: "tool", toolCallId: "c1", content: "Stopped at 20.", metadata: { stopped: true } },
+      "run-1",
+    )
+
+    const part = onlyTurn(messages).parts[0]
+    expect(part).toMatchObject({ type: "tool", status: "stopped", output: "Stopped at 20." })
+    expect(part).not.toHaveProperty("error")
   })
 })

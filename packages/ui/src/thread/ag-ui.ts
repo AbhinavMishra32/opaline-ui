@@ -9,7 +9,38 @@
  *   REASONING_MESSAGE_START / CONTENT / END   a thought, by messageId
  *   TEXT_MESSAGE_START / CONTENT / END        text, by messageId
  *   TOOL_CALL_START / ARGS / END / RESULT     a tool call, by toolCallId
+ *   CUSTOM "tool.activity"            what a tool call is doing, in words
+ *   CUSTOM "tool.output"              what a running tool has so far
  *   RUN_FINISHED | RUN_ERROR          the turn ends
+ *
+ * A tool call's words. AG-UI has no field for "what this call is doing", so
+ * a host that has them sends AG-UI's own extension event while the call
+ * streams, as often as they grow:
+ *
+ *   CUSTOM { name: "tool.activity",
+ *            value: { toolCallId, activity: "Finding your chat model files",
+ *                     activityDone?: "Found your chat model files",
+ *                     labelKeys?: ["activity", "activity_done"] } }
+ *
+ * and keeps them on the saved call, in the message's metadata:
+ *
+ *   { role: "assistant", toolCalls: [t1], metadata: { toolActivity: { t1: { activity, activityDone } } } }
+ *
+ * The row shows `activity` while the call runs and `activityDone` once it
+ * worked. `labelKeys` are arguments that only carried the words; they're
+ * left out of the input the row shows.
+ *
+ * A running tool's output. A tool that takes a while can send what it has
+ * so far, the whole text each time, until its result arrives:
+ *
+ *   CUSTOM { name: "tool.output", value: { toolCallId, output: "10\n9\n8" } }
+ *
+ * The row shows its last line while it runs, and all of it when opened.
+ *
+ * A result that came back because you pressed Stop says so in its metadata,
+ * and the row shows it as stopped, not failed:
+ *
+ *   { role: "tool", toolCallId, content: "Stopped at 20.", metadata: { stopped: true } }
  *
  * The thread draws one run as one assistant turn whose parts are those
  * blocks. Every delta finds its part by id, so blocks can stream at the
@@ -69,6 +100,27 @@ export type AGUIEvent =
   | { type: "TOOL_CALL_END"; toolCallId: string; timestamp?: number }
   | { type: "TOOL_CALL_RESULT"; toolCallId: string; content: string; messageId?: string; timestamp?: number }
   | { type: "MESSAGES_SNAPSHOT"; messages: AGUIMessage[]; timestamp?: number }
+  | { type: "CUSTOM"; name: string; value?: unknown; timestamp?: number }
+
+/** What a tool call is doing, in words: the value of a CUSTOM "tool.activity" event. */
+export type AGUIToolActivity = {
+  toolCallId: string
+  activity?: string
+  activityDone?: string
+  labelKeys?: string[]
+}
+
+/** The CUSTOM event name for a tool call's words. */
+export const TOOL_ACTIVITY_EVENT = "tool.activity"
+
+/** A CUSTOM "tool.output" event's value: what the tool has so far. */
+export type AGUIToolOutput = {
+  toolCallId: string
+  output: string
+}
+
+/** The CUSTOM event name for a running tool's output. */
+export const TOOL_OUTPUT_EVENT = "tool.output"
 
 /** Any other event (steps, state, custom): passed in freely, ignored. */
 export type OtherAGUIEvent = { type: string; [key: string]: unknown }
@@ -175,6 +227,24 @@ export function applyAGUIEvent(messages: ThreadMessage[], event: AGUIEvent | Oth
     case "MESSAGES_SNAPSHOT":
       return messagesFromAGUI(known.messages)
 
+    case "CUSTOM": {
+      if (known.name === TOOL_OUTPUT_EVENT) {
+        const live = toolOutputOf(known.value)
+        if (!live) {
+          return messages
+        }
+        return updateTool(messages, runId, live.toolCallId, (part) => withLiveOutput(part, live.output))
+      }
+      if (known.name !== TOOL_ACTIVITY_EVENT) {
+        return messages
+      }
+      const activity = toolActivityOf(known.value)
+      if (!activity) {
+        return messages
+      }
+      return updateTool(messages, runId, activity.toolCallId, (part) => withActivity(part, activity))
+    }
+
     default:
       return messages
   }
@@ -217,14 +287,17 @@ export function applyAGUIMessage(messages: ThreadMessage[], message: AGUIMessage
           if (part?.type === "tool") {
             existing = part
           }
-          next = upsertPart(next, {
+          const settled: ToolPart = {
             ...existing,
             type: "tool",
             id: call.id,
             name: call.function.name,
             status: existing.status ?? "running",
             input: parseArguments(call.function.arguments),
-          })
+          }
+          // The saved call carries its finished words.
+          const words = savedActivityOf(message.metadata, call.id)
+          next = upsertPart(next, words ? withActivity(settled, words) : settled)
         }
         return next
       })
@@ -232,6 +305,9 @@ export function applyAGUIMessage(messages: ThreadMessage[], message: AGUIMessage
     case "tool":
       return updateTool(messages, runId, message.toolCallId, (part) => {
         const endedAt = part.endedAt ?? Date.now()
+        if (isRecord(message.metadata) && message.metadata.stopped === true) {
+          return { ...part, output: message.content, status: "stopped", endedAt }
+        }
         if (message.error) {
           return { ...part, output: message.content, error: message.error, status: "error", endedAt }
         }
@@ -400,7 +476,7 @@ function closeTools(turn: AssistantMessage, time: number | undefined): Assistant
   const parts: MessagePart[] = []
   for (const part of turn.parts) {
     if (part.type === "tool" && part.status === "running") {
-      const stopped: ToolPart = { ...part, input: parseArguments(part.input), status: "error", error: STOPPED_TOOL }
+      const stopped: ToolPart = { ...part, input: parseArguments(part.input), status: "stopped" }
       if (time !== undefined) {
         stopped.endedAt = time
       }
@@ -411,9 +487,6 @@ function closeTools(turn: AssistantMessage, time: number | undefined): Assistant
   }
   return { ...turn, parts }
 }
-
-/** What a tool call that never finished says. */
-const STOPPED_TOOL = "Stopped before it finished."
 
 function closeReasoning(turn: AssistantMessage, time: number): AssistantMessage {
   const open = turn.parts.some((part) => part.type === "reasoning" && part.streaming)
@@ -437,6 +510,78 @@ function durationOf(turn: AssistantMessage, time: number): { durationMs?: number
     return {}
   }
   return { durationMs: time - turn.startedAt }
+}
+
+/** A tool call with its words: whichever the host sent, over what it had. Empty words are no words. */
+function withActivity(part: ToolPart, words: Omit<AGUIToolActivity, "toolCallId">): ToolPart {
+  const next: ToolPart = { ...part }
+  if (words.activity) {
+    next.activity = words.activity
+  }
+  if (words.activityDone) {
+    next.activityDone = words.activityDone
+  }
+  if (words.labelKeys) {
+    next.labelKeys = words.labelKeys
+  }
+  return next
+}
+
+/** A CUSTOM "tool.activity" event's value, if it is one. */
+function toolActivityOf(value: unknown): AGUIToolActivity | undefined {
+  if (!isRecord(value) || typeof value.toolCallId !== "string") {
+    return undefined
+  }
+  return {
+    toolCallId: value.toolCallId,
+    ...wordsOf(value),
+  }
+}
+
+/** What a running tool has so far. Once it has its result, late output changes nothing. */
+function withLiveOutput(part: ToolPart, output: string): ToolPart {
+  if (part.status !== "running") {
+    return part
+  }
+  return { ...part, output }
+}
+
+/** A CUSTOM "tool.output" event's value, if it is one. */
+function toolOutputOf(value: unknown): AGUIToolOutput | undefined {
+  if (!isRecord(value) || typeof value.toolCallId !== "string" || typeof value.output !== "string") {
+    return undefined
+  }
+  return { toolCallId: value.toolCallId, output: value.output }
+}
+
+/** A saved call's words, from its message's `metadata.toolActivity`. */
+function savedActivityOf(metadata: unknown, toolCallId: string): Omit<AGUIToolActivity, "toolCallId"> | undefined {
+  if (!isRecord(metadata) || !isRecord(metadata.toolActivity)) {
+    return undefined
+  }
+  const words = metadata.toolActivity[toolCallId]
+  if (!isRecord(words)) {
+    return undefined
+  }
+  return wordsOf(words)
+}
+
+function wordsOf(value: Record<string, unknown>): Omit<AGUIToolActivity, "toolCallId"> {
+  const words: Omit<AGUIToolActivity, "toolCallId"> = {}
+  if (typeof value.activity === "string") {
+    words.activity = value.activity
+  }
+  if (typeof value.activityDone === "string") {
+    words.activityDone = value.activityDone
+  }
+  if (Array.isArray(value.labelKeys)) {
+    words.labelKeys = value.labelKeys.filter((key): key is string => typeof key === "string")
+  }
+  return words
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
 }
 
 /** Tool arguments as an object when they're JSON, else as they came. */
