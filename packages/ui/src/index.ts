@@ -52,6 +52,7 @@ export {
   DropdownMenuTrigger,
 } from "./components/dropdown-menu"
 export { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyContent, EmptyMedia } from "./components/empty"
+export { DiffCounts, LineDiffView, diffCounts, lineDiff, wordDiff, type DiffLine } from "./components/line-diff"
 export {
   Field,
   FieldLabel,
