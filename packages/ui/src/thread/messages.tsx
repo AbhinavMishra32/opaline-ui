@@ -92,7 +92,7 @@ function isCard(part: MessagePart | undefined, events: ThreadEvents): boolean {
 
 /**
  * Every row of a turn in the order it happened, grouped (`groupParts`):
- * thinking rides in the panel of the call it led to. Spacing is per row:
+ * a thought is its own row, before the call it led to. Spacing is per row:
  * steps in one run of work sit touching so the rail can run through them,
  * prose claims its room from both sides, and cards get theirs once.
  */
@@ -130,12 +130,12 @@ function PartView({ row, continues, last, streaming: live }: { row: PartRow; con
     case "reasoning":
       return <ReasoningStep part={part} />
     case "tool":
-      return <ToolStep continues={continues} part={part} {...(row.thinking ? { thinking: row.thinking } : {})} {...(row.after ? { after: row.after } : {})} />
+      return <ToolStep continues={continues} part={part} />
     case "question":
       if (inlineQuestion(part, events)) {
         return <QuestionCard interactive part={part} {...(events.onAnswer ? { onAnswer: events.onAnswer } : {})} {...(events.onCancelQuestion ? { onCancel: events.onCancelQuestion } : {})} />
       }
-      return <ToolStep continues={continues} part={questionAsTool(part, config.labels.questionCancelled)} {...(row.thinking ? { thinking: row.thinking } : {})} />
+      return <ToolStep continues={continues} part={questionAsTool(part, config.labels.questionCancelled)} />
     case "status":
       return <StatusStep continues={continues} part={part} />
     case "error":

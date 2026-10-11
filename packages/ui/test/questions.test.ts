@@ -52,7 +52,7 @@ describe("questions", () => {
 })
 
 describe("groupParts", () => {
-  it("joins thinking and binds it to the call around it", () => {
+  it("joins thinking, and keeps it as its own row before the call", () => {
     const parts: MessagePart[] = [
       { type: "reasoning", id: "r1", text: "**A**" },
       { type: "reasoning", id: "r2", text: "**B**" },
@@ -62,9 +62,8 @@ describe("groupParts", () => {
       { type: "text", id: "x", text: "Answer" },
     ]
     const rows = groupParts(parts)
-    expect(rows.map((row) => row.part.id)).toEqual(["t", "x"])
-    expect(rows[0]!.thinking?.text).toBe("**A**\n\n**B**")
-    expect(rows[0]!.after?.text).toBe("after")
+    expect(rows.map((row) => row.part.id)).toEqual(["r1", "t", "r3", "x"])
+    expect(rows[0]!.part).toMatchObject({ type: "reasoning", text: "**A**\n\n**B**" })
   })
 
   it("keeps streaming thought as its own row", () => {

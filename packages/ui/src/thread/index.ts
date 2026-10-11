@@ -14,7 +14,6 @@ export {
   ErrorCard,
   WaitingLine,
   StepRow,
-  Thinking,
   Orb,
   Caret,
   DiffStat,

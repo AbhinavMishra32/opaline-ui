@@ -267,30 +267,6 @@ function MarkSwap({ markKey, reduced, children }: { markKey: string; reduced: bo
 }
 
 /**
- * The thinking around one step, inside the step: headings bold, prose under
- * them against a rule, held to a height and faded.
- */
-export function Thinking({ heading, text, ruled = false }: { heading: string; text: string; ruled?: boolean }) {
-  const sections = thoughts(text).filter((section) => section.title || section.body)
-  if (!sections.length) return null
-  return (
-    <div className={cn("px-3 py-2.5", ruled && "border-b border-[var(--border-surface-strong)]/60")}>
-      <p className="mb-1.5 text-thread font-medium text-[var(--transcript-step-mark)]">{heading}</p>
-      <FadedScroll>
-        <div className="border-l border-border/70 pl-2.5">
-          {sections.map((section, index) => (
-            <div className={index > 0 ? "mt-2" : undefined} key={index}>
-              {section.title ? <p className="text-thread font-medium leading-[1.6] text-[var(--transcript-step-strong)]">{section.title}</p> : null}
-              {section.body ? <p className="text-thread leading-[1.6] text-[var(--transcript-step)]">{section.body}</p> : null}
-            </div>
-          ))}
-        </div>
-      </FadedScroll>
-    </div>
-  )
-}
-
-/**
  * One tool call: its mark, what it did and to what, and the panel it opens.
  *
  * `Read main.py`, not `Read a file`: a column of bare verbs says five things
@@ -302,16 +278,10 @@ export function ToolStep({
   part,
   continues = false,
   defaultOpen = false,
-  thinking,
-  after,
 }: {
   part: ToolPart
   continues?: boolean
   defaultOpen?: boolean
-  /** The settled reasoning that led to this call, shown first in its panel. */
-  thinking?: ReasoningPart
-  /** The reasoning it prompted, shown under the result. */
-  after?: ReasoningPart
 }) {
   const config = useThreadConfig()
   const [open, setOpen] = React.useState(defaultOpen)
@@ -328,10 +298,8 @@ export function ToolStep({
   const builtIn = registered === undefined && !failed && !tool.definition.render ? defaultToolView(tool.kind, part, tool.props.input, tool.props.output) : undefined
   const custom = registered !== undefined ? registered : builtIn
   const hasRaw = Boolean(formatPayload(tool.props.input).trim() || formatPayload(part.output).trim() || part.error)
-  const before = thinking?.text.trim() ? thinking.text : ""
-  const later = after?.text.trim() ? after.text : ""
   const drawn = custom !== undefined ? custom !== null && custom !== false : hasRaw
-  const panel = drawn || Boolean(before || later)
+  const panel = drawn
   const bare = (Boolean(tool.definition.bare) && registered !== undefined) || (builtIn !== undefined && isBareKind(tool.kind))
   const opensFile = tool.subject && config.onOpenFile && looksLikePath(tool.subject)
   /* A question is a wait on the person, not work: no stopwatch on them. */
@@ -414,38 +382,15 @@ export function ToolStep({
           {panel && (
             <CollapsibleContent className={bare ? "px-0.5" : "op-block"} expandDuration={0.42} gap={6}>
               {bare ? (
-                <>
-                  {before && (
-                    <div className="op-block mb-2">
-                      <div className="op-tool-detail min-w-0">
-                        <Thinking heading={config.labels.thinkingBefore} text={before} />
-                      </div>
-                    </div>
-                  )}
-                  {custom}
-                  {later && (
-                    <div className="op-block mt-2">
-                      <div className="op-tool-detail min-w-0">
-                        <Thinking heading={config.labels.thinkingAfter} text={later} />
-                      </div>
-                    </div>
-                  )}
-                </>
+                custom
               ) : (
                 <div className="op-tool-detail min-w-0">
-                  {/* Why it did this, then what it did, then what it made of it. */}
-                  {before && <Thinking heading={config.labels.thinkingBefore} ruled={drawn} text={before} />}
-                  {!drawn ? null : failed ? (
+                  {failed ? (
                     <RawPayload input={tool.props.input} output={part.error ?? part.output} status={config.labels.failed} />
                   ) : custom !== undefined ? (
                     custom
                   ) : (
                     <RawPayload input={tool.props.input} output={part.output} {...(part.status === "done" ? { status: config.labels.done } : {})} {...(stopped ? { status: config.labels.stopped } : {})} />
-                  )}
-                  {later && (
-                    <div className={cn(drawn && "border-t border-[var(--border-surface-strong)]/60")}>
-                      <Thinking heading={config.labels.thinkingAfter} text={later} />
-                    </div>
                   )}
                 </div>
               )}
@@ -490,8 +435,6 @@ export function ReasoningStep({ part }: { part: ReasoningPart }) {
   const live = Boolean(part.streaming)
   const sections = thoughts(part.text)
   const prose = sections.some((section) => section.body)
-  /* A settled block that is only headings is a table of contents for a chapter
-     nobody wrote: those headings were live status and go when it is done. */
   const [settling] = React.useState(live)
   const [home, setHome] = React.useState(true)
   React.useEffect(() => {
@@ -501,8 +444,9 @@ export function ReasoningStep({ part }: { part: ReasoningPart }) {
     return () => cancelAnimationFrame(frame)
   }, [live, settling])
 
-  if (!live && !prose) return null
-
+  /* A settled thought that is only headings keeps its row, as its heading:
+     dropping it would make the row flash by and vanish just before the call
+     it led to. */
   const titled = sections.map((section, index) => (section.title ? index : -1)).filter((index) => index >= 0).at(-1) ?? -1
   const seconds = part.startedAt ? Math.max(1, Math.round(((part.endedAt ?? Date.now()) - part.startedAt) / 1000)) : undefined
   const title = latestHeading(part.text) ?? (live ? labels.thinking : seconds ? labels.thoughtFor(seconds) : labels.thinking)

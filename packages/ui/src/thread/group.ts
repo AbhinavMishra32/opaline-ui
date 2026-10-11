@@ -1,17 +1,10 @@
 import { questionExchange } from "./question-exchange"
 import { inferTool } from "./tools"
-import type { MessagePart, ReasoningPart } from "./types"
+import type { MessagePart } from "./types"
 
-/**
- * A row of a turn: one part, and — for a tool call — the thinking that led to
- * it and the thinking it prompted, which ride in the panel the row opens.
- */
+/** A row of a turn: one part. Thinking always has rows of its own, never inside a tool's. */
 export type PartRow = {
   part: MessagePart
-  /** Settled reasoning immediately before the call. */
-  thinking?: ReasoningPart
-  /** Settled reasoning after the turn's last call, before it answers. */
-  after?: ReasoningPart
 }
 
 /** A tool that asks the person something, by its name. */
@@ -46,16 +39,11 @@ function isPreparation(part: MessagePart, next: MessagePart | undefined): boolea
  * read back from storage, so the two fold identically.
  *
  * - Thinking interrupted only by more thinking is one thought: consecutive
- *   settled reasoning blocks are joined.
- * - A settled thought immediately followed by a call belongs to that call
- *   (`thinking`); the thought after the last call, before the answer, goes back
- *   onto it (`after`). A thought still streaming, or one that led to prose,
- *   keeps its own row.
+ *   settled reasoning blocks are joined. A thought is always its own row,
+ *   before the call it led to, never folded into that call's panel.
  * - "Preparing <tool>" statuses go once the wait they describe is over.
- *
- * Pass `bind: false` to keep every reasoning block as its own row.
  */
-export function groupParts(parts: readonly MessagePart[], { bind = true }: { bind?: boolean } = {}): PartRow[] {
+export function groupParts(parts: readonly MessagePart[]): PartRow[] {
   const grouped: PartRow[] = []
   for (const [index, part] of parts.entries()) {
     if (isPreparation(part, parts[index + 1])) continue
@@ -73,26 +61,5 @@ export function groupParts(parts: readonly MessagePart[], { bind = true }: { bin
     }
     grouped.push({ part })
   }
-  return bind ? bindThinking(grouped) : grouped
-}
-
-function bindThinking(rows: PartRow[]): PartRow[] {
-  const bound: PartRow[] = []
-  for (let index = 0; index < rows.length; index += 1) {
-    const row = rows[index]!
-    const next = rows[index + 1]
-    const settled = row.part.type === "reasoning" && !row.part.streaming ? row.part : undefined
-    if (settled && next?.part.type === "tool" && !next.thinking && !isOutcome(next.part)) {
-      bound.push({ ...next, thinking: settled })
-      index += 1
-      continue
-    }
-    const held = bound.at(-1)
-    if (settled && held?.part.type === "tool" && !held.after && !isOutcome(held.part) && (!next || next.part.type === "text")) {
-      bound[bound.length - 1] = { ...held, after: settled }
-      continue
-    }
-    bound.push(row)
-  }
-  return bound
+  return grouped
 }

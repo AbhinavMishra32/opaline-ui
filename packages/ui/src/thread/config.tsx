@@ -39,8 +39,6 @@ export type ThreadLabels = {
   /** A running ask-the-user tool's detail. */
   waitingForAnswer: string
   /** A tool row's panel headings for the reasoning around the call. */
-  thinkingBefore: string
-  thinkingAfter: string
   /** A settled tool with no registered title or output. */
   done: string
   /** The fold's tooltip. */
@@ -115,8 +113,6 @@ export const defaultLabels: ThreadLabels = {
   copyFailed: "Copy failed — try again",
   rated: (verdict) => `${verdict} — rate again to change`,
   waitingForAnswer: "Waiting for your answer",
-  thinkingBefore: "Thinking",
-  thinkingAfter: "What it made of it",
   done: "Done",
   foldTitle: (length, open) => `${length} of work — click to ${open ? "hide" : "see"} the steps`,
   loadingSteps: "Loading the steps…",
